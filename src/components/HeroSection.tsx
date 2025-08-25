@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Music, Sparkles, Download, Globe } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/hero-musician.jpg";
 
 const HeroSection = () => {
+  const navigate = useNavigate();
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-dark">
       {/* Background Image with Overlay */}
@@ -39,7 +41,7 @@ const HeroSection = () => {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
-          <Button variant="hero" size="lg" className="group">
+          <Button variant="hero" size="lg" className="group" onClick={() => navigate("/auth")}>
             Get Started Free
             <Sparkles className="w-5 h-5 ml-2 group-hover:animate-spin" />
           </Button>
