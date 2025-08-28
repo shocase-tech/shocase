@@ -18,39 +18,69 @@ export type Database = {
         Row: {
           artist_name: string
           bio: string | null
+          contact_info: Json | null
           created_at: string
+          gallery_photos: string[] | null
           genre: string | null
+          hero_photo_url: string | null
           id: string
+          past_shows: Json | null
           pdf_urls: string[] | null
+          playlists: string[] | null
+          press_mentions: Json | null
           press_photos: string[] | null
+          press_quotes: Json | null
           profile_photo_url: string | null
+          show_videos: string[] | null
           social_links: Json | null
+          streaming_links: Json | null
+          upcoming_shows: Json | null
           updated_at: string
           user_id: string
         }
         Insert: {
           artist_name: string
           bio?: string | null
+          contact_info?: Json | null
           created_at?: string
+          gallery_photos?: string[] | null
           genre?: string | null
+          hero_photo_url?: string | null
           id?: string
+          past_shows?: Json | null
           pdf_urls?: string[] | null
+          playlists?: string[] | null
+          press_mentions?: Json | null
           press_photos?: string[] | null
+          press_quotes?: Json | null
           profile_photo_url?: string | null
+          show_videos?: string[] | null
           social_links?: Json | null
+          streaming_links?: Json | null
+          upcoming_shows?: Json | null
           updated_at?: string
           user_id: string
         }
         Update: {
           artist_name?: string
           bio?: string | null
+          contact_info?: Json | null
           created_at?: string
+          gallery_photos?: string[] | null
           genre?: string | null
+          hero_photo_url?: string | null
           id?: string
+          past_shows?: Json | null
           pdf_urls?: string[] | null
+          playlists?: string[] | null
+          press_mentions?: Json | null
           press_photos?: string[] | null
+          press_quotes?: Json | null
           profile_photo_url?: string | null
+          show_videos?: string[] | null
           social_links?: Json | null
+          streaming_links?: Json | null
+          upcoming_shows?: Json | null
           updated_at?: string
           user_id?: string
         }
