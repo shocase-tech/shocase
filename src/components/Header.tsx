@@ -60,8 +60,11 @@ const Header = () => {
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         {/* Logo */}
         <div className="flex items-center">
-          <Music className="w-8 h-8 text-primary mr-2" />
-          <span className="text-xl font-bold text-foreground">AI Press Kit</span>
+          <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-2">
+            <span className="text-primary-foreground font-bold text-sm">A</span>
+          </div>
+          <span className="text-xl font-bold text-primary">SHOCASE</span>
+          <span className="text-sm text-muted-foreground ml-1">.xyz</span>
         </div>
 
         {/* Auth Section */}

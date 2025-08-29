@@ -7,11 +7,11 @@ import { useEffect } from "react";
 const Index = () => {
   useEffect(() => {
     // Set page title and meta description for SEO
-    document.title = "AI Press Kit Generator - Professional EPKs for Musicians";
+    document.title = "SHOCASE - Professional EPKs for Musicians";
     
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
-      metaDescription.setAttribute('content', 'Create professional Electronic Press Kits in minutes. Upload photos, add bios, streaming links, and tour dates. Get shareable landing pages and downloadable PDFs with AI assistance.');
+      metaDescription.setAttribute('content', 'Create professional Electronic Press Kits in minutes with SHOCASE. Upload photos, add bios, streaming links, and tour dates. Get shareable landing pages and downloadable PDFs with AI assistance.');
     }
   }, []);
 
