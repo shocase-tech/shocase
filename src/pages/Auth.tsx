@@ -11,9 +11,31 @@ import { useToast } from "@/hooks/use-toast";
 export default function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Password strength validation
+  const validatePassword = (password: string) => {
+    const minLength = password.length >= 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    
+    return {
+      minLength,
+      hasUpperCase,
+      hasLowerCase,
+      hasNumbers,
+      hasSpecialChar,
+      isValid: minLength && hasUpperCase && hasLowerCase && hasNumbers && hasSpecialChar
+    };
+  };
+
+  const passwordValidation = validatePassword(password);
+  const passwordsMatch = password === confirmPassword && confirmPassword !== "";
 
   useEffect(() => {
     // Redirect to dashboard if already logged in
@@ -29,6 +51,28 @@ export default function Auth() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    // Validate password requirements
+    if (!passwordValidation.isValid) {
+      toast({
+        title: "Password Requirements Not Met",
+        description: "Please ensure your password meets all requirements.",
+        variant: "destructive",
+      });
+      setLoading(false);
+      return;
+    }
+
+    // Validate passwords match
+    if (!passwordsMatch) {
+      toast({
+        title: "Passwords Don't Match",
+        description: "Please ensure both password fields match.",
+        variant: "destructive",
+      });
+      setLoading(false);
+      return;
+    }
 
     try {
       const redirectUrl = `${window.location.origin}/`;
@@ -138,6 +182,7 @@ export default function Auth() {
                     required
                   />
                 </div>
+                
                 <div className="space-y-2">
                   <Label htmlFor="signup-password">Password</Label>
                   <Input
@@ -146,10 +191,68 @@ export default function Auth() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    minLength={6}
+                    className={password && !passwordValidation.isValid ? "border-destructive" : ""}
                   />
+                  
+                  {password && (
+                    <div className="space-y-1 text-xs">
+                      <div className={`flex items-center gap-1 ${passwordValidation.minLength ? 'text-green-600' : 'text-muted-foreground'}`}>
+                        <span className={`text-xs ${passwordValidation.minLength ? '✓' : '○'}`}>
+                          {passwordValidation.minLength ? '✓' : '○'}
+                        </span>
+                        At least 8 characters
+                      </div>
+                      <div className={`flex items-center gap-1 ${passwordValidation.hasUpperCase ? 'text-green-600' : 'text-muted-foreground'}`}>
+                        <span className={`text-xs ${passwordValidation.hasUpperCase ? '✓' : '○'}`}>
+                          {passwordValidation.hasUpperCase ? '✓' : '○'}
+                        </span>
+                        One uppercase letter
+                      </div>
+                      <div className={`flex items-center gap-1 ${passwordValidation.hasLowerCase ? 'text-green-600' : 'text-muted-foreground'}`}>
+                        <span className={`text-xs ${passwordValidation.hasLowerCase ? '✓' : '○'}`}>
+                          {passwordValidation.hasLowerCase ? '✓' : '○'}
+                        </span>
+                        One lowercase letter
+                      </div>
+                      <div className={`flex items-center gap-1 ${passwordValidation.hasNumbers ? 'text-green-600' : 'text-muted-foreground'}`}>
+                        <span className={`text-xs ${passwordValidation.hasNumbers ? '✓' : '○'}`}>
+                          {passwordValidation.hasNumbers ? '✓' : '○'}
+                        </span>
+                        One number
+                      </div>
+                      <div className={`flex items-center gap-1 ${passwordValidation.hasSpecialChar ? 'text-green-600' : 'text-muted-foreground'}`}>
+                        <span className={`text-xs ${passwordValidation.hasSpecialChar ? '✓' : '○'}`}>
+                          {passwordValidation.hasSpecialChar ? '✓' : '○'}
+                        </span>
+                        One special character
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="confirm-password">Confirm Password</Label>
+                  <Input
+                    id="confirm-password"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    className={confirmPassword && !passwordsMatch ? "border-destructive" : passwordsMatch ? "border-green-600" : ""}
+                  />
+                  {confirmPassword && !passwordsMatch && (
+                    <p className="text-xs text-destructive">Passwords do not match</p>
+                  )}
+                  {passwordsMatch && (
+                    <p className="text-xs text-green-600">✓ Passwords match</p>
+                  )}
+                </div>
+                
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  disabled={loading || !passwordValidation.isValid || !passwordsMatch}
+                >
                   {loading ? "Creating Account..." : "Create Account"}
                 </Button>
               </form>
