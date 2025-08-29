@@ -3,9 +3,10 @@ import { useParams, Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket, Download, Mail, Phone, Star, Quote, Play, Users, Award, TrendingUp } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { Database } from "@/integrations/supabase/types";
 
 type PublicArtistProfile = {
   id: string;
@@ -24,8 +25,11 @@ type PublicArtistProfile = {
   playlists: string[] | null;
   past_shows: any;
   upcoming_shows: any;
+  contact_info: any;
   created_at: string;
   updated_at: string;
+  is_published: boolean;
+  url_slug: string;
 };
 
 export default function PublicArtistProfile() {
@@ -43,6 +47,7 @@ export default function PublicArtistProfile() {
           .rpc("get_public_artist_profile", { profile_identifier: identifier });
 
         if (error) {
+          console.error("Error fetching profile:", error);
           setError("Artist not found");
           return;
         }
@@ -52,8 +57,9 @@ export default function PublicArtistProfile() {
           return;
         }
 
-        setProfile(data[0]);
+        setProfile(data[0] as PublicArtistProfile);
       } catch (err) {
+        console.error("Catch error:", err);
         setError("Failed to load artist profile");
       } finally {
         setLoading(false);
@@ -65,8 +71,8 @@ export default function PublicArtistProfile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5">
-        <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="min-h-screen bg-gradient-dark">
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
           <Skeleton className="h-64 w-full rounded-lg mb-8" />
           <Skeleton className="h-8 w-48 mb-4" />
           <Skeleton className="h-4 w-full mb-2" />
@@ -80,10 +86,12 @@ export default function PublicArtistProfile() {
     return <Navigate to="/not-found" replace />;
   }
 
+  const genreArray = Array.isArray(profile.genre) ? profile.genre : [profile.genre];
+
   return (
     <>
       <Helmet>
-        <title>{profile.artist_name} - Electronic Press Kit</title>
+        <title>{profile.artist_name} - Electronic Press Kit | SHOCASE</title>
         <meta name="description" content={profile.bio ? profile.bio.substring(0, 160) : `${profile.artist_name} - Professional artist press kit featuring music, videos, gallery, and booking information.`} />
         <meta property="og:title" content={`${profile.artist_name} - Electronic Press Kit`} />
         <meta property="og:description" content={profile.bio ? profile.bio.substring(0, 160) : `${profile.artist_name} press kit`} />
@@ -93,222 +101,312 @@ export default function PublicArtistProfile() {
         <meta name="twitter:title" content={`${profile.artist_name} - Electronic Press Kit`} />
         <meta name="twitter:description" content={profile.bio ? profile.bio.substring(0, 160) : `${profile.artist_name} press kit`} />
         <meta name="twitter:image" content={profile.hero_photo_url || profile.profile_photo_url || ''} />
-        <link rel="canonical" href={`${window.location.origin}/artist/${profile.id}`} />
+        <link rel="canonical" href={`${window.location.origin}/artist/${profile.url_slug || profile.id}`} />
       </Helmet>
-      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5">
-        <div className="container mx-auto px-4 py-8 max-w-4xl">
-          {/* Hero Section */}
+
+      <div className="min-h-screen bg-gradient-dark">
+        {/* Hero Section */}
+        <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
           {profile.hero_photo_url && (
-            <div className="relative h-64 md:h-80 rounded-xl overflow-hidden mb-8 shadow-2xl">
-              <img
-                src={profile.hero_photo_url}
-                alt={`${profile.artist_name} hero`}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-              <div className="absolute bottom-6 left-6 right-6">
-                <div className="flex items-end gap-4">
-                  {profile.profile_photo_url && (
-                    <img
-                      src={profile.profile_photo_url}
-                      alt={profile.artist_name}
-                      className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 border-white/30 shadow-lg"
-                    />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">
-                      {profile.artist_name}
-                    </h1>
-                    {profile.genre && (
-                      <Badge variant="secondary" className="mb-2">
-                        {profile.genre}
-                      </Badge>
+            <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{
+              backgroundImage: `url(${profile.hero_photo_url})`
+            }}>
+              <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/80 to-background/95"></div>
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/60"></div>
+            </div>
+          )}
+          
+          {/* Floating Elements */}
+          <div className="absolute top-20 left-20 w-32 h-32 bg-primary/20 rounded-full blur-xl animate-pulse"></div>
+          <div className="absolute bottom-20 right-20 w-48 h-48 bg-accent/20 rounded-full blur-2xl animate-pulse delay-1000"></div>
+
+          {/* Hero Content */}
+          <div className="relative z-10 max-w-6xl mx-auto px-6 text-center">
+            <div className="flex items-center justify-center mb-8">
+              <Music className="w-16 h-16 text-primary mr-4" />
+              <Star className="w-12 h-12 text-accent animate-pulse" />
+            </div>
+            
+            <h1 className="text-5xl md:text-7xl font-bold gradient-text mb-6">
+              {profile.artist_name}
+            </h1>
+            
+            {genreArray && genreArray.length > 0 && (
+              <div className="flex flex-wrap justify-center gap-3 mb-8">
+                {genreArray.filter(Boolean).map((genre: string, index: number) => (
+                  <Badge key={index} variant="secondary" className="text-lg px-4 py-2">
+                    {genre}
+                  </Badge>
+                ))}
+              </div>
+            )}
+
+            {profile.bio && (
+              <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-4xl mx-auto leading-relaxed">
+                {profile.bio.length > 200 ? `${profile.bio.substring(0, 200)}...` : profile.bio}
+              </p>
+            )}
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+              {profile.contact_info && (profile.contact_info as any).email && (
+                <Button variant="hero" size="lg" asChild className="group">
+                  <a href={`mailto:${(profile.contact_info as any).email}`}>
+                    <Mail className="w-5 h-5 mr-2" />
+                    Book Now
+                    <Star className="w-5 h-5 ml-2 group-hover:animate-spin" />
+                  </a>
+                </Button>
+              )}
+              
+              <Button variant="glass" size="lg" className="group" asChild>
+                <a href="#listen">
+                  <Play className="w-5 h-5 mr-2" />
+                  Listen Now
+                </a>
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        <div className="container mx-auto px-4 py-12 max-w-7xl">
+          {/* Key Stats Section */}
+          <section className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
+            <Card className="glass-card border-glass text-center p-6">
+              <CardContent className="p-0">
+                <Users className="w-8 h-8 text-primary mx-auto mb-2" />
+                <h3 className="text-2xl font-bold text-foreground">Live</h3>
+                <p className="text-sm text-muted-foreground">Performance Ready</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="glass-card border-glass text-center p-6">
+              <CardContent className="p-0">
+                <Award className="w-8 h-8 text-accent mx-auto mb-2" />
+                <h3 className="text-2xl font-bold text-foreground">Pro</h3>
+                <p className="text-sm text-muted-foreground">Quality Shows</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="glass-card border-glass text-center p-6">
+              <CardContent className="p-0">
+                <TrendingUp className="w-8 h-8 text-primary mx-auto mb-2" />
+                <h3 className="text-2xl font-bold text-foreground">{profile.past_shows && Array.isArray(profile.past_shows) ? profile.past_shows.length : '0'}</h3>
+                <p className="text-sm text-muted-foreground">Past Shows</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="glass-card border-glass text-center p-6">
+              <CardContent className="p-0">
+                <Music className="w-8 h-8 text-accent mx-auto mb-2" />
+                <h3 className="text-2xl font-bold text-foreground">Pro</h3>
+                <p className="text-sm text-muted-foreground">Audio/Video</p>
+              </CardContent>
+            </Card>
+          </section>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Main Content */}
+            <div className="lg:col-span-2 space-y-8">
+              {/* Videos Section */}
+              {profile.show_videos && profile.show_videos.length > 0 && (
+                <section id="videos" className="glass-card border-glass p-8 rounded-xl">
+                  <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
+                    <Play className="w-8 h-8 text-primary" />
+                    Live Performance Videos
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {profile.show_videos.map((video, index) => (
+                      <div key={index} className="aspect-video rounded-lg overflow-hidden bg-black/20 shadow-lg hover:shadow-xl transition-all duration-300">
+                        <iframe
+                          src={video.replace('watch?v=', 'embed/')}
+                          className="w-full h-full"
+                          frameBorder="0"
+                          allowFullScreen
+                          title={`${profile.artist_name} performance ${index + 1}`}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* Bio Section */}
+              {profile.bio && (
+                <section className="glass-card border-glass p-8 rounded-xl">
+                  <h2 className="text-3xl font-bold mb-6">Artist Biography</h2>
+                  <p className="text-muted-foreground leading-relaxed text-lg">{profile.bio}</p>
+                </section>
+              )}
+
+              {/* Press Quotes */}
+              {profile.press_quotes && Array.isArray(profile.press_quotes) && profile.press_quotes.length > 0 && (
+                <section className="glass-card border-glass p-8 rounded-xl">
+                  <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
+                    <Quote className="w-8 h-8 text-accent" />
+                    Press & Reviews
+                  </h2>
+                  <div className="space-y-6">
+                    {profile.press_quotes.map((quote: any, index: number) => (
+                      <blockquote key={index} className="border-l-4 border-primary pl-6 bg-white/5 p-6 rounded-r-lg hover:shadow-glow transition-all duration-300">
+                        <p className="italic text-xl mb-4 leading-relaxed">"{quote.text}"</p>
+                        <cite className="text-lg font-bold text-primary">— {quote.source}</cite>
+                      </blockquote>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* Gallery Photos */}
+              {profile.gallery_photos && profile.gallery_photos.length > 0 && (
+                <section className="glass-card border-glass p-8 rounded-xl">
+                  <h2 className="text-3xl font-bold mb-6">Photo Gallery</h2>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {profile.gallery_photos.map((photo, index) => (
+                      <img
+                        key={index}
+                        src={photo}
+                        alt={`${profile.artist_name} gallery ${index + 1}`}
+                        className="w-full h-40 object-cover rounded-lg border border-white/20 hover:scale-105 transition-transform cursor-pointer shadow-lg"
+                      />
+                    ))}
+                  </div>
+                </section>
+              )}
+            </div>
+
+            {/* Sidebar */}
+            <div className="space-y-8">
+              {/* Streaming Links */}
+              {profile.streaming_links && typeof profile.streaming_links === 'object' && profile.streaming_links !== null && !Array.isArray(profile.streaming_links) && Object.keys(profile.streaming_links).length > 0 && (
+                <section id="listen" className="glass-card border-glass p-6 rounded-xl">
+                  <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                    <Music className="w-6 h-6 text-primary" />
+                    Listen Now
+                  </h2>
+                  <div className="space-y-3">
+                    {(profile.streaming_links as any).spotify && (
+                      <a
+                        href={(profile.streaming_links as any).spotify}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 w-full px-4 py-3 rounded-lg bg-green-600 hover:bg-green-700 text-white transition-colors font-medium"
+                      >
+                        <Music className="w-5 h-5" />
+                        Spotify
+                        <ExternalLink className="w-4 h-4 ml-auto" />
+                      </a>
+                    )}
+                    {(profile.streaming_links as any).apple_music && (
+                      <a
+                        href={(profile.streaming_links as any).apple_music}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 w-full px-4 py-3 rounded-lg bg-black hover:bg-gray-800 text-white transition-colors font-medium"
+                      >
+                        <Music className="w-5 h-5" />
+                        Apple Music
+                        <ExternalLink className="w-4 h-4 ml-auto" />
+                      </a>
+                    )}
+                    {(profile.streaming_links as any).bandcamp && (
+                      <a
+                        href={(profile.streaming_links as any).bandcamp}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 w-full px-4 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors font-medium"
+                      >
+                        <Music className="w-5 h-5" />
+                        Bandcamp
+                        <ExternalLink className="w-4 h-4 ml-auto" />
+                      </a>
                     )}
                   </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Header without hero */}
-          {!profile.hero_photo_url && (
-            <div className="flex items-start gap-6 mb-8">
-              {profile.profile_photo_url && (
-                <img
-                  src={profile.profile_photo_url}
-                  alt={profile.artist_name}
-                  className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-4 border-white/20 shadow-lg"
-                />
+                </section>
               )}
-              <div className="flex-1">
-                <h1 className="text-4xl md:text-5xl font-bold gradient-text mb-4">
-                  {profile.artist_name}
-                </h1>
-                {profile.genre && (
-                  <Badge variant="secondary" className="mb-2">
-                    {profile.genre}
-                  </Badge>
-                )}
-              </div>
-            </div>
-          )}
 
-          <div className="grid gap-8">
-            {/* Bio Section */}
-            {profile.bio && (
-              <section className="glass-card border-white/10 p-6 rounded-xl">
-                <h2 className="text-2xl font-semibold mb-4">About</h2>
-                <p className="text-muted-foreground leading-relaxed text-lg">{profile.bio}</p>
-              </section>
-            )}
-
-            {/* Videos Section */}
-            {profile.show_videos && profile.show_videos.length > 0 && (
-              <section className="glass-card border-white/10 p-6 rounded-xl">
-                <h2 className="text-2xl font-semibold mb-4">Videos</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {profile.show_videos.map((video, index) => (
-                    <div key={index} className="aspect-video rounded-lg overflow-hidden bg-black/20">
-                      <iframe
-                        src={video.replace('watch?v=', 'embed/')}
-                        className="w-full h-full"
-                        frameBorder="0"
-                        allowFullScreen
-                        title={`${profile.artist_name} video ${index + 1}`}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Gallery Photos */}
-            {profile.gallery_photos && profile.gallery_photos.length > 0 && (
-              <section className="glass-card border-white/10 p-6 rounded-xl">
-                <h2 className="text-2xl font-semibold mb-4">Gallery</h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                  {profile.gallery_photos.map((photo, index) => (
-                    <img
-                      key={index}
-                      src={photo}
-                      alt={`${profile.artist_name} gallery ${index + 1}`}
-                      className="w-full h-32 object-cover rounded-lg border border-white/20 hover:scale-105 transition-transform cursor-pointer"
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Press Quotes */}
-            {profile.press_quotes && Array.isArray(profile.press_quotes) && profile.press_quotes.length > 0 && (
-              <section className="glass-card border-white/10 p-6 rounded-xl">
-                <h2 className="text-2xl font-semibold mb-4">Press</h2>
-                <div className="space-y-4">
-                  {profile.press_quotes.map((quote: any, index: number) => (
-                    <blockquote key={index} className="border-l-4 border-primary pl-6 bg-white/5 p-4 rounded-r-lg">
-                      <p className="italic text-lg mb-2">"{quote.text}"</p>
-                      <cite className="text-sm font-medium text-primary">— {quote.source}</cite>
-                    </blockquote>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Streaming Links */}
-            {profile.streaming_links && typeof profile.streaming_links === 'object' && profile.streaming_links !== null && !Array.isArray(profile.streaming_links) && Object.keys(profile.streaming_links).length > 0 && (
-              <section className="glass-card border-white/10 p-6 rounded-xl">
-                <h2 className="text-2xl font-semibold mb-4">Listen</h2>
-                <div className="flex flex-wrap gap-3">
-                  {(profile.streaming_links as any).spotify && (
-                    <a
-                      href={(profile.streaming_links as any).spotify}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-4 py-3 rounded-lg bg-green-600 hover:bg-green-700 text-white transition-colors"
-                    >
-                      <Music className="w-5 h-5" />
-                      Spotify
-                      <ExternalLink className="w-4 h-4" />
-                    </a>
-                  )}
-                  {(profile.streaming_links as any).apple_music && (
-                    <a
-                      href={(profile.streaming_links as any).apple_music}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-4 py-3 rounded-lg bg-black hover:bg-gray-800 text-white transition-colors"
-                    >
-                      <Music className="w-5 h-5" />
-                      Apple Music
-                      <ExternalLink className="w-4 h-4" />
-                    </a>
-                  )}
-                  {(profile.streaming_links as any).bandcamp && (
-                    <a
-                      href={(profile.streaming_links as any).bandcamp}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-4 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
-                    >
-                      <Music className="w-5 h-5" />
-                      Bandcamp
-                      <ExternalLink className="w-4 h-4" />
-                    </a>
-                  )}
-                </div>
-              </section>
-            )}
-
-            {/* Upcoming Shows */}
-            {profile.upcoming_shows && Array.isArray(profile.upcoming_shows) && profile.upcoming_shows.length > 0 && (
-              <section className="glass-card border-white/10 p-6 rounded-xl">
-                <h2 className="text-2xl font-semibold mb-4">Upcoming Shows</h2>
-                <div className="space-y-4">
-                  {profile.upcoming_shows.map((show: any, index: number) => (
-                    <div key={index} className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <Calendar className="w-5 h-5 text-primary" />
-                        <div>
-                          <p className="font-semibold">{show.venue}</p>
-                          <p className="text-sm text-muted-foreground flex items-center gap-1">
-                            <MapPin className="w-3 h-3" />
-                            {show.city} • {show.date}
-                          </p>
+              {/* Upcoming Shows */}
+              {profile.upcoming_shows && Array.isArray(profile.upcoming_shows) && profile.upcoming_shows.length > 0 && (
+                <section className="glass-card border-glass p-6 rounded-xl">
+                  <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                    <Calendar className="w-6 h-6 text-accent" />
+                    Upcoming Shows
+                  </h2>
+                  <div className="space-y-4">
+                    {profile.upcoming_shows.map((show: any, index: number) => (
+                      <div key={index} className="p-4 bg-white/5 rounded-lg border border-white/10 hover:border-primary/50 transition-colors">
+                        <div className="flex items-center gap-3 mb-2">
+                          <Calendar className="w-4 h-4 text-primary" />
+                          <p className="font-bold text-lg">{show.venue}</p>
                         </div>
+                        <p className="text-sm text-muted-foreground flex items-center gap-1 mb-3">
+                          <MapPin className="w-3 h-3" />
+                          {show.city} • {show.date}
+                        </p>
+                        {show.ticket_link && (
+                          <Button asChild size="sm" className="w-full">
+                            <a
+                              href={show.ticket_link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <Ticket className="w-4 h-4 mr-2" />
+                              Get Tickets
+                            </a>
+                          </Button>
+                        )}
                       </div>
-                      {show.ticket_link && (
-                        <a
-                          href={show.ticket_link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-                        >
-                          <Ticket className="w-4 h-4" />
-                          Tickets
-                        </a>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
+                    ))}
+                  </div>
+                </section>
+              )}
 
-            {/* Social Links */}
-            <section className="glass-card border-white/10 p-6 rounded-xl">
-              <h2 className="text-2xl font-semibold mb-4">Connect</h2>
-              <div className="space-y-4">
-                {profile.social_links && typeof profile.social_links === 'object' && profile.social_links !== null && !Array.isArray(profile.social_links) && (
-                  <div className="flex flex-wrap gap-3">
+              {/* Contact & Booking */}
+              <section className="glass-card border-glass p-6 rounded-xl">
+                <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                  <Mail className="w-6 h-6 text-primary" />
+                  Booking Contact
+                </h2>
+                <div className="space-y-4">
+                  {profile.contact_info && (profile.contact_info as any).email && (
+                    <Button asChild className="w-full" variant="hero">
+                      <a href={`mailto:${(profile.contact_info as any).email}`}>
+                        <Mail className="w-4 h-4 mr-2" />
+                        Email for Booking
+                      </a>
+                    </Button>
+                  )}
+                  
+                  {profile.contact_info && (profile.contact_info as any).phone && (
+                    <Button asChild className="w-full" variant="outline">
+                      <a href={`tel:${(profile.contact_info as any).phone}`}>
+                        <Phone className="w-4 h-4 mr-2" />
+                        Call: {(profile.contact_info as any).phone}
+                      </a>
+                    </Button>
+                  )}
+                </div>
+                
+                <p className="text-sm text-muted-foreground mt-4 p-3 bg-white/5 rounded-lg border-l-4 border-accent">
+                  Professional booking inquiries welcome. Fast response guaranteed.
+                </p>
+              </section>
+
+              {/* Social Links */}
+              {profile.social_links && typeof profile.social_links === 'object' && profile.social_links !== null && !Array.isArray(profile.social_links) && (
+                <section className="glass-card border-glass p-6 rounded-xl">
+                  <h2 className="text-2xl font-bold mb-6">Follow</h2>
+                  <div className="space-y-3">
                     {(profile.social_links as any).website && (
                       <a
                         href={(profile.social_links as any).website}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+                        className="flex items-center gap-3 w-full px-4 py-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
                       >
-                        <Globe className="w-4 h-4" />
-                        Website
-                        <ExternalLink className="w-3 h-3" />
+                        <Globe className="w-5 h-5" />
+                        Official Website
+                        <ExternalLink className="w-4 h-4 ml-auto" />
                       </a>
                     )}
                     {(profile.social_links as any).instagram && (
@@ -316,21 +414,39 @@ export default function PublicArtistProfile() {
                         href={`https://instagram.com/${(profile.social_links as any).instagram.replace('@', '')}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 transition-colors"
+                        className="flex items-center gap-3 w-full px-4 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 transition-colors"
                       >
-                        <Instagram className="w-4 h-4" />
+                        <Instagram className="w-5 h-5" />
                         Instagram
-                        <ExternalLink className="w-3 h-3" />
+                        <ExternalLink className="w-4 h-4 ml-auto" />
                       </a>
                     )}
                   </div>
-                )}
-                <p className="text-sm text-muted-foreground">
-                  For booking inquiries and professional contact, please reach out through the social media links above.
-                </p>
+                </section>
+              )}
+            </div>
+          </div>
+
+          {/* Past Shows Section */}
+          {profile.past_shows && Array.isArray(profile.past_shows) && profile.past_shows.length > 0 && (
+            <section className="glass-card border-glass p-8 rounded-xl mt-12">
+              <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
+                <Award className="w-8 h-8 text-accent" />
+                Performance History
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {profile.past_shows.map((show: any, index: number) => (
+                  <div key={index} className="p-4 bg-white/5 rounded-lg border border-white/10 hover:border-accent/50 transition-colors">
+                    <p className="font-semibold text-lg">{show.venue}</p>
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                      <MapPin className="w-3 h-3" />
+                      {show.city} • {show.date}
+                    </p>
+                  </div>
+                ))}
               </div>
             </section>
-          </div>
+          )}
         </div>
       </div>
     </>
