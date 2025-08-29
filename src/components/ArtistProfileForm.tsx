@@ -6,10 +6,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
+import { ImageStorageService } from "@/lib/imageStorage";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Sparkles, Plus, Trash2 } from "lucide-react";
 import FileUpload from "./FileUpload";
 import GenreInput from "./GenreInput";
+import PrivateImage from "./PrivateImage";
 import PhotoUpload from "./PhotoUpload";
 import SectionSaveButton from "./SectionSaveButton";
 
@@ -159,20 +161,20 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error("Not authenticated");
 
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${user.id}/${type}/${Date.now()}.${fileExt}`;
+    // Upload file and get storage path (not URL)
+    const storagePath = await ImageStorageService.uploadFile(file, type, user.id);
 
-    const { error: uploadError } = await supabase.storage
-      .from('artist-uploads')
-      .upload(fileName, file);
-
-    if (uploadError) throw uploadError;
-
-    const { data } = supabase.storage
-      .from('artist-uploads')
-      .getPublicUrl(fileName);
-
-    return data.publicUrl;
+    // For immediate display in the form, generate a signed URL
+    const signedUrl = await ImageStorageService.getSignedUrl(storagePath);
+    
+    // Save the storage path to the database, but return the signed URL for immediate display
+    if (type === 'profile') {
+      await saveSection({ profile_photo_url: storagePath });
+    } else if (type === 'hero') {
+      await saveSection({ hero_photo_url: storagePath });
+    }
+    
+    return signedUrl;
   };
 
   const saveSection = async (sectionData: any) => {
@@ -428,13 +430,21 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
                         {profile.profile_photo_url && (
                           <div>
                             <p className="text-sm text-muted-foreground mb-2">Profile Photo</p>
-                            <img src={profile.profile_photo_url} alt="Profile" className="w-full h-24 object-cover rounded" />
+                            <PrivateImage 
+                              storagePath={profile.profile_photo_url} 
+                              alt="Profile" 
+                              className="w-full h-24 object-cover rounded" 
+                            />
                           </div>
                         )}
                         {profile.hero_photo_url && (
                           <div>
                             <p className="text-sm text-muted-foreground mb-2">Hero Photo</p>
-                            <img src={profile.hero_photo_url} alt="Hero" className="w-full h-24 object-cover rounded" />
+                            <PrivateImage 
+                              storagePath={profile.hero_photo_url} 
+                              alt="Hero" 
+                              className="w-full h-24 object-cover rounded" 
+                            />
                           </div>
                         )}
                       </div>
@@ -469,9 +479,23 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
                 <PhotoUpload
                   title="Press Photos"
                   photos={profile.press_photos?.map(url => typeof url === 'string' ? { url } : url) || []}
-                  onUpload={(file) => handleFileUpload(file, 'press')}
+                  onUpload={async (file) => {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (!user) throw new Error("Not authenticated");
+                    
+                    // Upload and get storage path
+                    const storagePath = await ImageStorageService.uploadFile(file, 'press', user.id);
+                    
+                    // Add to current photos
+                    const currentPhotos = profile.press_photos || [];
+                    const updatedPhotos = [...currentPhotos, storagePath];
+                    await saveSection({ press_photos: updatedPhotos });
+                    
+                    // Return signed URL for immediate display
+                    return ImageStorageService.getSignedUrl(storagePath);
+                  }}
                   onUpdate={(photos) => {
-                    const updateData = { press_photos: JSON.stringify(photos) };
+                    const updateData = { press_photos: photos.map(p => p.url) };
                     saveSection(updateData);
                   }}
                   maxPhotos={8}
@@ -481,9 +505,23 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
                 <PhotoUpload
                   title="Gallery Photos"
                   photos={profile.gallery_photos?.map(url => typeof url === 'string' ? { url } : url) || []}
-                  onUpload={(file) => handleFileUpload(file, 'gallery')}
+                  onUpload={async (file) => {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (!user) throw new Error("Not authenticated");
+                    
+                    // Upload and get storage path
+                    const storagePath = await ImageStorageService.uploadFile(file, 'gallery', user.id);
+                    
+                    // Add to current photos
+                    const currentPhotos = profile.gallery_photos || [];
+                    const updatedPhotos = [...currentPhotos, storagePath];
+                    await saveSection({ gallery_photos: updatedPhotos });
+                    
+                    // Return signed URL for immediate display
+                    return ImageStorageService.getSignedUrl(storagePath);
+                  }}
                   onUpdate={(photos) => {
-                    const updateData = { gallery_photos: JSON.stringify(photos) };
+                    const updateData = { gallery_photos: photos.map(p => p.url) };
                     saveSection(updateData);
                   }}
                   maxPhotos={12}

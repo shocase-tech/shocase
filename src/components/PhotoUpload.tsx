@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Upload, X, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import DragDropSection from "@/components/DragDropSection";
+import PrivateImage from "@/components/PrivateImage";
 
 interface PhotoItem {
   url: string;
@@ -109,8 +110,8 @@ export default function PhotoUpload({
             <Card className="overflow-hidden">
               <CardContent className="p-0">
                 <div className="relative group">
-                  <img
-                    src={photo.url}
+                  <PrivateImage
+                    storagePath={photo.url}
                     alt={photo.label || `Photo ${index + 1}`}
                     className="w-full h-32 object-cover"
                   />

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket, Download, Mail, Phone, Star, Quote, Play, Users, Award, TrendingUp } from "lucide-react";
+import PublicImage from "@/components/PublicImage";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type PublicArtistProfile = {
@@ -108,9 +109,12 @@ export default function PublicArtistProfile() {
         {/* Hero Section */}
         <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
           {profile.hero_photo_url && (
-            <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{
-              backgroundImage: `url(${profile.hero_photo_url})`
-            }}>
+            <div className="absolute inset-0">
+              <PublicImage
+                storagePath={profile.hero_photo_url}
+                alt={`${profile.artist_name} hero`}
+                className="w-full h-full object-cover"
+              />
               <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/80 to-background/95"></div>
               <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/60"></div>
             </div>
@@ -263,9 +267,9 @@ export default function PublicArtistProfile() {
                   <h2 className="text-3xl font-bold mb-6">Photo Gallery</h2>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {profile.gallery_photos.map((photo, index) => (
-                      <img
+                      <PublicImage
                         key={index}
-                        src={photo}
+                        storagePath={photo}
                         alt={`${profile.artist_name} gallery ${index + 1}`}
                         className="w-full h-40 object-cover rounded-lg border border-white/20 hover:scale-105 transition-transform cursor-pointer shadow-lg"
                       />
