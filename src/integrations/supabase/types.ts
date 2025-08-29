@@ -91,7 +91,29 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_public_artist_profile: {
+        Args: { profile_id: string }
+        Returns: {
+          artist_name: string
+          bio: string
+          created_at: string
+          gallery_photos: string[]
+          genre: string
+          hero_photo_url: string
+          id: string
+          past_shows: Json
+          playlists: string[]
+          press_mentions: Json
+          press_photos: string[]
+          press_quotes: Json
+          profile_photo_url: string
+          show_videos: string[]
+          social_links: Json
+          streaming_links: Json
+          upcoming_shows: Json
+          updated_at: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
