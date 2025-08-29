@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import ArtistProfileForm from "@/components/ArtistProfileForm";
 import ArtistProfileView from "@/components/ArtistProfileView";
+import { Copy, ExternalLink } from "lucide-react";
 
 interface ArtistProfile {
   id: string;
@@ -108,6 +109,30 @@ export default function Dashboard() {
     });
   };
 
+  const copyPublicLink = async () => {
+    if (!profile) return;
+    
+    const publicUrl = `${window.location.origin}/artist/${profile.id}`;
+    try {
+      await navigator.clipboard.writeText(publicUrl);
+      toast({
+        title: "Link copied!",
+        description: "Your public press kit link has been copied to clipboard.",
+      });
+    } catch (err) {
+      toast({
+        title: "Copy failed",
+        description: "Please copy the link manually.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const openPublicProfile = () => {
+    if (!profile) return;
+    window.open(`/artist/${profile.id}`, '_blank');
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -139,6 +164,31 @@ export default function Dashboard() {
                 {profile ? "Manage your artist profile" : "Create your first artist profile to get started"}
               </CardDescription>
             </CardHeader>
+            {profile && (
+              <CardContent>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button
+                    onClick={copyPublicLink}
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <Copy className="w-4 h-4" />
+                    Copy Public Link
+                  </Button>
+                  <Button
+                    onClick={openPublicProfile}
+                    variant="secondary"
+                    className="flex items-center gap-2"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    View Press Kit
+                  </Button>
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Share your professional press kit: {window.location.origin}/artist/{profile.id}
+                </p>
+              </CardContent>
+            )}
           </Card>
 
           {profile ? (
