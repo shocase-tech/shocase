@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Upload, X, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import DragDropSection from "@/components/DragDropSection";
 
 interface PhotoItem {
   url: string;
@@ -99,57 +100,57 @@ export default function PhotoUpload({
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {photos.map((photo, index) => (
-          <Card key={index} className="overflow-hidden">
-            <CardContent className="p-0">
-              <div className="relative group">
-                <img
-                  src={photo.url}
-                  alt={photo.label || `Photo ${index + 1}`}
-                  className="w-full h-32 object-cover"
-                />
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => startEdit(index)}
-                  >
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => removePhoto(index)}
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-              <div className="p-2">
-                {editingIndex === index ? (
-                  <div className="space-y-2">
-                    <Input
-                      value={editLabel}
-                      onChange={(e) => setEditLabel(e.target.value)}
-                      placeholder="Add caption..."
-                      className="text-xs"
-                    />
-                    <div className="flex gap-1">
-                      <Button size="sm" onClick={() => updateLabel(index)}>
-                        Save
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={() => setEditingIndex(null)}>
-                        Cancel
-                      </Button>
-                    </div>
+          <DragDropSection
+            key={index}
+            id={`photo-${index}`}
+            onDelete={() => removePhoto(index)}
+            isDraggable={false}
+          >
+            <Card className="overflow-hidden">
+              <CardContent className="p-0">
+                <div className="relative group">
+                  <img
+                    src={photo.url}
+                    alt={photo.label || `Photo ${index + 1}`}
+                    className="w-full h-32 object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => startEdit(index)}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
                   </div>
-                ) : (
-                  <p className="text-xs text-muted-foreground truncate">
-                    {photo.label || "No caption"}
-                  </p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                </div>
+                <div className="p-2">
+                  {editingIndex === index ? (
+                    <div className="space-y-2">
+                      <Input
+                        value={editLabel}
+                        onChange={(e) => setEditLabel(e.target.value)}
+                        placeholder="Add caption..."
+                        className="text-xs"
+                      />
+                      <div className="flex gap-1">
+                        <Button size="sm" onClick={() => updateLabel(index)}>
+                          Save
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => setEditingIndex(null)}>
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground truncate">
+                      {photo.label || "No caption"}
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </DragDropSection>
         ))}
 
         {photos.length < maxPhotos && (

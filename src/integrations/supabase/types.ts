@@ -24,6 +24,7 @@ export type Database = {
           genre: string | null
           hero_photo_url: string | null
           id: string
+          is_published: boolean | null
           past_shows: Json | null
           pdf_urls: string[] | null
           playlists: string[] | null
@@ -36,6 +37,7 @@ export type Database = {
           streaming_links: Json | null
           upcoming_shows: Json | null
           updated_at: string
+          url_slug: string | null
           user_id: string
         }
         Insert: {
@@ -47,6 +49,7 @@ export type Database = {
           genre?: string | null
           hero_photo_url?: string | null
           id?: string
+          is_published?: boolean | null
           past_shows?: Json | null
           pdf_urls?: string[] | null
           playlists?: string[] | null
@@ -59,6 +62,7 @@ export type Database = {
           streaming_links?: Json | null
           upcoming_shows?: Json | null
           updated_at?: string
+          url_slug?: string | null
           user_id: string
         }
         Update: {
@@ -70,6 +74,7 @@ export type Database = {
           genre?: string | null
           hero_photo_url?: string | null
           id?: string
+          is_published?: boolean | null
           past_shows?: Json | null
           pdf_urls?: string[] | null
           playlists?: string[] | null
@@ -82,6 +87,7 @@ export type Database = {
           streaming_links?: Json | null
           upcoming_shows?: Json | null
           updated_at?: string
+          url_slug?: string | null
           user_id?: string
         }
         Relationships: []
@@ -91,8 +97,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_url_slug: {
+        Args: { artist_name: string }
+        Returns: string
+      }
       get_public_artist_profile: {
-        Args: { profile_id: string }
+        Args: { profile_id: string } | { profile_identifier: string }
         Returns: {
           artist_name: string
           bio: string

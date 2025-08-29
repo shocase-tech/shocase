@@ -29,18 +29,18 @@ type PublicArtistProfile = {
 };
 
 export default function PublicArtistProfile() {
-  const { id } = useParams<{ id: string }>();
+  const { identifier } = useParams<{ identifier: string }>();
   const [profile, setProfile] = useState<PublicArtistProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
-      if (!id) return;
+      if (!identifier) return;
 
       try {
         const { data, error } = await supabase
-          .rpc("get_public_artist_profile", { profile_id: id });
+          .rpc("get_public_artist_profile", { profile_identifier: identifier });
 
         if (error) {
           setError("Artist not found");
@@ -61,7 +61,7 @@ export default function PublicArtistProfile() {
     };
 
     fetchProfile();
-  }, [id]);
+  }, [identifier]);
 
   if (loading) {
     return (

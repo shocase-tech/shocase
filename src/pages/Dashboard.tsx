@@ -30,6 +30,8 @@ interface DashboardArtistProfile {
   past_shows?: any[];
   upcoming_shows?: any[];
   contact_info?: any;
+  is_published?: boolean;
+  url_slug?: string;
   created_at: string;
   updated_at: string;
 }
@@ -142,9 +144,9 @@ export default function Dashboard() {
   };
 
   const copyPublicLink = async () => {
-    if (!profile) return;
+    if (!profile || !profile.is_published) return;
     
-    const publicUrl = `${window.location.origin}/artist/${profile.id}`;
+    const publicUrl = `${window.location.origin}/artist/${profile.url_slug || profile.id}`;
     try {
       await navigator.clipboard.writeText(publicUrl);
       toast({
@@ -160,9 +162,47 @@ export default function Dashboard() {
     }
   };
 
-  const openPublicProfile = () => {
+  const previewProfile = () => {
     if (!profile) return;
-    window.open(`/artist/${profile.id}`, '_blank');
+    window.open(`/artist/${profile.url_slug || profile.id}`, '_blank');
+  };
+
+  const publishProfile = async () => {
+    if (!profile || !user) return;
+
+    try {
+      // Generate URL slug from artist name if it doesn't exist
+      let urlSlug = profile.url_slug;
+      if (!urlSlug) {
+        const { data: slugData, error: slugError } = await supabase
+          .rpc('generate_url_slug', { artist_name: profile.artist_name });
+        
+        if (slugError) throw slugError;
+        urlSlug = slugData;
+      }
+
+      const { error } = await supabase
+        .from('artist_profiles')
+        .update({ 
+          is_published: true,
+          url_slug: urlSlug 
+        })
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      setProfile({ ...profile, is_published: true, url_slug: urlSlug });
+      toast({
+        title: "Press kit published!",
+        description: `Your press kit is now live at ${window.location.origin}/artist/${urlSlug}`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to publish press kit: " + error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   if (loading) {
@@ -200,25 +240,40 @@ export default function Dashboard() {
               <CardContent>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Button
-                    onClick={copyPublicLink}
+                    onClick={previewProfile}
                     variant="outline"
                     className="flex items-center gap-2"
                   >
-                    <Copy className="w-4 h-4" />
-                    Copy Public Link
-                  </Button>
-                  <Button
-                    onClick={openPublicProfile}
-                    variant="secondary"
-                    className="flex items-center gap-2"
-                  >
                     <ExternalLink className="w-4 h-4" />
-                    View Press Kit
+                    Preview Press Kit
                   </Button>
+                  {!profile.is_published ? (
+                    <Button
+                      onClick={publishProfile}
+                      className="flex items-center gap-2"
+                    >
+                      Publish Press Kit
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={copyPublicLink}
+                      variant="secondary"
+                      className="flex items-center gap-2"
+                    >
+                      <Copy className="w-4 h-4" />
+                      Copy Public Link
+                    </Button>
+                  )}
                 </div>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Share your professional press kit: {window.location.origin}/artist/{profile.id}
-                </p>
+                {profile.is_published ? (
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Share your professional press kit: {window.location.origin}/artist/{profile.url_slug || profile.id}
+                  </p>
+                ) : (
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Publish your press kit to share it with the world
+                  </p>
+                )}
               </CardContent>
             )}
           </Card>
