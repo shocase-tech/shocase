@@ -63,7 +63,7 @@ const Header = () => {
           <img 
             src="/src/assets/shocase-logo.png" 
             alt="SHOCASE Logo" 
-            className="h-8"
+            className="h-10"
           />
         </div>
 
