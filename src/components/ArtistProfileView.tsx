@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket } from "lucide-react";
 import DragDropContainer from "@/components/DragDropContainer";
 import DragDropSection from "@/components/DragDropSection";
+import PrivateImage from "@/components/PrivateImage";
 import { useState } from "react";
 
 interface ArtistProfile {
@@ -76,10 +77,10 @@ export default function ArtistProfileView({ profile }: ArtistProfileViewProps) {
               )}
             </div>
             {profile.profile_photo_url && (
-              <img
-                src={profile.profile_photo_url}
+              <PrivateImage
+                storagePath={profile.profile_photo_url}
                 alt={profile.artist_name}
-                className="w-20 h-20 rounded-full object-cover border-2 border-white/20"
+                className="w-32 h-32 rounded-full object-cover border-4 border-white/20 shadow-lg"
               />
             )}
           </div>
