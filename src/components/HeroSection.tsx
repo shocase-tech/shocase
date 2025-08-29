@@ -2,16 +2,13 @@ import { Button } from "@/components/ui/button";
 import { Music, Sparkles, Download, Globe } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/hero-musician.jpg";
-
 const HeroSection = () => {
   const navigate = useNavigate();
-  return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-dark">
+  return <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-dark">
       {/* Background Image with Overlay */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${heroImage})` }}
-      >
+      <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{
+      backgroundImage: `url(${heroImage})`
+    }}>
         <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/80 to-background/95"></div>
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/60"></div>
       </div>
@@ -31,9 +28,7 @@ const HeroSection = () => {
           AI Press Kit Generator
         </h1>
         
-        <p className="text-xl md:text-2xl text-muted-foreground mb-4 max-w-4xl mx-auto leading-relaxed">
-          Create professional Electronic Press Kits in minutes, not hours
-        </p>
+        <p className="text-xl md:text-2xl text-muted-foreground mb-4 max-w-4xl mx-auto leading-relaxed">Create professional Electronic Press Kits in minutes, not hours</p>
         
         <p className="text-lg text-muted-foreground/80 mb-12 max-w-2xl mx-auto">
           Upload photos, add your bio, streaming links, and tour dates. 
@@ -79,8 +74,6 @@ const HeroSection = () => {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default HeroSection;
