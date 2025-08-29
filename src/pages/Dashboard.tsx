@@ -9,23 +9,34 @@ import ArtistProfileForm from "@/components/ArtistProfileForm";
 import ArtistProfileView from "@/components/ArtistProfileView";
 import { Copy, ExternalLink } from "lucide-react";
 
-interface ArtistProfile {
+// Use the database type but with transformed data for the UI
+interface DashboardArtistProfile {
   id: string;
   user_id: string;
   artist_name: string;
   bio?: string;
-  genre?: string;
+  genre?: string[];
   social_links?: any;
   profile_photo_url?: string;
-  press_photos?: string[];
+  press_photos?: { url: string; label?: string }[];
   pdf_urls?: string[];
+  gallery_photos?: { url: string; label?: string }[];
+  hero_photo_url?: string;
+  show_videos?: string[];
+  press_quotes?: any[];
+  press_mentions?: any[];
+  streaming_links?: any;
+  playlists?: string[];
+  past_shows?: any[];
+  upcoming_shows?: any[];
+  contact_info?: any;
   created_at: string;
   updated_at: string;
 }
 
 export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<ArtistProfile | null>(null);
+  const [profile, setProfile] = useState<DashboardArtistProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -76,7 +87,28 @@ export default function Dashboard() {
         throw error;
       }
 
-      setProfile(data);
+      // Transform the data to match our interface
+      if (data) {
+        const transformedProfile: DashboardArtistProfile = {
+          ...data,
+          genre: data.genre ? (typeof data.genre === 'string' ? JSON.parse(data.genre) : data.genre) : [],
+          press_quotes: Array.isArray(data.press_quotes) ? data.press_quotes : [],
+          press_mentions: Array.isArray(data.press_mentions) ? data.press_mentions : [],
+          past_shows: Array.isArray(data.past_shows) ? data.past_shows : [],
+          upcoming_shows: Array.isArray(data.upcoming_shows) ? data.upcoming_shows : [],
+          gallery_photos: data.gallery_photos ? 
+            (data.gallery_photos.length > 0 && typeof data.gallery_photos[0] === 'string' ? 
+              (data.gallery_photos as unknown as string[]).map((url: string) => ({ url })) : 
+              data.gallery_photos as unknown as { url: string; label?: string }[]) : [],
+          press_photos: data.press_photos ? 
+            (data.press_photos.length > 0 && typeof data.press_photos[0] === 'string' ? 
+              (data.press_photos as unknown as string[]).map((url: string) => ({ url })) : 
+              data.press_photos as unknown as { url: string; label?: string }[]) : [],
+        };
+        setProfile(transformedProfile);
+      } else {
+        setProfile(null);
+      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -195,7 +227,7 @@ export default function Dashboard() {
             <div className="space-y-8">
               <ArtistProfileView profile={profile} />
               <ArtistProfileForm 
-                profile={profile} 
+                profile={profile as any} 
                 onSaved={handleProfileSaved} 
               />
             </div>

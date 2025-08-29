@@ -7,14 +7,14 @@ interface ArtistProfile {
   user_id: string;
   artist_name: string;
   bio?: string;
-  genre?: string;
+  genre?: string[];
   social_links?: any;
   profile_photo_url?: string;
-  press_photos?: string[];
+  press_photos?: { url: string; label?: string }[];
   pdf_urls?: string[];
   hero_photo_url?: string;
   show_videos?: string[];
-  gallery_photos?: string[];
+  gallery_photos?: { url: string; label?: string }[];
   press_quotes?: any[];
   press_mentions?: any[];
   streaming_links?: any;
@@ -51,9 +51,11 @@ export default function ArtistProfileView({ profile }: ArtistProfileViewProps) {
           <div className="flex items-start justify-between">
             <div>
               <CardTitle className="text-2xl gradient-text">{profile.artist_name}</CardTitle>
-              {profile.genre && (
-                <div className="mt-2">
-                  <Badge variant="secondary">{profile.genre}</Badge>
+              {profile.genre && profile.genre.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {profile.genre.map((genre, index) => (
+                    <Badge key={index} variant="secondary">{genre}</Badge>
+                  ))}
                 </div>
               )}
               {profile.contact_info?.email && (
@@ -204,12 +206,18 @@ export default function ArtistProfileView({ profile }: ArtistProfileViewProps) {
               <h3 className="font-semibold mb-3">Gallery</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {profile.gallery_photos.slice(0, 7).map((photo, index) => (
-                  <img
-                    key={index}
-                    src={photo}
-                    alt={`Gallery ${index + 1}`}
-                    className="w-full h-24 object-cover rounded-md border border-white/20"
-                  />
+                  <div key={index} className="relative">
+                    <img
+                      src={typeof photo === 'string' ? photo : photo.url}
+                      alt={typeof photo === 'string' ? `Gallery ${index + 1}` : photo.label || `Gallery ${index + 1}`}
+                      className="w-full h-24 object-cover rounded-md border border-white/20"
+                    />
+                    {typeof photo !== 'string' && photo.label && (
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-xs p-1 rounded-b-md">
+                        {photo.label}
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
             </div>
@@ -220,12 +228,18 @@ export default function ArtistProfileView({ profile }: ArtistProfileViewProps) {
               <h3 className="font-semibold mb-3">Press Photos</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {profile.press_photos.map((photo, index) => (
-                  <img
-                    key={index}
-                    src={photo}
-                    alt={`Press photo ${index + 1}`}
-                    className="w-full h-24 object-cover rounded-md border border-white/20"
-                  />
+                  <div key={index} className="relative">
+                    <img
+                      src={typeof photo === 'string' ? photo : photo.url}
+                      alt={typeof photo === 'string' ? `Press photo ${index + 1}` : photo.label || `Press photo ${index + 1}`}
+                      className="w-full h-24 object-cover rounded-md border border-white/20"
+                    />
+                    {typeof photo !== 'string' && photo.label && (
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-xs p-1 rounded-b-md">
+                        {photo.label}
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
             </div>

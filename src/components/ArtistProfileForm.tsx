@@ -9,20 +9,24 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Sparkles, Plus, Trash2 } from "lucide-react";
 import FileUpload from "./FileUpload";
+import GenreInput from "./GenreInput";
+import PhotoUpload from "./PhotoUpload";
+import SectionSaveButton from "./SectionSaveButton";
 
 interface ArtistProfile {
   id: string;
   user_id: string;
   artist_name: string;
   bio?: string;
-  genre?: string;
+  genre?: string[];
+  gallery_photos?: { url: string; label?: string }[];
+  press_photos?: { url: string; label?: string }[];
   social_links?: any;
   profile_photo_url?: string;
-  press_photos?: string[];
+  
   pdf_urls?: string[];
   hero_photo_url?: string;
   show_videos?: string[];
-  gallery_photos?: string[];
   press_quotes?: any[];
   press_mentions?: any[];
   streaming_links?: any;
@@ -33,7 +37,7 @@ interface ArtistProfile {
 }
 
 interface ArtistProfileFormProps {
-  profile?: ArtistProfile;
+  profile?: ArtistProfile | any; // Allow flexibility for different profile types
   onSaved: () => void;
 }
 
@@ -41,7 +45,7 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
   const [formData, setFormData] = useState({
     artist_name: profile?.artist_name || "",
     bio: profile?.bio || "",
-    genre: profile?.genre || "",
+    genre: Array.isArray(profile?.genre) ? profile.genre : (profile?.genre ? (typeof profile.genre === 'string' ? JSON.parse(profile.genre) : [profile.genre]) : []),
     website: profile?.social_links?.website || "",
     instagram: profile?.social_links?.instagram || "",
     spotify: profile?.social_links?.spotify || "",
@@ -75,7 +79,7 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
         user_id: user.id,
         artist_name: formData.artist_name,
         bio: formData.bio,
-        genre: formData.genre,
+        genre: JSON.stringify(formData.genre),
         social_links: {
           website: formData.website,
           instagram: formData.instagram,
@@ -151,62 +155,51 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
     }
   };
 
-  const handleFileUpload = async (file: File, type: 'profile' | 'press' | 'pdf' | 'hero' | 'gallery') => {
+  const handleFileUpload = async (file: File, type: 'profile' | 'press' | 'pdf' | 'hero' | 'gallery'): Promise<string> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Not authenticated");
+
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${user.id}/${type}/${Date.now()}.${fileExt}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('artist-uploads')
+      .upload(fileName, file);
+
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage
+      .from('artist-uploads')
+      .getPublicUrl(fileName);
+
+    return data.publicUrl;
+  };
+
+  const saveSection = async (sectionData: any) => {
+    if (!profile) return;
+    
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
+      setLoading(true);
+      const { error } = await supabase
+        .from("artist_profiles")
+        .update(sectionData)
+        .eq("id", profile.id);
 
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${type}/${Date.now()}.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('artist-uploads')
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data } = supabase.storage
-        .from('artist-uploads')
-        .getPublicUrl(fileName);
-
-      // Update profile with new file URL
-      if (profile) {
-        let updateData: any = {};
-        
-        if (type === 'profile') {
-          updateData.profile_photo_url = data.publicUrl;
-        } else if (type === 'hero') {
-          updateData.hero_photo_url = data.publicUrl;
-        } else if (type === 'press') {
-          const currentPhotos = profile.press_photos || [];
-          updateData.press_photos = [...currentPhotos, data.publicUrl];
-        } else if (type === 'gallery') {
-          const currentGallery = profile.gallery_photos || [];
-          updateData.gallery_photos = [...currentGallery, data.publicUrl];
-        } else if (type === 'pdf') {
-          const currentPdfs = profile.pdf_urls || [];
-          updateData.pdf_urls = [...currentPdfs, data.publicUrl];
-        }
-
-        const { error: updateError } = await supabase
-          .from("artist_profiles")
-          .update(updateData)
-          .eq("id", profile.id);
-
-        if (updateError) throw updateError;
-
-        onSaved();
-        toast({
-          title: "Success!",
-          description: "File uploaded successfully.",
-        });
-      }
+      if (error) throw error;
+      
+      onSaved();
+      toast({
+        title: "Success!",
+        description: "Section updated successfully.",
+      });
     } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to upload file: " + error.message,
+        description: error.message,
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -259,12 +252,11 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="genre">Genre</Label>
-                  <Input
-                    id="genre"
-                    value={formData.genre}
-                    onChange={(e) => setFormData({ ...formData, genre: e.target.value })}
-                    placeholder="e.g., Rock, Pop, Hip-Hop"
+                  <Label htmlFor="genre">Genres</Label>
+                  <GenreInput
+                    genres={formData.genre}
+                    onChange={(genres) => setFormData({ ...formData, genre: genres })}
+                    placeholder="Add genres (e.g., Rock, Pop, Hip-Hop)"
                   />
                 </div>
               </div>
@@ -393,39 +385,114 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
                 {loading ? "Saving..." : (profile ? "Update Profile" : "Create Profile")}
               </Button>
             </form>
+            
+            {profile && (
+              <SectionSaveButton
+                sectionName="Basic Info"
+                loading={loading}
+                onSave={() => saveSection({
+                  artist_name: formData.artist_name,
+                  bio: formData.bio,
+                  genre: JSON.stringify(formData.genre),
+                  social_links: {
+                    website: formData.website,
+                    instagram: formData.instagram,
+                    spotify: formData.spotify,
+                  },
+                  contact_info: formData.contact_info,
+                })}
+              />
+            )}
           </TabsContent>
 
           <TabsContent value="media" className="space-y-6">
             {profile && (
               <div className="space-y-8">
-                <div>
-                  <h3 className="text-lg font-semibold mb-4">Photos</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4">Profile & Hero Photos</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <FileUpload
+                        label="Profile Photo"
+                        accept="image/*"
+                        onUpload={(file) => handleFileUpload(file, 'profile')}
+                      />
+                      <FileUpload
+                        label="Hero Photo"
+                        accept="image/*"
+                        onUpload={(file) => handleFileUpload(file, 'hero')}
+                      />
+                    </div>
+                    {(profile.profile_photo_url || profile.hero_photo_url) && (
+                      <div className="grid grid-cols-2 gap-4 mt-4">
+                        {profile.profile_photo_url && (
+                          <div>
+                            <p className="text-sm text-muted-foreground mb-2">Profile Photo</p>
+                            <img src={profile.profile_photo_url} alt="Profile" className="w-full h-24 object-cover rounded" />
+                          </div>
+                        )}
+                        {profile.hero_photo_url && (
+                          <div>
+                            <p className="text-sm text-muted-foreground mb-2">Hero Photo</p>
+                            <img src={profile.hero_photo_url} alt="Hero" className="w-full h-24 object-cover rounded" />
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4">Documents</h3>
                     <FileUpload
-                      label="Profile Photo"
-                      accept="image/*"
-                      onUpload={(file) => handleFileUpload(file, 'profile')}
+                      label="Upload PDFs"
+                      accept=".pdf"
+                      onUpload={(file) => handleFileUpload(file, 'pdf')}
                     />
-                    <FileUpload
-                      label="Hero Photo"
-                      accept="image/*"
-                      onUpload={(file) => handleFileUpload(file, 'hero')}
-                    />
-                    <FileUpload
-                      label="Press Photos"
-                      accept="image/*"
-                      onUpload={(file) => handleFileUpload(file, 'press')}
-                    />
-                    <FileUpload
-                      label="Gallery Photos"
-                      accept="image/*"
-                      onUpload={(file) => handleFileUpload(file, 'gallery')}
-                    />
+                    {profile.pdf_urls && profile.pdf_urls.length > 0 && (
+                      <div className="mt-4">
+                        <p className="text-sm text-muted-foreground mb-2">Uploaded PDFs:</p>
+                        <div className="space-y-2">
+                          {profile.pdf_urls.map((url, index) => (
+                            <div key={index} className="flex items-center gap-2 text-sm">
+                              <span>📄</span>
+                              <a href={url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                                Document {index + 1}
+                              </a>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
+                <PhotoUpload
+                  title="Press Photos"
+                  photos={profile.press_photos?.map(url => typeof url === 'string' ? { url } : url) || []}
+                  onUpload={(file) => handleFileUpload(file, 'press')}
+                  onUpdate={(photos) => {
+                    const updateData = { press_photos: JSON.stringify(photos) };
+                    saveSection(updateData);
+                  }}
+                  maxPhotos={8}
+                  maxSizeText="Max 5MB per photo, up to 8 photos"
+                />
+
+                <PhotoUpload
+                  title="Gallery Photos"
+                  photos={profile.gallery_photos?.map(url => typeof url === 'string' ? { url } : url) || []}
+                  onUpload={(file) => handleFileUpload(file, 'gallery')}
+                  onUpdate={(photos) => {
+                    const updateData = { gallery_photos: JSON.stringify(photos) };
+                    saveSection(updateData);
+                  }}
+                  maxPhotos={12}
+                  maxSizeText="Max 5MB per photo, up to 12 photos"
+                />
+
                 <div>
                   <h3 className="text-lg font-semibold mb-4">Videos (Up to 3)</h3>
+                  <p className="text-sm text-muted-foreground mb-4">Add YouTube or Vimeo links to showcase your performances</p>
                   {formData.show_videos.map((video, index) => (
                     <div key={index} className="flex gap-2 mb-2">
                       <Input
@@ -456,14 +523,13 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
                   )}
                 </div>
 
-                <div>
-                  <h3 className="text-lg font-semibold mb-4">Documents</h3>
-                  <FileUpload
-                    label="PDFs"
-                    accept=".pdf"
-                    onUpload={(file) => handleFileUpload(file, 'pdf')}
-                  />
-                </div>
+                <SectionSaveButton
+                  sectionName="Media"
+                  loading={loading}
+                  onSave={() => saveSection({
+                    show_videos: formData.show_videos,
+                  })}
+                />
               </div>
             )}
           </TabsContent>
@@ -536,6 +602,15 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
                 Add Mention
               </Button>
             </div>
+            
+            <SectionSaveButton
+              sectionName="Press Kit"
+              loading={loading}
+              onSave={() => saveSection({
+                press_quotes: formData.press_quotes,
+                press_mentions: formData.press_mentions,
+              })}
+            />
           </TabsContent>
 
           <TabsContent value="shows" className="space-y-6">
@@ -621,6 +696,15 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
                 Add Show
               </Button>
             </div>
+            
+            <SectionSaveButton
+              sectionName="Shows"
+              loading={loading}
+              onSave={() => saveSection({
+                past_shows: formData.past_shows,
+                upcoming_shows: formData.upcoming_shows,
+              })}
+            />
           </TabsContent>
         </Tabs>
       </CardContent>
