@@ -24,7 +24,7 @@ const HeroSection = () => {
           <Sparkles className="w-12 h-12 text-accent animate-pulse" />
         </div>
         
-        <img src="/src/assets/shocase-logo.png" alt="SHOCASE Logo" className="h-20 md:h-28 mx-auto mb-6" />
+        <img src="/src/assets/shocase-logo.png" alt="SHOCASE Logo" className="h-32 md:h-48 lg:h-56 mx-auto mb-6" />
         
         <p className="text-xl md:text-2xl text-muted-foreground mb-4 max-w-4xl mx-auto leading-relaxed">Create professional Electronic Press Kits in minutes, not hours</p>
         
