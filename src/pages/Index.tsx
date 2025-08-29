@@ -1,6 +1,7 @@
 import HeroSection from "@/components/HeroSection";
 import FeaturesSection from "@/components/FeaturesSection";
-import WizardPreview from "@/components/WizardPreview";
+import CTASection from "@/components/CTASection";
+import Header from "@/components/Header";
 import { useEffect } from "react";
 
 const Index = () => {
@@ -16,9 +17,10 @@ const Index = () => {
 
   return (
     <main className="min-h-screen bg-gradient-dark">
+      <Header />
       <HeroSection />
       <FeaturesSection />
-      <WizardPreview />
+      <CTASection />
     </main>
   );
 };

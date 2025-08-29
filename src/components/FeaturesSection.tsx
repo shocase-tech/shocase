@@ -130,7 +130,7 @@ const FeaturesSection = () => {
               </div>
             </div>
             <p className="text-sm text-muted-foreground">
-              Backend functionality requires <strong>Supabase integration</strong> for authentication, file storage, and payments
+              Start with our free plan and upgrade when you're ready for unlimited EPKs and custom branding
             </p>
           </div>
         </div>
