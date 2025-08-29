@@ -14,6 +14,7 @@ import GenreInput from "./GenreInput";
 import PrivateImage from "./PrivateImage";
 import PhotoUpload from "./PhotoUpload";
 import SectionSaveButton from "./SectionSaveButton";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 interface ArtistProfile {
   id: string;
@@ -51,6 +52,7 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
     website: profile?.social_links?.website || "",
     instagram: profile?.social_links?.instagram || "",
     spotify: profile?.social_links?.spotify || "",
+    tiktok: profile?.social_links?.tiktok || "",
     show_videos: profile?.show_videos || [],
     press_quotes: profile?.press_quotes || [],
     press_mentions: profile?.press_mentions || [],
@@ -67,6 +69,7 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
     location: "",
     vibe: ""
   });
+  const [activeTab, setActiveTab] = useState("basic");
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -86,6 +89,7 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
           website: formData.website,
           instagram: formData.instagram,
           spotify: formData.spotify,
+          tiktok: formData.tiktok,
         },
         show_videos: formData.show_videos,
         press_quotes: formData.press_quotes,
@@ -233,7 +237,7 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="basic" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="basic">Basic Info</TabsTrigger>
             <TabsTrigger value="media">Media</TabsTrigger>
@@ -329,7 +333,7 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="website">Website</Label>
                   <Input
@@ -357,6 +361,15 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
                     value={formData.spotify}
                     onChange={(e) => setFormData({ ...formData, spotify: e.target.value })}
                     placeholder="Spotify profile URL"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="tiktok">TikTok</Label>
+                  <Input
+                    id="tiktok"
+                    value={formData.tiktok}
+                    onChange={(e) => setFormData({ ...formData, tiktok: e.target.value })}
+                    placeholder="@yourusername"
                   />
                 </div>
               </div>
@@ -400,6 +413,7 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
                     website: formData.website,
                     instagram: formData.instagram,
                     spotify: formData.spotify,
+                    tiktok: formData.tiktok,
                   },
                   contact_info: formData.contact_info,
                 })}
@@ -414,41 +428,98 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
                   <div>
                     <h3 className="text-lg font-semibold mb-4">Profile & Hero Photos</h3>
                     <div className="grid grid-cols-2 gap-4">
-                      <FileUpload
-                        label="Profile Photo"
-                        accept="image/*"
-                        onUpload={(file) => handleFileUpload(file, 'profile')}
-                      />
-                      <FileUpload
-                        label="Hero Photo"
-                        accept="image/*"
-                        onUpload={(file) => handleFileUpload(file, 'hero')}
-                      />
-                    </div>
-                    {(profile.profile_photo_url || profile.hero_photo_url) && (
-                      <div className="grid grid-cols-2 gap-4 mt-4">
+                      <div className="space-y-2">
+                        <FileUpload
+                          label="Profile Photo"
+                          accept="image/*"
+                          onUpload={(file) => handleFileUpload(file, 'profile')}
+                        />
                         {profile.profile_photo_url && (
-                          <div>
+                          <div className="relative group">
                             <p className="text-sm text-muted-foreground mb-2">Profile Photo</p>
-                            <PrivateImage 
-                              storagePath={profile.profile_photo_url} 
-                              alt="Profile" 
-                              className="w-full h-24 object-cover rounded" 
-                            />
-                          </div>
-                        )}
-                        {profile.hero_photo_url && (
-                          <div>
-                            <p className="text-sm text-muted-foreground mb-2">Hero Photo</p>
-                            <PrivateImage 
-                              storagePath={profile.hero_photo_url} 
-                              alt="Hero" 
-                              className="w-full h-24 object-cover rounded" 
-                            />
+                            <div className="relative">
+                              <PrivateImage 
+                                storagePath={profile.profile_photo_url} 
+                                alt="Profile" 
+                                className="w-full h-24 object-cover rounded" 
+                              />
+                              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded">
+                                <span className="text-white text-sm font-medium">Replace</span>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="absolute top-2 right-2 h-6 w-6 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                    >
+                                      <Trash2 className="h-3 w-3" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Delete Profile Photo</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Are you sure you want to delete this profile photo? This action cannot be undone.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => saveSection({ profile_photo_url: null })}>
+                                        Delete
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </div>
+                            </div>
                           </div>
                         )}
                       </div>
-                    )}
+                      <div className="space-y-2">
+                        <FileUpload
+                          label="Hero Photo"
+                          accept="image/*"
+                          onUpload={(file) => handleFileUpload(file, 'hero')}
+                        />
+                        {profile.hero_photo_url && (
+                          <div className="relative group">
+                            <p className="text-sm text-muted-foreground mb-2">Hero Photo</p>
+                            <div className="relative">
+                              <PrivateImage 
+                                storagePath={profile.hero_photo_url} 
+                                alt="Hero" 
+                                className="w-full h-24 object-cover rounded" 
+                              />
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="absolute top-2 right-2 h-6 w-6 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Delete Hero Photo</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to delete this hero photo? This action cannot be undone.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => saveSection({ hero_photo_url: null })}>
+                                      Delete
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                   
                   <div>
@@ -477,32 +548,6 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
                 </div>
 
                 <PhotoUpload
-                  title="Press Photos"
-                  photos={profile.press_photos?.map(url => typeof url === 'string' ? { url } : url) || []}
-                  onUpload={async (file) => {
-                    const { data: { user } } = await supabase.auth.getUser();
-                    if (!user) throw new Error("Not authenticated");
-                    
-                    // Upload and get storage path
-                    const storagePath = await ImageStorageService.uploadFile(file, 'press', user.id);
-                    
-                    // Add to current photos
-                    const currentPhotos = profile.press_photos || [];
-                    const updatedPhotos = [...currentPhotos, storagePath];
-                    await saveSection({ press_photos: updatedPhotos });
-                    
-                    // Return signed URL for immediate display
-                    return ImageStorageService.getSignedUrl(storagePath);
-                  }}
-                  onUpdate={(photos) => {
-                    const updateData = { press_photos: photos.map(p => p.url) };
-                    saveSection(updateData);
-                  }}
-                  maxPhotos={8}
-                  maxSizeText="Max 5MB per photo, up to 8 photos"
-                />
-
-                <PhotoUpload
                   title="Gallery Photos"
                   photos={profile.gallery_photos?.map(url => typeof url === 'string' ? { url } : url) || []}
                   onUpload={async (file) => {
@@ -521,6 +566,10 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
                     return ImageStorageService.getSignedUrl(storagePath);
                   }}
                   onUpdate={(photos) => {
+                    const updateData = { gallery_photos: photos.map(p => p.url) };
+                    saveSection(updateData);
+                  }}
+                  onReorder={(photos) => {
                     const updateData = { gallery_photos: photos.map(p => p.url) };
                     saveSection(updateData);
                   }}

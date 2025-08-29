@@ -3,10 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Upload, X, Edit } from "lucide-react";
+import { Upload, X, Edit, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import DragDropSection from "@/components/DragDropSection";
+import DragDropContainer from "@/components/DragDropContainer";
 import PrivateImage from "@/components/PrivateImage";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 interface PhotoItem {
   url: string;
@@ -18,6 +20,7 @@ interface PhotoUploadProps {
   photos: PhotoItem[];
   onUpload: (file: File) => Promise<string>;
   onUpdate: (photos: PhotoItem[]) => void;
+  onReorder?: (photos: PhotoItem[]) => void;
   maxPhotos?: number;
   maxSizeText?: string;
   accept?: string;
@@ -28,6 +31,7 @@ export default function PhotoUpload({
   photos, 
   onUpload, 
   onUpdate, 
+  onReorder,
   maxPhotos = 10,
   maxSizeText = "Max 5MB per photo",
   accept = "image/*"
@@ -77,6 +81,17 @@ export default function PhotoUpload({
     onUpdate(newPhotos);
   };
 
+  const handleReorder = (newOrder: string[]) => {
+    if (!onReorder) return;
+    
+    const reorderedPhotos = newOrder.map(id => {
+      const index = parseInt(id.replace('photo-', ''));
+      return photos[index];
+    }).filter(Boolean);
+    
+    onReorder(reorderedPhotos);
+  };
+
   const updateLabel = (index: number) => {
     const newPhotos = [...photos];
     newPhotos[index] = { ...newPhotos[index], label: editLabel };
@@ -100,14 +115,91 @@ export default function PhotoUpload({
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {photos.map((photo, index) => (
-          <DragDropSection
-            key={index}
-            id={`photo-${index}`}
-            onDelete={() => removePhoto(index)}
-            isDraggable={false}
+        {onReorder ? (
+          <DragDropContainer
+            items={photos.map((_, index) => `photo-${index}`)}
+            onReorder={handleReorder}
           >
-            <Card className="overflow-hidden">
+            {photos.map((photo, index) => (
+              <DragDropSection
+                key={`photo-${index}`}
+                id={`photo-${index}`}
+                isDraggable={true}
+              >
+                <Card className="overflow-hidden">
+                  <CardContent className="p-0">
+                    <div className="relative group">
+                      <PrivateImage
+                        storagePath={photo.url}
+                        alt={photo.label || `Photo ${index + 1}`}
+                        className="w-full h-32 object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => startEdit(index)}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete Photo</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete this photo? This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => removePhoto(index)}>
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </div>
+                    <div className="p-2">
+                      {editingIndex === index ? (
+                        <div className="space-y-2">
+                          <Input
+                            value={editLabel}
+                            onChange={(e) => setEditLabel(e.target.value)}
+                            placeholder="Add caption..."
+                            className="text-xs"
+                          />
+                          <div className="flex gap-1">
+                            <Button size="sm" onClick={() => updateLabel(index)}>
+                              Save
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={() => setEditingIndex(null)}>
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-xs text-muted-foreground truncate">
+                          {photo.label || "No caption"}
+                        </p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </DragDropSection>
+            ))}
+          </DragDropContainer>
+        ) : (
+          photos.map((photo, index) => (
+            <Card key={index} className="overflow-hidden">
               <CardContent className="p-0">
                 <div className="relative group">
                   <PrivateImage
@@ -123,6 +215,30 @@ export default function PhotoUpload({
                     >
                       <Edit className="w-4 h-4" />
                     </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Photo</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete this photo? This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => removePhoto(index)}>
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </div>
                 <div className="p-2">
@@ -151,8 +267,8 @@ export default function PhotoUpload({
                 </div>
               </CardContent>
             </Card>
-          </DragDropSection>
-        ))}
+          ))
+        )}
 
         {photos.length < maxPhotos && (
           <Card className="border-dashed">
