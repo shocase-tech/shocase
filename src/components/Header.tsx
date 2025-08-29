@@ -8,12 +8,11 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { User, LogOut, Settings } from "lucide-react";
+import { User, LogOut, Settings, Music } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
-import ShowcaseLogo from "./ShowcaseLogo";
 
 const Header = () => {
   const [user, setUser] = useState<SupabaseUser | null>(null);
@@ -60,7 +59,13 @@ const Header = () => {
     <header className="absolute top-0 left-0 right-0 z-50 p-6">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         {/* Logo */}
-        <ShowcaseLogo size="sm" />
+        <div className="flex items-center">
+          <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-2">
+            <span className="text-primary-foreground font-bold text-sm">A</span>
+          </div>
+          <span className="text-xl font-bold text-primary">SHOCASE</span>
+          <span className="text-sm text-muted-foreground ml-1">.xyz</span>
+        </div>
 
         {/* Auth Section */}
         <div className="flex items-center">
