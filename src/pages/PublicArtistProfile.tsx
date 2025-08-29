@@ -7,11 +7,30 @@ import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket } from 
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Database } from "@/integrations/supabase/types";
 
-type ArtistProfile = Database['public']['Tables']['artist_profiles']['Row'];
+type PublicArtistProfile = {
+  id: string;
+  artist_name: string;
+  bio: string | null;
+  genre: string | null;
+  social_links: any;
+  profile_photo_url: string | null;
+  press_photos: string[] | null;
+  hero_photo_url: string | null;
+  show_videos: string[] | null;
+  gallery_photos: string[] | null;
+  press_quotes: any;
+  press_mentions: any;
+  streaming_links: any;
+  playlists: string[] | null;
+  past_shows: any;
+  upcoming_shows: any;
+  created_at: string;
+  updated_at: string;
+};
 
 export default function PublicArtistProfile() {
   const { id } = useParams<{ id: string }>();
-  const [profile, setProfile] = useState<ArtistProfile | null>(null);
+  const [profile, setProfile] = useState<PublicArtistProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,17 +40,19 @@ export default function PublicArtistProfile() {
 
       try {
         const { data, error } = await supabase
-          .from("artist_profiles")
-          .select("*")
-          .eq("id", id)
-          .single();
+          .rpc("get_public_artist_profile", { profile_id: id });
 
         if (error) {
           setError("Artist not found");
           return;
         }
 
-        setProfile(data);
+        if (!data || data.length === 0) {
+          setError("Artist not found");
+          return;
+        }
+
+        setProfile(data[0]);
       } catch (err) {
         setError("Failed to load artist profile");
       } finally {
@@ -272,7 +293,7 @@ export default function PublicArtistProfile() {
               </section>
             )}
 
-            {/* Social Links & Contact */}
+            {/* Social Links */}
             <section className="glass-card border-white/10 p-6 rounded-xl">
               <h2 className="text-2xl font-semibold mb-4">Connect</h2>
               <div className="space-y-4">
@@ -304,11 +325,9 @@ export default function PublicArtistProfile() {
                     )}
                   </div>
                 )}
-                {profile.contact_info && typeof profile.contact_info === 'object' && profile.contact_info !== null && !Array.isArray(profile.contact_info) && (profile.contact_info as any).email && (
-                  <p className="text-muted-foreground">
-                    <span className="font-medium">Contact:</span> {(profile.contact_info as any).email}
-                  </p>
-                )}
+                <p className="text-sm text-muted-foreground">
+                  For booking inquiries and professional contact, please reach out through the social media links above.
+                </p>
               </div>
             </section>
           </div>
