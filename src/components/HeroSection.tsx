@@ -24,18 +24,11 @@ const HeroSection = () => {
           <Sparkles className="w-12 h-12 text-accent animate-pulse" />
         </div>
         
-        <img 
-          src="/src/assets/shocase-logo.png" 
-          alt="SHOCASE Logo" 
-          className="h-20 md:h-28 mx-auto mb-6"
-        />
+        <img src="/src/assets/shocase-logo.png" alt="SHOCASE Logo" className="h-20 md:h-28 mx-auto mb-6" />
         
         <p className="text-xl md:text-2xl text-muted-foreground mb-4 max-w-4xl mx-auto leading-relaxed">Create professional Electronic Press Kits in minutes, not hours</p>
         
-        <p className="text-lg text-muted-foreground/80 mb-12 max-w-2xl mx-auto">
-          Upload photos, add your bio, streaming links, and tour dates. 
-          Our AI helps you craft the perfect press kit with both shareable landing pages and downloadable PDFs.
-        </p>
+        
 
         <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
           <Button variant="hero" size="lg" className="group" onClick={() => navigate("/auth")}>
