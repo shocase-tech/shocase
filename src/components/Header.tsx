@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
+import showcaseIcon from "@/assets/shocase-icon.png";
 
 const Header = () => {
   const [user, setUser] = useState<SupabaseUser | null>(null);
@@ -61,8 +62,8 @@ const Header = () => {
         {/* Logo */}
         <div className="flex items-center">
           <img 
-            src="/src/assets/shocase-logo.png" 
-            alt="SHOCASE Logo" 
+            src={showcaseIcon} 
+            alt="SHOCASE Icon" 
             className="h-10"
           />
         </div>

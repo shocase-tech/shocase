@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Music, Sparkles, Download, Globe } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/hero-musician.jpg";
+import showcaseLogo from "@/assets/shocase-logo-new.png";
 const HeroSection = () => {
   const navigate = useNavigate();
   return <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-dark">
@@ -24,7 +25,7 @@ const HeroSection = () => {
           <Sparkles className="w-12 h-12 text-accent animate-pulse" />
         </div>
         
-        <img src="/src/assets/shocase-logo.png" alt="SHOCASE Logo" className="h-32 md:h-40 mx-auto mb-6" />
+        <img src={showcaseLogo} alt="SHOCASE Logo" className="h-32 md:h-40 mx-auto mb-6" />
         
         <p className="text-xl md:text-2xl text-muted-foreground mb-4 max-w-4xl mx-auto leading-relaxed">Create professional Electronic Press Kits in minutes, not hours</p>
         
