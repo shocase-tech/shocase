@@ -20,7 +20,7 @@ export default function FloatingProgressIndicator({
   return (
     <div
       className={cn(
-        "fixed bottom-20 right-5 z-50 transition-all duration-300 transform",
+        "fixed bottom-5 right-5 z-50 transition-all duration-300 transform",
         isVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-full pointer-events-none"
       )}
     >
