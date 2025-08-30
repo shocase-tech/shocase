@@ -41,11 +41,20 @@ export default function PublicArtistProfile() {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      if (!identifier) return;
+      if (!identifier) {
+        setError("No artist identifier provided");
+        setLoading(false);
+        return;
+      }
+
+      console.log("Fetching profile for identifier:", identifier);
 
       try {
+        // Create Supabase client without auth requirement for public data
         const { data, error } = await supabase
           .rpc("get_public_artist_profile", { profile_identifier: identifier });
+
+        console.log("RPC response:", { data, error });
 
         if (error) {
           console.error("Error fetching profile:", error);
@@ -54,11 +63,14 @@ export default function PublicArtistProfile() {
         }
 
         if (!data || data.length === 0) {
+          console.log("No data returned for identifier:", identifier);
           setError("Artist not found");
           return;
         }
 
+        console.log("Profile found:", data[0]);
         setProfile(data[0] as PublicArtistProfile);
+        setError(null);
       } catch (err) {
         console.error("Catch error:", err);
         setError("Failed to load artist profile");
