@@ -65,22 +65,28 @@ export default function PublicArtistProfile() {
       try {
         console.log("Making RPC call with identifier:", identifier);
         
-        // First try to get published profile
+        // Query published profiles directly
         const { data, error } = await supabase
-          .rpc("get_public_artist_profile", { profile_identifier: identifier });
+          .from('artist_profiles')
+          .select('*')
+          .eq('is_published', true)
+          .or(`url_slug.eq.${identifier},id.eq.${identifier}`)
+          .single();
 
-        console.log("RPC response:", { data, error, identifier, dataLength: data?.length });
+        console.log("Direct query response:", { data, error, identifier });
 
         if (error) {
-          console.error("RPC error:", error);
-          setError("Failed to load artist profile");
-          return;
-        }
-
-        if (data && data.length > 0) {
-          const profileData = data[0] as PublicArtistProfile;
-          console.log("Published profile loaded:", { artistName: profileData.artist_name });
-          setProfile(profileData);
+          console.error("Query error:", error);
+          if (error.code === 'PGRST116') {
+            // No rows found
+            console.log("No published profile found");
+          } else {
+            setError("Failed to load artist profile");
+            return;
+          }
+        } else {
+          console.log("Published profile loaded:", { artistName: data.artist_name });
+          setProfile(data as PublicArtistProfile);
           setError(null);
           return;
         }
@@ -149,12 +155,25 @@ export default function PublicArtistProfile() {
     );
   }
 
-  // Parse genre from comma-separated string or array
-  const genreArray = Array.isArray(profile.genre) 
-    ? profile.genre 
-    : profile.genre 
-      ? profile.genre.split(',').map(g => g.trim()).filter(Boolean)
-      : [];
+  // Parse genre from JSON array, comma-separated string, or array
+  let genreArray: string[] = [];
+  try {
+    if (Array.isArray(profile.genre)) {
+      genreArray = profile.genre;
+    } else if (typeof profile.genre === 'string') {
+      // Try to parse as JSON first
+      try {
+        const parsed = JSON.parse(profile.genre);
+        genreArray = Array.isArray(parsed) ? parsed : [profile.genre];
+      } catch {
+        // If not JSON, split by comma
+        genreArray = profile.genre.split(',').map(g => g.trim()).filter(Boolean);
+      }
+    }
+  } catch (error) {
+    console.error('Error parsing genre:', error);
+    genreArray = [];
+  }
 
   return (
     <>
