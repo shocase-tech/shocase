@@ -118,8 +118,9 @@ function SortablePhoto({ photo, index, onDelete, onUpdateCaption }: SortablePhot
               value={captionValue}
               onChange={(e) => setCaptionValue(e.target.value)}
               placeholder="Add a caption..."
-              className="text-xs h-8"
+              className="text-xs h-8 bg-background/80 border-border"
               maxLength={100}
+              autoFocus
             />
             <div className="flex gap-1">
               <Button size="sm" onClick={handleSaveCaption} className="text-xs h-6 px-2">
@@ -281,7 +282,7 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
 
       const { error } = await supabase
         .from('artist_profiles')
-        .update({ gallery_photos: photos as any })
+        .update({ gallery_photos: photos })
         .eq('user_id', user.id);
 
       if (error) throw error;
