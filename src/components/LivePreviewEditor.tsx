@@ -138,8 +138,8 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
         'hero',
         profile.hero_photo_url ? (
           <div className="relative h-48 md:h-64 rounded-lg overflow-hidden">
-            <img
-              src={profile.hero_photo_url}
+            <PrivateImage
+              storagePath={profile.hero_photo_url}
               alt="Hero"
               className="w-full h-full object-cover"
             />
@@ -155,7 +155,7 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
           {renderEditableSection(
             'basic',
             <div className="flex items-start justify-between">
-              <div>
+              <div className="flex-1">
                 <CardTitle className="text-2xl gradient-text">{profile.artist_name}</CardTitle>
                 {profile.genre && profile.genre.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-2">
@@ -167,12 +167,57 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
                 {profile.contact_info?.email && (
                   <p className="text-sm text-muted-foreground mt-1">{profile.contact_info.email}</p>
                 )}
+                {profile.contact_info?.phone && (
+                  <p className="text-sm text-muted-foreground">{profile.contact_info.phone}</p>
+                )}
+                
+                {/* Streaming Links */}
+                {profile.streaming_links && Object.keys(profile.streaming_links).length > 0 && (
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium mb-2">Listen</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {profile.streaming_links.spotify && (
+                        <a
+                          href={profile.streaming_links.spotify}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1 px-2 py-1 text-xs rounded-md bg-green-600 hover:bg-green-700 text-white transition-colors"
+                        >
+                          <Music className="w-3 h-3" />
+                          Spotify
+                        </a>
+                      )}
+                      {profile.streaming_links.apple_music && (
+                        <a
+                          href={profile.streaming_links.apple_music}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1 px-2 py-1 text-xs rounded-md bg-gray-800 hover:bg-gray-900 text-white transition-colors"
+                        >
+                          <Music className="w-3 h-3" />
+                          Apple Music
+                        </a>
+                      )}
+                      {profile.streaming_links.bandcamp && (
+                        <a
+                          href={profile.streaming_links.bandcamp}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1 px-2 py-1 text-xs rounded-md bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+                        >
+                          <Music className="w-3 h-3" />
+                          Bandcamp
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
               {profile.profile_photo_url && (
                 <PrivateImage
                   storagePath={profile.profile_photo_url}
                   alt={profile.artist_name}
-                  className="w-32 h-32 rounded-full object-cover border-4 border-white/20 shadow-lg"
+                  className="w-32 h-32 rounded-full object-cover border-4 border-white/20 shadow-lg ml-4"
                 />
               )}
             </div>,
@@ -209,18 +254,6 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
                     >
                       <Instagram className="w-4 h-4" />
                       Instagram
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  )}
-                  {profile.social_links.spotify && (
-                    <a
-                      href={profile.social_links.spotify}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-3 py-2 rounded-md bg-white/5 hover:bg-white/10 transition-colors"
-                    >
-                      <Music className="w-4 h-4" />
-                      Spotify
                       <ExternalLink className="w-3 h-3" />
                     </a>
                   )}
@@ -276,11 +309,16 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                       {profile.gallery_photos.slice(0, 12).map((photo: any, index: number) => (
                         <div key={index} className="relative">
-                          <img
-                            src={typeof photo === 'string' ? photo : photo.url}
+                          <PrivateImage
+                            storagePath={typeof photo === 'string' ? photo : photo.url}
                             alt={typeof photo === 'string' ? `Gallery ${index + 1}` : photo.label || `Gallery ${index + 1}`}
                             className="w-full h-24 object-cover rounded-md border border-white/20"
                           />
+                          {(typeof photo !== 'string' && photo.label) && (
+                            <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-1 rounded-b-md">
+                              <p className="text-xs truncate">{photo.label}</p>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -449,54 +487,6 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
             </div>
           )}
 
-          {/* Streaming Links */}
-          {renderEditableSection(
-            'streaming',
-            profile.streaming_links && Object.keys(profile.streaming_links).length > 0 ? (
-              <div>
-                <h3 className="font-semibold mb-3">Listen</h3>
-                <div className="flex flex-wrap gap-3">
-                  {profile.streaming_links.spotify && (
-                    <a
-                      href={profile.streaming_links.spotify}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-4 py-3 rounded-lg bg-green-600 hover:bg-green-700 text-white transition-colors"
-                    >
-                      <Music className="w-5 h-5" />
-                      Spotify
-                      <ExternalLink className="w-4 h-4" />
-                    </a>
-                  )}
-                  {profile.streaming_links.apple_music && (
-                    <a
-                      href={profile.streaming_links.apple_music}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-4 py-3 rounded-lg bg-black hover:bg-gray-800 text-white transition-colors"
-                    >
-                      <Music className="w-5 h-5" />
-                      Apple Music
-                      <ExternalLink className="w-4 h-4" />
-                    </a>
-                  )}
-                  {profile.streaming_links.bandcamp && (
-                    <a
-                      href={profile.streaming_links.bandcamp}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-4 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
-                    >
-                      <Music className="w-5 h-5" />
-                      Bandcamp
-                      <ExternalLink className="w-4 h-4" />
-                    </a>
-                  )}
-                </div>
-              </div>
-            ) : null,
-            !!(profile.streaming_links && Object.keys(profile.streaming_links).length > 0)
-          )}
         </CardContent>
       </Card>
     </div>

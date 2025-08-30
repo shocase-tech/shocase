@@ -10,8 +10,10 @@ import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { X, Save, Lightbulb, Upload } from "lucide-react";
+import { X, Save, Lightbulb, Upload, Camera } from "lucide-react";
 import PhotoUpload from "@/components/PhotoUpload";
+import PrivateImage from "@/components/PrivateImage";
+import { ImageStorageService } from "@/lib/imageStorage";
 
 interface InlineEditorProps {
   sectionId: string;
@@ -38,6 +40,7 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
         show_videos: profile.show_videos || [],
         profile_photo_url: profile.profile_photo_url || '',
         hero_photo_url: profile.hero_photo_url || '',
+        gallery_photos: profile.gallery_photos || [],
       });
     } else {
       setFormData({
@@ -50,9 +53,39 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
         show_videos: [],
         profile_photo_url: '',
         hero_photo_url: '',
+        gallery_photos: [],
       });
     }
   }, [profile]);
+
+  // File upload handlers
+  const handleProfilePhotoUpload = async (file: File) => {
+    if (!user) throw new Error('User not authenticated');
+    const storagePath = await ImageStorageService.uploadFile(file, 'profile', user.id);
+    setFormData({ ...formData, profile_photo_url: storagePath });
+    return storagePath;
+  };
+
+  const handleHeroPhotoUpload = async (file: File) => {
+    if (!user) throw new Error('User not authenticated');
+    const storagePath = await ImageStorageService.uploadFile(file, 'hero', user.id);
+    setFormData({ ...formData, hero_photo_url: storagePath });
+    return storagePath;
+  };
+
+  const handleGalleryUpload = async (file: File) => {
+    if (!user) throw new Error('User not authenticated');
+    const storagePath = await ImageStorageService.uploadFile(file, 'gallery', user.id);
+    return storagePath;
+  };
+
+  const updateGalleryPhotos = (photos: any[]) => {
+    setFormData({ ...formData, gallery_photos: photos });
+  };
+
+  const reorderGalleryPhotos = (photos: any[]) => {
+    setFormData({ ...formData, gallery_photos: photos });
+  };
 
   const handleSave = async () => {
     if (!user) return;
@@ -196,10 +229,53 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
 
       <div>
         <Label>Profile Photo</Label>
-        <div className="border-2 border-dashed border-muted-foreground/30 p-4 text-center rounded-lg">
-          <Upload className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">Upload profile photo</p>
-        </div>
+        {formData.profile_photo_url ? (
+          <div className="relative inline-block">
+            <PrivateImage
+              storagePath={formData.profile_photo_url}
+              alt="Profile photo"
+              className="w-32 h-32 object-cover rounded-lg"
+            />
+            <Button
+              size="sm"
+              variant="outline"
+              className="absolute top-2 right-2"
+              onClick={() => setFormData({ ...formData, profile_photo_url: '' })}
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+        ) : (
+          <div className="border-2 border-dashed border-muted-foreground/30 p-4 text-center rounded-lg">
+            <Label className="cursor-pointer">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    try {
+                      await handleProfilePhotoUpload(file);
+                      toast({
+                        title: "Photo uploaded",
+                        description: "Profile photo uploaded successfully",
+                      });
+                    } catch (error) {
+                      toast({
+                        title: "Upload failed",
+                        description: "Failed to upload profile photo",
+                        variant: "destructive",
+                      });
+                    }
+                  }
+                }}
+                className="hidden"
+              />
+              <Camera className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">Upload profile photo</p>
+            </Label>
+          </div>
+        )}
       </div>
 
       <div>
@@ -329,10 +405,53 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
   const renderHeroSection = () => (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">Hero Image</h3>
-      <div className="border-2 border-dashed border-muted-foreground/30 p-4 text-center rounded-lg">
-        <Upload className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
-        <p className="text-sm text-muted-foreground">Upload hero image</p>
-      </div>
+      {formData.hero_photo_url ? (
+        <div className="relative inline-block">
+          <PrivateImage
+            storagePath={formData.hero_photo_url}
+            alt="Hero image"
+            className="w-full max-w-md h-48 object-cover rounded-lg"
+          />
+          <Button
+            size="sm"
+            variant="outline"
+            className="absolute top-2 right-2"
+            onClick={() => setFormData({ ...formData, hero_photo_url: '' })}
+          >
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+      ) : (
+        <div className="border-2 border-dashed border-muted-foreground/30 p-4 text-center rounded-lg">
+          <Label className="cursor-pointer">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  try {
+                    await handleHeroPhotoUpload(file);
+                    toast({
+                      title: "Photo uploaded",
+                      description: "Hero image uploaded successfully",
+                    });
+                  } catch (error) {
+                    toast({
+                      title: "Upload failed",
+                      description: "Failed to upload hero image",
+                      variant: "destructive",
+                    });
+                  }
+                }
+              }}
+              className="hidden"
+            />
+            <Camera className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">Upload hero image</p>
+          </Label>
+        </div>
+      )}
     </div>
   );
 
@@ -427,6 +546,20 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
     </div>
   );
 
+  const renderGallerySection = () => (
+    <div className="space-y-4">
+      <PhotoUpload
+        title="Gallery Photos"
+        photos={formData.gallery_photos || []}
+        onUpload={handleGalleryUpload}
+        onUpdate={updateGalleryPhotos}
+        onReorder={reorderGalleryPhotos}
+        maxPhotos={12}
+        maxSizeText="Max 5MB per photo"
+      />
+    </div>
+  );
+
   const renderSection = () => {
     switch (sectionId) {
       case 'basic':
@@ -439,6 +572,8 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
         return renderHeroSection();
       case 'videos':
         return renderVideosSection();
+      case 'gallery':
+        return renderGallerySection();
       default:
         return <div>Section not found</div>;
     }
