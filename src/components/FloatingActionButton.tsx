@@ -32,8 +32,8 @@ export default function FloatingActionButton({
   return (
     <div
       className={cn(
-        "fixed bottom-5 right-5 z-40 transition-all duration-300 transform",
-        isVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-full pointer-events-none",
+        "fixed bottom-6 right-6 z-50 transition-all duration-300 transform",
+        isVisible ? "opacity-100 translate-x-0 scale-100" : "opacity-0 translate-x-full scale-95 pointer-events-none",
         className
       )}
     >
@@ -42,24 +42,36 @@ export default function FloatingActionButton({
         disabled={isSaving || !hasUnsavedChanges}
         size="lg"
         className={cn(
-          "shadow-lg hover:shadow-xl transition-all duration-300 h-14 px-6",
-          "bg-gradient-primary border border-glass backdrop-blur-glass",
-          hasUnsavedChanges && "animate-pulse shadow-glow"
+          "h-16 w-16 rounded-full shadow-2xl hover:shadow-glow transition-all duration-300 p-0",
+          "bg-gradient-primary border-2 border-primary/20 backdrop-blur-glass",
+          "hover:scale-110 hover:border-primary/40",
+          hasUnsavedChanges && "animate-pulse shadow-glow ring-4 ring-primary/20"
         )}
       >
         {isSaving ? (
-          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+          <Loader2 className="w-6 h-6 animate-spin" />
         ) : (
-          <Save className="w-5 h-5 mr-2" />
+          <Save className="w-6 h-6" />
         )}
-        {isSaving ? "Saving..." : hasUnsavedChanges ? "Save Profile" : "Saved"}
       </Button>
       
       {hasUnsavedChanges && (
-        <div className="absolute -top-2 -right-2">
-          <div className="w-4 h-4 bg-destructive rounded-full animate-pulse" />
+        <div className="absolute -top-1 -right-1">
+          <div className="w-5 h-5 bg-destructive rounded-full animate-pulse border-2 border-background" />
         </div>
       )}
+      
+      {/* Tooltip */}
+      <div
+        className={cn(
+          "absolute bottom-full right-0 mb-2 px-3 py-1 bg-background/90 backdrop-blur-sm rounded-md shadow-lg transition-all duration-200",
+          "text-sm whitespace-nowrap border border-white/10",
+          isVisible && hasUnsavedChanges ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2 pointer-events-none"
+        )}
+      >
+        {isSaving ? "Saving..." : hasUnsavedChanges ? "Save Profile" : "Saved"}
+        <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-background/90" />
+      </div>
     </div>
   );
 }

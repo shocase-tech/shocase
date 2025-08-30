@@ -58,6 +58,96 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
     if (callback) callback();
   };
 
+  // Function to render shows with automatic date-based sorting
+  const renderShowsSection = () => {
+    const allShows = profile.upcoming_shows || [];
+    
+    if (allShows.length === 0) {
+      return (
+        <div className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-8 text-center">
+          <Plus className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
+          <p className="text-muted-foreground">Click to add shows</p>
+        </div>
+      );
+    }
+
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0); // Set to start of day for accurate comparison
+    
+    // Separate and sort shows
+    const upcomingShows = allShows
+      .filter((show: any) => new Date(show.date) >= currentDate)
+      .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    
+    const pastShows = allShows
+      .filter((show: any) => new Date(show.date) < currentDate)
+      .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    return (
+      <div>
+        <h3 className="font-semibold mb-4">Shows</h3>
+        <div className="space-y-6">
+          {/* Upcoming Shows */}
+          {upcomingShows.length > 0 && (
+            <div>
+              <h4 className="text-sm font-medium text-primary mb-3">Upcoming Shows</h4>
+              <div className="space-y-2">
+                {upcomingShows.map((show: any, index: number) => (
+                  <div key={`upcoming-${index}`} className="flex items-center justify-between p-3 bg-white/5 rounded-md border border-primary/20">
+                    <div className="flex items-center gap-3">
+                      <Calendar className="w-5 h-5 text-primary" />
+                      <div>
+                        <p className="font-medium">{show.venue}</p>
+                        <p className="text-sm text-muted-foreground flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          {show.city} • {new Date(show.date).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                    {show.ticket_link && (
+                      <a
+                        href={show.ticket_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                      >
+                        <Ticket className="w-4 h-4" />
+                        Tickets
+                      </a>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Past Shows */}
+          {pastShows.length > 0 && (
+            <div>
+              <h4 className="text-sm font-medium text-muted-foreground mb-3">Past Shows</h4>
+              <div className="space-y-2">
+                {pastShows.map((show: any, index: number) => (
+                  <div key={`past-${index}`} className="flex items-center justify-between p-3 bg-white/5 rounded-md opacity-75">
+                    <div className="flex items-center gap-3">
+                      <Calendar className="w-5 h-5 text-muted-foreground" />
+                      <div>
+                        <p className="font-medium text-muted-foreground">{show.venue}</p>
+                        <p className="text-sm text-muted-foreground flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          {show.city} • {new Date(show.date).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   const renderEditableSection = (sectionId: string, content: React.ReactNode, hasContent: boolean = true) => {
     const isEditing = editingSection === sectionId;
     
@@ -366,126 +456,97 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
             !!(profile.show_videos && profile.show_videos.length > 0)
           )}
 
-          {/* Press Mentions Section */}
-          {editingSection === 'mentions' ? (
-            <div className="space-y-4">
-              <MentionsEditor
-                profile={profile}
-                user={user}
-                onSave={() => handleSectionSave()}
-                onCancel={() => setEditingSection(null)}
-              />
-            </div>
-          ) : (
-            <div className="group relative">
-              <div 
-                className="cursor-pointer transition-all duration-200 hover:bg-white/5 rounded-lg p-2"
-                onClick={() => handleSectionClick('mentions')}
-              >
-                {profile.press_mentions && profile.press_mentions.length > 0 ? (
-                  <div>
-                    <h3 className="font-semibold mb-3">Press Mentions</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                      {profile.press_mentions.map((mention: any, index: number) => (
-                        <a
-                          key={index}
-                          href={mention.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
-                        >
-                          {mention.favicon && (
-                            <img src={mention.favicon} alt="" className="w-4 h-4" />
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium truncate">{mention.title || mention.publication}</p>
-                            <p className="text-xs text-muted-foreground truncate">{mention.description}</p>
-                          </div>
-                          <ExternalLink className="w-3 h-3 opacity-50" />
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-8 text-center">
-                    <Plus className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
-                    <p className="text-muted-foreground">Click to add press mentions</p>
-                  </div>
-                )}
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm"
-                >
-                  <Edit3 className="w-3 h-3" />
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Shows Section */}
-          {editingSection === 'shows' ? (
-            <div className="space-y-4">
-              <ShowsEditor
-                profile={profile}
-                user={user}
-                onSave={() => handleSectionSave()}
-                onCancel={() => setEditingSection(null)}
-              />
-            </div>
-          ) : (
-            <div className="group relative">
-              <div 
-                className="cursor-pointer transition-all duration-200 hover:bg-white/5 rounded-lg p-2"
-                onClick={() => handleSectionClick('shows')}
-              >
-                {profile.upcoming_shows && profile.upcoming_shows.length > 0 ? (
-                  <div>
-                    <h3 className="font-semibold mb-3">Upcoming Shows</h3>
-                    <div className="space-y-2">
-                      {profile.upcoming_shows.map((show: any, index: number) => (
-                        <div key={index} className="flex items-center justify-between p-3 bg-white/5 rounded-md">
-                          <div className="flex items-center gap-3">
-                            <Calendar className="w-5 h-5 text-primary" />
-                            <div>
-                              <p className="font-medium">{show.venue}</p>
-                              <p className="text-sm text-muted-foreground flex items-center gap-1">
-                                <MapPin className="w-3 h-3" />
-                                {show.city} • {show.date}
-                              </p>
-                            </div>
-                          </div>
-                          {show.ticket_link && (
+          {/* Two Column Layout: Press Mentions & Shows */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Left Column: Press Mentions */}
+            <div>
+              {editingSection === 'mentions' ? (
+                <div className="space-y-4">
+                  <MentionsEditor
+                    profile={profile}
+                    user={user}
+                    onSave={() => handleSectionSave()}
+                    onCancel={() => setEditingSection(null)}
+                  />
+                </div>
+              ) : (
+                <div className="group relative">
+                  <div 
+                    className="cursor-pointer transition-all duration-200 hover:bg-white/5 rounded-lg p-2"
+                    onClick={() => handleSectionClick('mentions')}
+                  >
+                    {profile.press_mentions && profile.press_mentions.length > 0 ? (
+                      <div>
+                        <h3 className="font-semibold mb-3">Press Mentions</h3>
+                        <div className="space-y-3">
+                          {profile.press_mentions.map((mention: any, index: number) => (
                             <a
-                              href={show.ticket_link}
+                              key={index}
+                              href={mention.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                              className="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
                             >
-                              <Ticket className="w-4 h-4" />
-                              Tickets
+                              {mention.favicon && (
+                                <img src={mention.favicon} alt="" className="w-4 h-4" />
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium truncate">{mention.title || mention.publication}</p>
+                                <p className="text-xs text-muted-foreground truncate">{mention.description}</p>
+                              </div>
+                              <ExternalLink className="w-3 h-3 opacity-50" />
                             </a>
-                          )}
+                          ))}
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    ) : (
+                      <div className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-8 text-center">
+                        <Plus className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
+                        <p className="text-muted-foreground">Click to add press mentions</p>
+                      </div>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm"
+                    >
+                      <Edit3 className="w-3 h-3" />
+                    </Button>
                   </div>
-                ) : (
-                  <div className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-8 text-center">
-                    <Plus className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
-                    <p className="text-muted-foreground">Click to add upcoming shows</p>
-                  </div>
-                )}
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm"
-                >
-                  <Edit3 className="w-3 h-3" />
-                </Button>
-              </div>
+                </div>
+              )}
             </div>
-          )}
+
+            {/* Right Column: Shows */}
+            <div>
+              {editingSection === 'shows' ? (
+                <div className="space-y-4">
+                  <ShowsEditor
+                    profile={profile}
+                    user={user}
+                    onSave={() => handleSectionSave()}
+                    onCancel={() => setEditingSection(null)}
+                  />
+                </div>
+              ) : (
+                <div className="group relative">
+                  <div 
+                    className="cursor-pointer transition-all duration-200 hover:bg-white/5 rounded-lg p-2"
+                    onClick={() => handleSectionClick('shows')}
+                  >
+                    {renderShowsSection()}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm"
+                    >
+                      <Edit3 className="w-3 h-3" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
 
         </CardContent>
       </Card>
