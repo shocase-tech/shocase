@@ -165,6 +165,33 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
             placeholder="your@email.com"
           />
         </div>
+
+        <div>
+          <Label htmlFor="phone">Phone Number</Label>
+          <Input
+            id="phone"
+            type="tel"
+            value={formData.contact_info?.phone || ''}
+            onChange={(e) => setFormData({
+              ...formData,
+              contact_info: { ...formData.contact_info, phone: e.target.value }
+            })}
+            placeholder="+1 (555) 123-4567"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="genre">Genres</Label>
+          <Input
+            id="genre"
+            value={Array.isArray(formData.genre) ? formData.genre.join(', ') : formData.genre || ''}
+            onChange={(e) => setFormData({ 
+              ...formData, 
+              genre: e.target.value.split(',').map(g => g.trim()).filter(g => g.length > 0)
+            })}
+            placeholder="Rock, Pop, Indie"
+          />
+        </div>
       </div>
 
       <div>
@@ -176,31 +203,47 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
       </div>
 
       <div>
-        <Label>Genres</Label>
-        <div className="flex flex-wrap gap-2 mb-2">
-          {(formData.genre || []).map((genre: string, index: number) => (
-            <Badge key={index} variant="secondary" className="cursor-pointer" onClick={() => removeGenre(genre)}>
-              {genre} <X className="w-3 h-3 ml-1" />
-            </Badge>
-          ))}
+        <h4 className="text-md font-medium">Streaming Links</h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="spotify_streaming">Spotify</Label>
+            <Input
+              id="spotify_streaming"
+              value={formData.streaming_links?.spotify || ''}
+              onChange={(e) => setFormData({
+                ...formData,
+                streaming_links: { ...formData.streaming_links, spotify: e.target.value }
+              })}
+              placeholder="https://open.spotify.com/..."
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="apple_music">Apple Music</Label>
+            <Input
+              id="apple_music"
+              value={formData.streaming_links?.apple_music || ''}
+              onChange={(e) => setFormData({
+                ...formData,
+                streaming_links: { ...formData.streaming_links, apple_music: e.target.value }
+              })}
+              placeholder="https://music.apple.com/..."
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="bandcamp">Bandcamp</Label>
+            <Input
+              id="bandcamp"
+              value={formData.streaming_links?.bandcamp || ''}
+              onChange={(e) => setFormData({
+                ...formData,
+                streaming_links: { ...formData.streaming_links, bandcamp: e.target.value }
+              })}
+              placeholder="https://yourband.bandcamp.com"
+            />
+          </div>
         </div>
-        <Select onValueChange={addGenre}>
-          <SelectTrigger>
-            <SelectValue placeholder="Add a genre" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Pop">Pop</SelectItem>
-            <SelectItem value="Rock">Rock</SelectItem>
-            <SelectItem value="Hip Hop">Hip Hop</SelectItem>
-            <SelectItem value="Electronic">Electronic</SelectItem>
-            <SelectItem value="Folk">Folk</SelectItem>
-            <SelectItem value="Jazz">Jazz</SelectItem>
-            <SelectItem value="Classical">Classical</SelectItem>
-            <SelectItem value="R&B">R&B</SelectItem>
-            <SelectItem value="Country">Country</SelectItem>
-            <SelectItem value="Indie">Indie</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
     </div>
   );
@@ -264,19 +307,6 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
               social_links: { ...formData.social_links, instagram: e.target.value }
             })}
             placeholder="@username"
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="spotify">Spotify</Label>
-          <Input
-            id="spotify"
-            value={formData.social_links?.spotify || ''}
-            onChange={(e) => setFormData({
-              ...formData,
-              social_links: { ...formData.social_links, spotify: e.target.value }
-            })}
-            placeholder="https://open.spotify.com/artist/..."
           />
         </div>
 
@@ -409,8 +439,6 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
         return renderHeroSection();
       case 'videos':
         return renderVideosSection();
-      case 'streaming':
-        return renderStreamingSection();
       default:
         return <div>Section not found</div>;
     }
