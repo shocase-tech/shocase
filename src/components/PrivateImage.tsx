@@ -14,8 +14,11 @@ export default function PrivateImage({ storagePath, alt, className, fallback }: 
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    const loadImage = async () => {
+  const loadImage = async () => {
+      console.log("PrivateImage loading image with storagePath:", storagePath);
+      
       if (!storagePath) {
+        console.log("No storagePath provided");
         setLoading(false);
         setError(true);
         return;
@@ -23,13 +26,16 @@ export default function PrivateImage({ storagePath, alt, className, fallback }: 
 
       // If it's already a URL (for backwards compatibility), use it directly
       if (!ImageStorageService.isStoragePath(storagePath)) {
+        console.log("Using direct URL:", storagePath);
         setImageUrl(storagePath);
         setLoading(false);
         return;
       }
 
       try {
+        console.log("Getting signed URL for storage path:", storagePath);
         const signedUrl = await ImageStorageService.getSignedUrl(storagePath);
+        console.log("Received signed URL:", signedUrl);
         setImageUrl(signedUrl);
         setError(!signedUrl);
       } catch (err) {

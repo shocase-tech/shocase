@@ -117,7 +117,7 @@ function SortablePhoto({ photo, index, onDelete, onUpdateCaption }: SortablePhot
             <Input
               value={captionValue}
               onChange={(e) => setCaptionValue(e.target.value)}
-              placeholder="Add a caption..."
+              placeholder="Press Enter to save caption"
               className="text-sm h-9 bg-background border-input focus:ring-2 focus:ring-ring focus:border-transparent"
               maxLength={100}
               autoFocus
@@ -129,23 +129,9 @@ function SortablePhoto({ photo, index, onDelete, onUpdateCaption }: SortablePhot
                 }
               }}
             />
-            <div className="flex gap-2 justify-end">
-              <Button 
-                size="sm" 
-                variant="outline" 
-                onClick={handleCancelCaption} 
-                className="h-8 px-3 text-sm"
-              >
-                Cancel
-              </Button>
-              <Button 
-                size="sm" 
-                onClick={handleSaveCaption} 
-                className="h-8 px-3 text-sm"
-              >
-                Save
-              </Button>
-            </div>
+            <p className="text-xs text-muted-foreground">
+              Press Enter to save • Escape to cancel
+            </p>
           </div>
         ) : (
           <div 
@@ -187,19 +173,35 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
 
   useEffect(() => {
     if (profile?.gallery_photos) {
-      // Convert from array of strings to array of objects for compatibility
-      const photoObjects = profile.gallery_photos.map((url: string | any) => {
-        // Check if it's already an object or a string
-        if (typeof url === 'object' && url?.url) {
-          return url;
+      console.log("GalleryEditor: Raw gallery_photos from profile:", profile.gallery_photos);
+      
+      // Normalize gallery photos - extract actual storage paths from nested objects
+      const photoObjects = profile.gallery_photos.map((item: any, index: number) => {
+        console.log(`Processing gallery item ${index}:`, item);
+        
+        // Handle deeply nested objects (the bug case)
+        if (typeof item === 'object' && item?.url) {
+          let url = item.url;
+          // If url is still an object, keep extracting
+          while (typeof url === 'object' && url?.url) {
+            url = url.url;
+          }
+          console.log(`Extracted URL from nested object:`, url);
+          return { url: url || "", label: item.label || "" };
         }
-        // Handle string URLs
-        if (typeof url === 'string') {
-          return { url, label: "" };
+        
+        // Handle string URLs (legacy format)
+        if (typeof item === 'string') {
+          console.log(`Using string URL:`, item);
+          return { url: item, label: "" };
         }
-        // Fallback for null/undefined
-        return { url: "", label: "" };
-      }).filter(photo => photo.url); // Remove any empty URLs
+        
+        // Fallback for invalid data
+        console.warn(`Invalid gallery item, skipping:`, item);
+        return null;
+      }).filter(photo => photo && photo.url); // Remove invalid entries
+      
+      console.log("GalleryEditor: Normalized photo objects:", photoObjects);
       setPhotos(photoObjects);
     }
   }, [profile]);
@@ -212,7 +214,15 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
         const activeIndex = items.findIndex((_, index) => `photo-${index}` === active.id);
         const overIndex = items.findIndex((_, index) => `photo-${index}` === over.id);
 
-        return arrayMove(items, activeIndex, overIndex);
+        const newOrder = arrayMove(items, activeIndex, overIndex);
+        console.log("Drag ended, new order:", newOrder);
+        
+        // Auto-save the new order immediately to database
+        setTimeout(() => {
+          handleSave();
+        }, 100);
+        
+        return newOrder;
       });
     }
   };
@@ -312,13 +322,20 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
 
     try {
       setLoading(true);
+      
+      console.log("GalleryEditor saving photos:", photos);
 
-      // Convert back to the format expected by the database (array of strings for now)
-      const galleryUrls = photos.map(photo => photo.url);
+      // Store as objects with both url and label to preserve order and captions
+      const photoData = photos.map(photo => ({
+        url: photo.url,
+        label: photo.label || ""
+      }));
+
+      console.log("GalleryEditor saving photo data:", photoData);
 
       const { error } = await supabase
         .from('artist_profiles')
-        .update({ gallery_photos: galleryUrls as string[] })
+        .update({ gallery_photos: photoData as any })
         .eq('user_id', user.id);
 
       if (error) throw error;
@@ -330,6 +347,7 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
 
       onSave();
     } catch (error: any) {
+      console.error("Gallery save error:", error);
       toast({
         title: "Error",
         description: error.message,

@@ -171,20 +171,24 @@ export default function PhotoUpload({
                     <div className="p-2">
                       {editingIndex === index ? (
                         <div className="space-y-2">
-                          <Input
-                            value={editLabel}
-                            onChange={(e) => setEditLabel(e.target.value)}
-                            placeholder="Add caption..."
-                            className="text-xs"
-                          />
-                          <div className="flex gap-1">
-                            <Button size="sm" onClick={() => updateLabel(index)}>
-                              Save
-                            </Button>
-                            <Button size="sm" variant="outline" onClick={() => setEditingIndex(null)}>
-                              Cancel
-                            </Button>
-                          </div>
+                       <Input
+                         value={editLabel}
+                         onChange={(e) => setEditLabel(e.target.value)}
+                         placeholder="Press Enter to save caption"
+                         className="text-xs"
+                         autoFocus
+                         onKeyDown={(e) => {
+                           if (e.key === 'Enter') {
+                             updateLabel(index);
+                           } else if (e.key === 'Escape') {
+                             setEditingIndex(null);
+                             setEditLabel("");
+                           }
+                         }}
+                       />
+                       <p className="text-xs text-muted-foreground">
+                         Press Enter to save • Escape to cancel
+                       </p>
                         </div>
                       ) : (
                         <p className="text-xs text-muted-foreground truncate">
@@ -244,20 +248,24 @@ export default function PhotoUpload({
                 <div className="p-2">
                   {editingIndex === index ? (
                     <div className="space-y-2">
-                      <Input
-                        value={editLabel}
-                        onChange={(e) => setEditLabel(e.target.value)}
-                        placeholder="Add caption..."
-                        className="text-xs"
-                      />
-                      <div className="flex gap-1">
-                        <Button size="sm" onClick={() => updateLabel(index)}>
-                          Save
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={() => setEditingIndex(null)}>
-                          Cancel
-                        </Button>
-                      </div>
+                       <Input
+                         value={editLabel}
+                         onChange={(e) => setEditLabel(e.target.value)}
+                         placeholder="Press Enter to save caption"
+                         className="text-xs"
+                         autoFocus
+                         onKeyDown={(e) => {
+                           if (e.key === 'Enter') {
+                             updateLabel(index);
+                           } else if (e.key === 'Escape') {
+                             setEditingIndex(null);
+                             setEditLabel("");
+                           }
+                         }}
+                       />
+                       <p className="text-xs text-muted-foreground">
+                         Press Enter to save • Escape to cancel
+                       </p>
                     </div>
                   ) : (
                     <p className="text-xs text-muted-foreground truncate">
