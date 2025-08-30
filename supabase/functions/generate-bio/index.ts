@@ -13,19 +13,35 @@ serve(async (req) => {
   }
 
   try {
-    const { artist_name, genre, influences, location, vibe } = await req.json();
+    const { artist_name, genre, influences, location, vibe, existing_bio, is_remix } = await req.json();
     
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
     if (!openAIApiKey) {
       throw new Error('OpenAI API key not configured');
     }
 
-    const prompt = `Write a compelling, professional artist bio for ${artist_name}, a ${genre || 'music'} artist${location ? ` based in ${location}` : ''}. 
+    let prompt;
+    
+    if (is_remix && existing_bio) {
+      prompt = `Remix and improve this existing artist bio for ${artist_name}:
+
+"${existing_bio}"
+
+Rework it using these style guidelines:
+- Genre: ${genre || 'Not specified'}
+- Influences: ${influences || 'Not specified'}
+- Location: ${location || 'Not specified'}
+- Writing Style: ${vibe || 'Not specified'}
+
+Keep the core information but improve the writing, flow, and style. Make it more engaging while maintaining authenticity. Keep it 150-200 words and written in third person.`;
+    } else {
+      prompt = `Write a compelling, professional artist bio for ${artist_name}, a ${genre || 'music'} artist${location ? ` based in ${location}` : ''}. 
 
 Context:
 - Genre: ${genre || 'Not specified'}
 - Influences: ${influences || 'Not specified'}
-- Vibe/Style: ${vibe || 'Not specified'}
+- Location: ${location || 'Not specified'}
+- Writing Style: ${vibe || 'Not specified'}
 
 The bio should be:
 - 150-200 words long
@@ -36,6 +52,7 @@ The bio should be:
 - Written in third person
 
 Do not include placeholders or make up specific achievements, releases, or dates.`;
+    }
 
     console.log('Generating bio for:', artist_name);
 

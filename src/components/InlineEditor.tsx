@@ -170,6 +170,59 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
     { value: "casual", label: "Casual", example: "Conversational, approachable, like talking to a friend" }
   ];
 
+  const [bioConfig, setBioConfig] = useState({
+    style: '',
+    genres: '',
+    influences: '',
+    location: ''
+  });
+  const [generatingBio, setGeneratingBio] = useState(false);
+
+  const generateBio = async (isRemix = false) => {
+    if (!user || !formData.artist_name) {
+      toast({
+        title: "Error",
+        description: "Artist name is required to generate bio",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setGeneratingBio(true);
+
+      const { data, error } = await supabase.functions.invoke('generate-bio', {
+        body: {
+          artist_name: formData.artist_name,
+          genre: bioConfig.genres || formData.genre,
+          influences: bioConfig.influences,
+          location: bioConfig.location,
+          vibe: bioConfig.style,
+          existing_bio: isRemix ? formData.bio : null,
+          is_remix: isRemix
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.bio) {
+        setFormData({ ...formData, bio: data.bio });
+        toast({
+          title: "Bio generated!",
+          description: `Your ${isRemix ? 'remixed' : 'new'} bio has been created.`,
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to generate bio",
+        variant: "destructive",
+      });
+    } finally {
+      setGeneratingBio(false);
+    }
+  };
+
   const renderBasicSection = () => (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">Artist Details</h3>
@@ -325,32 +378,111 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
   );
 
   const renderBioSection = () => (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex items-center gap-2">
         <h3 className="text-lg font-semibold">Artist Bio</h3>
         <Lightbulb className="w-4 h-4 text-primary" />
       </div>
       
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
-        {bioToneOptions.map((option) => (
-          <Card key={option.value} className="cursor-pointer hover:bg-muted/20 transition-colors">
-            <CardContent className="p-3">
-              <p className="font-medium text-sm">{option.label}</p>
-              <p className="text-xs text-muted-foreground mt-1">{option.example}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
+      {/* Bio Text Area */}
       <div>
-        <Label htmlFor="bio">Bio</Label>
+        <Label htmlFor="bio">Your Bio</Label>
         <Textarea
           id="bio"
-          rows={6}
+          rows={8}
           value={formData.bio}
           onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-          placeholder="Tell your story..."
+          placeholder="Write your artist bio here, or use AI to generate one..."
+          className="text-sm leading-relaxed"
         />
+      </div>
+
+      {/* AI Configuration */}
+      <div className="space-y-4 p-4 bg-muted/30 rounded-lg">
+        <h4 className="text-md font-medium">AI Configuration</h4>
+        
+        {/* Writing Style Options */}
+        <div>
+          <Label className="text-sm font-medium mb-2 block">Writing Style</Label>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            {bioToneOptions.map((option) => (
+              <Card 
+                key={option.value} 
+                className={`cursor-pointer transition-colors ${
+                  bioConfig.style === option.value 
+                    ? 'ring-2 ring-primary bg-primary/10' 
+                    : 'hover:bg-muted/50'
+                }`}
+                onClick={() => setBioConfig({ ...bioConfig, style: option.value })}
+              >
+                <CardContent className="p-3">
+                  <p className="font-medium text-sm">{option.label}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{option.example}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Additional Inputs */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <Label htmlFor="ai_genres">Genres</Label>
+            <Input
+              id="ai_genres"
+              value={bioConfig.genres}
+              onChange={(e) => setBioConfig({ ...bioConfig, genres: e.target.value })}
+              placeholder="Electronic, Ambient, Jazz"
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="ai_influences">Musical Influences</Label>
+            <Input
+              id="ai_influences"
+              value={bioConfig.influences}
+              onChange={(e) => setBioConfig({ ...bioConfig, influences: e.target.value })}
+              placeholder="Radiohead, Aphex Twin, Miles Davis"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="ai_location">Location</Label>
+            <Input
+              id="ai_location"
+              value={bioConfig.location}
+              onChange={(e) => setBioConfig({ ...bioConfig, location: e.target.value })}
+              placeholder="Brooklyn, NY"
+            />
+          </div>
+        </div>
+
+        {/* AI Action Buttons */}
+        <div className="flex gap-3 pt-2">
+          <Button
+            onClick={() => generateBio(false)}
+            disabled={generatingBio}
+            className="flex-1"
+            variant="default"
+          >
+            <Lightbulb className="w-4 h-4 mr-2" />
+            {generatingBio ? "Generating..." : "Generate Bio"}
+          </Button>
+          
+          <Button
+            onClick={() => generateBio(true)}
+            disabled={generatingBio || !formData.bio?.trim()}
+            className="flex-1"
+            variant="outline"
+          >
+            <Lightbulb className="w-4 h-4 mr-2" />
+            {generatingBio ? "Remixing..." : "Remix Bio"}
+          </Button>
+        </div>
+        
+        <p className="text-xs text-muted-foreground">
+          Generate creates a new bio from scratch. Remix reworks your existing bio using AI.
+        </p>
       </div>
     </div>
   );
