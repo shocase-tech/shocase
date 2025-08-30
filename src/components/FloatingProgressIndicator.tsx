@@ -22,14 +22,30 @@ export default function FloatingProgressIndicator({
   const incompleteMilestones = milestones.filter(m => !m.completed).slice(0, 2);
   const completedCount = milestones.filter(m => m.completed).length;
 
+  // Debug logging
+  console.log('🌊 FloatingProgressIndicator render:', {
+    isVisible,
+    completionPercentage,
+    completedCount,
+    totalMilestones: milestones.length,
+    hasProfile: !!profile,
+    hasToggleFunction: !!onTogglePublish
+  });
+
   return (
     <div
       className={cn(
-        "fixed bottom-5 right-5 z-50 transition-all duration-300 transform",
-        isVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-full pointer-events-none"
+        "fixed bottom-6 right-6 z-50 transition-all duration-300 transform",
+        // Add a temporary bright border for testing visibility
+        "border-4 border-red-500 bg-red-100",
+        isVisible ? "opacity-100 translate-x-0 scale-100" : "opacity-0 translate-x-full scale-95 pointer-events-none"
       )}
+      style={{
+        // Force visibility for initial testing
+        display: 'block'
+      }}
     >
-      <div className="glass-card border-glass backdrop-blur-glass p-4 rounded-lg shadow-card min-w-[280px]">
+      <div className="glass-card border-glass backdrop-blur-glass p-4 rounded-lg shadow-card min-w-[280px] bg-background/95 border border-white/20">
         <div className="flex items-center gap-3 mb-3">
           {/* Circular Progress Ring */}
           <div className="relative w-12 h-12">

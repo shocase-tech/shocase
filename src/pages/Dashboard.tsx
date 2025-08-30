@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import LivePreviewEditor from "@/components/LivePreviewEditor";
 import FloatingProgressIndicator from "@/components/FloatingProgressIndicator";
 import { useScrollVisibility } from "@/hooks/useScrollVisibility";
+import { useScrollPosition } from "@/hooks/useScrollPosition";
 
 interface DashboardArtistProfile {
   id: string;
@@ -49,6 +50,18 @@ export default function Dashboard() {
   
   // Show floating indicators when user scrolls past main progress card
   const isProgressCardVisible = useScrollVisibility(progressCardRef);
+  
+  // Alternative scroll-based approach for comparison
+  const { scrollY, isAboveThreshold } = useScrollPosition({ threshold: 500 });
+  
+  // Debug logging for scroll visibility
+  console.log('📋 Dashboard scroll state:', {
+    hasProgressCardRef: !!progressCardRef.current,
+    isProgressCardVisible,
+    scrollY,
+    isAboveThreshold,
+    shouldShowFloating: isProgressCardVisible || isAboveThreshold
+  });
 
   useEffect(() => {
     const getSession = async () => {
@@ -426,7 +439,7 @@ export default function Dashboard() {
           <FloatingProgressIndicator
             completionPercentage={completionPercentage}
             milestones={milestones}
-            isVisible={isProgressCardVisible}
+            isVisible={isProgressCardVisible || isAboveThreshold}
             profile={profile}
             onTogglePublish={togglePublishStatus}
           />
