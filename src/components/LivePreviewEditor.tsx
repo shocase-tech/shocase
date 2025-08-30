@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,20 +18,70 @@ interface LivePreviewEditorProps {
 
 export default function LivePreviewEditor({ profile, onProfileUpdated, user }: LivePreviewEditorProps) {
   const [editingSection, setEditingSection] = useState<string | null>(null);
+  const scrollPositionRef = useRef<number>(0);
+
+  // Persist state when user switches tabs
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        // Store scroll position when tab becomes hidden
+        scrollPositionRef.current = window.scrollY;
+      } else {
+        // Restore scroll position when tab becomes visible
+        setTimeout(() => {
+          window.scrollTo(0, scrollPositionRef.current);
+        }, 100);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
 
   const handleSectionClick = (sectionId: string) => {
     setEditingSection(editingSection === sectionId ? null : sectionId);
   };
 
+  const handleSectionSave = (callback?: () => void) => {
+    // Save current scroll position
+    const currentScrollY = window.scrollY;
+    
+    // Update the profile data
+    onProfileUpdated();
+    
+    // Don't close editing section, maintain scroll position
+    setTimeout(() => {
+      window.scrollTo(0, currentScrollY);
+    }, 50);
+    
+    // Run any additional callback
+    if (callback) callback();
+  };
+
   const renderEditableSection = (sectionId: string, content: React.ReactNode, hasContent: boolean = true) => {
     const isEditing = editingSection === sectionId;
+    
+    if (isEditing) {
+      // Render inline editing directly within the content area
+      return (
+        <div className="space-y-4">
+          <InlineEditor
+            sectionId={sectionId}
+            profile={profile}
+            user={user}
+            onSave={() => handleSectionSave()}
+            onCancel={() => setEditingSection(null)}
+          />
+        </div>
+      );
+    }
     
     return (
       <div className="group relative">
         <div 
-          className={`cursor-pointer transition-all duration-200 ${
-            isEditing ? 'ring-2 ring-primary ring-offset-2' : 'hover:bg-white/5 rounded-lg'
-          } ${!hasContent ? 'border-2 border-dashed border-muted-foreground/30 rounded-lg p-4' : ''}`}
+          className={`cursor-pointer transition-all duration-200 hover:bg-white/5 rounded-lg p-2 ${
+            !hasContent ? 'border-2 border-dashed border-muted-foreground/30 rounded-lg p-8' : ''
+          }`}
           onClick={() => handleSectionClick(sectionId)}
         >
           {hasContent ? content : (
@@ -50,21 +100,6 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
             </Button>
           )}
         </div>
-        
-        {isEditing && (
-          <div className="mt-4 p-4 border border-primary/20 rounded-lg bg-background/50 backdrop-blur-sm">
-            <InlineEditor
-              sectionId={sectionId}
-              profile={profile}
-              user={user}
-              onSave={() => {
-                onProfileUpdated();
-                setEditingSection(null);
-              }}
-              onCancel={() => setEditingSection(null)}
-            />
-          </div>
-        )}
       </div>
     );
   };
@@ -81,15 +116,12 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
             Get Started
           </Button>
           {editingSection === 'basic' && (
-            <div className="mt-6 p-4 border border-primary/20 rounded-lg bg-background/50 backdrop-blur-sm">
+            <div className="mt-6">
               <InlineEditor
                 sectionId="basic"
                 profile={null}
                 user={user}
-                onSave={() => {
-                  onProfileUpdated();
-                  setEditingSection(null);
-                }}
+                onSave={() => handleSectionSave(() => setEditingSection(null))}
                 onCancel={() => setEditingSection(null)}
               />
             </div>
@@ -223,60 +255,55 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
           )}
 
           {/* Gallery Section */}
-          <div className="group relative">
-            <div 
-              className={`cursor-pointer transition-all duration-200 ${
-                editingSection === 'gallery' ? 'ring-2 ring-primary ring-offset-2' : 'hover:bg-white/5 rounded-lg'
-              }`}
-              onClick={() => handleSectionClick('gallery')}
-            >
-              {profile.gallery_photos && profile.gallery_photos.length > 0 ? (
-                <div>
-                  <h3 className="font-semibold mb-3">Gallery</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    {profile.gallery_photos.slice(0, 12).map((photo: any, index: number) => (
-                      <div key={index} className="relative">
-                        <img
-                          src={typeof photo === 'string' ? photo : photo.url}
-                          alt={typeof photo === 'string' ? `Gallery ${index + 1}` : photo.label || `Gallery ${index + 1}`}
-                          className="w-full h-24 object-cover rounded-md border border-white/20"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    {profile.gallery_photos.length} of 12 photos
-                  </p>
-                </div>
-              ) : (
-                <div className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-8 text-center">
-                  <Plus className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-muted-foreground">Click to add gallery photos</p>
-                </div>
-              )}
-              <Button
-                size="sm"
-                variant="outline"
-                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm"
-              >
-                <Edit3 className="w-3 h-3" />
-              </Button>
+          {editingSection === 'gallery' ? (
+            <div className="space-y-4">
+              <GalleryEditor
+                profile={profile}
+                user={user}
+                onSave={() => handleSectionSave()}
+                onCancel={() => setEditingSection(null)}
+              />
             </div>
-            
-            {editingSection === 'gallery' && (
-              <div className="mt-4">
-                <GalleryEditor
-                  profile={profile}
-                  user={user}
-                  onSave={() => {
-                    onProfileUpdated();
-                    setEditingSection(null);
-                  }}
-                  onCancel={() => setEditingSection(null)}
-                />
+          ) : (
+            <div className="group relative">
+              <div 
+                className="cursor-pointer transition-all duration-200 hover:bg-white/5 rounded-lg p-2"
+                onClick={() => handleSectionClick('gallery')}
+              >
+                {profile.gallery_photos && profile.gallery_photos.length > 0 ? (
+                  <div>
+                    <h3 className="font-semibold mb-3">Gallery</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {profile.gallery_photos.slice(0, 12).map((photo: any, index: number) => (
+                        <div key={index} className="relative">
+                          <img
+                            src={typeof photo === 'string' ? photo : photo.url}
+                            alt={typeof photo === 'string' ? `Gallery ${index + 1}` : photo.label || `Gallery ${index + 1}`}
+                            className="w-full h-24 object-cover rounded-md border border-white/20"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {profile.gallery_photos.length} of 12 photos
+                    </p>
+                  </div>
+                ) : (
+                  <div className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-8 text-center">
+                    <Plus className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
+                    <p className="text-muted-foreground">Click to add gallery photos</p>
+                  </div>
+                )}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm"
+                >
+                  <Edit3 className="w-3 h-3" />
+                </Button>
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Videos Section */}
           {renderEditableSection(
@@ -302,135 +329,125 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
           )}
 
           {/* Press Mentions Section */}
-          <div className="group relative">
-            <div 
-              className={`cursor-pointer transition-all duration-200 ${
-                editingSection === 'mentions' ? 'ring-2 ring-primary ring-offset-2' : 'hover:bg-white/5 rounded-lg'
-              }`}
-              onClick={() => handleSectionClick('mentions')}
-            >
-              {profile.press_mentions && profile.press_mentions.length > 0 ? (
-                <div>
-                  <h3 className="font-semibold mb-3">Press Mentions</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {profile.press_mentions.map((mention: any, index: number) => (
-                      <a
-                        key={index}
-                        href={mention.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
-                      >
-                        {mention.favicon && (
-                          <img src={mention.favicon} alt="" className="w-4 h-4" />
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">{mention.title || mention.publication}</p>
-                          <p className="text-xs text-muted-foreground truncate">{mention.description}</p>
-                        </div>
-                        <ExternalLink className="w-3 h-3 opacity-50" />
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-8 text-center">
-                  <Plus className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-muted-foreground">Click to add press mentions</p>
-                </div>
-              )}
-              <Button
-                size="sm"
-                variant="outline"
-                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm"
-              >
-                <Edit3 className="w-3 h-3" />
-              </Button>
+          {editingSection === 'mentions' ? (
+            <div className="space-y-4">
+              <MentionsEditor
+                profile={profile}
+                user={user}
+                onSave={() => handleSectionSave()}
+                onCancel={() => setEditingSection(null)}
+              />
             </div>
-            
-            {editingSection === 'mentions' && (
-              <div className="mt-4">
-                <MentionsEditor
-                  profile={profile}
-                  user={user}
-                  onSave={() => {
-                    onProfileUpdated();
-                    setEditingSection(null);
-                  }}
-                  onCancel={() => setEditingSection(null)}
-                />
+          ) : (
+            <div className="group relative">
+              <div 
+                className="cursor-pointer transition-all duration-200 hover:bg-white/5 rounded-lg p-2"
+                onClick={() => handleSectionClick('mentions')}
+              >
+                {profile.press_mentions && profile.press_mentions.length > 0 ? (
+                  <div>
+                    <h3 className="font-semibold mb-3">Press Mentions</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {profile.press_mentions.map((mention: any, index: number) => (
+                        <a
+                          key={index}
+                          href={mention.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+                        >
+                          {mention.favicon && (
+                            <img src={mention.favicon} alt="" className="w-4 h-4" />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium truncate">{mention.title || mention.publication}</p>
+                            <p className="text-xs text-muted-foreground truncate">{mention.description}</p>
+                          </div>
+                          <ExternalLink className="w-3 h-3 opacity-50" />
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-8 text-center">
+                    <Plus className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
+                    <p className="text-muted-foreground">Click to add press mentions</p>
+                  </div>
+                )}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm"
+                >
+                  <Edit3 className="w-3 h-3" />
+                </Button>
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Shows Section */}
-          <div className="group relative">
-            <div 
-              className={`cursor-pointer transition-all duration-200 ${
-                editingSection === 'shows' ? 'ring-2 ring-primary ring-offset-2' : 'hover:bg-white/5 rounded-lg'
-              }`}
-              onClick={() => handleSectionClick('shows')}
-            >
-              {profile.upcoming_shows && profile.upcoming_shows.length > 0 ? (
-                <div>
-                  <h3 className="font-semibold mb-3">Upcoming Shows</h3>
-                  <div className="space-y-2">
-                    {profile.upcoming_shows.map((show: any, index: number) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-white/5 rounded-md">
-                        <div className="flex items-center gap-3">
-                          <Calendar className="w-5 h-5 text-primary" />
-                          <div>
-                            <p className="font-medium">{show.venue}</p>
-                            <p className="text-sm text-muted-foreground flex items-center gap-1">
-                              <MapPin className="w-3 h-3" />
-                              {show.city} • {show.date}
-                            </p>
-                          </div>
-                        </div>
-                        {show.ticket_link && (
-                          <a
-                            href={show.ticket_link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-                          >
-                            <Ticket className="w-4 h-4" />
-                            Tickets
-                          </a>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-8 text-center">
-                  <Plus className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-muted-foreground">Click to add upcoming shows</p>
-                </div>
-              )}
-              <Button
-                size="sm"
-                variant="outline"
-                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm"
-              >
-                <Edit3 className="w-3 h-3" />
-              </Button>
+          {editingSection === 'shows' ? (
+            <div className="space-y-4">
+              <ShowsEditor
+                profile={profile}
+                user={user}
+                onSave={() => handleSectionSave()}
+                onCancel={() => setEditingSection(null)}
+              />
             </div>
-            
-            {editingSection === 'shows' && (
-              <div className="mt-4">
-                <ShowsEditor
-                  profile={profile}
-                  user={user}
-                  onSave={() => {
-                    onProfileUpdated();
-                    setEditingSection(null);
-                  }}
-                  onCancel={() => setEditingSection(null)}
-                />
+          ) : (
+            <div className="group relative">
+              <div 
+                className="cursor-pointer transition-all duration-200 hover:bg-white/5 rounded-lg p-2"
+                onClick={() => handleSectionClick('shows')}
+              >
+                {profile.upcoming_shows && profile.upcoming_shows.length > 0 ? (
+                  <div>
+                    <h3 className="font-semibold mb-3">Upcoming Shows</h3>
+                    <div className="space-y-2">
+                      {profile.upcoming_shows.map((show: any, index: number) => (
+                        <div key={index} className="flex items-center justify-between p-3 bg-white/5 rounded-md">
+                          <div className="flex items-center gap-3">
+                            <Calendar className="w-5 h-5 text-primary" />
+                            <div>
+                              <p className="font-medium">{show.venue}</p>
+                              <p className="text-sm text-muted-foreground flex items-center gap-1">
+                                <MapPin className="w-3 h-3" />
+                                {show.city} • {show.date}
+                              </p>
+                            </div>
+                          </div>
+                          {show.ticket_link && (
+                            <a
+                              href={show.ticket_link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                            >
+                              <Ticket className="w-4 h-4" />
+                              Tickets
+                            </a>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-8 text-center">
+                    <Plus className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
+                    <p className="text-muted-foreground">Click to add upcoming shows</p>
+                  </div>
+                )}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm"
+                >
+                  <Edit3 className="w-3 h-3" />
+                </Button>
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Streaming Links */}
           {renderEditableSection(

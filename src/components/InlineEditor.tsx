@@ -81,10 +81,11 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
       }
 
       toast({
-        title: "Success!",
-        description: "Profile updated successfully.",
+        title: "Section updated!",
+        description: "Your changes have been saved.",
       });
 
+      // Call onSave to refresh the data but don't close the editor
       onSave();
     } catch (error: any) {
       toast({
@@ -421,11 +422,11 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
       
       <Separator />
       
-      <div className="flex justify-between">
-        <Button variant="outline" onClick={onCancel}>
-          Cancel
+      <div className="flex justify-between gap-3">
+        <Button variant="outline" onClick={onCancel} className="flex-1">
+          Done Editing
         </Button>
-        <Button onClick={handleSave} disabled={loading}>
+        <Button onClick={handleSave} disabled={loading} className="flex-1">
           <Save className="w-4 h-4 mr-2" />
           {loading ? "Saving..." : "Save Changes"}
         </Button>
