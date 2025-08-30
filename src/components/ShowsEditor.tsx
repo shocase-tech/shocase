@@ -292,7 +292,8 @@ export default function ShowsEditor({ profile, user, onSave, onCancel }: ShowsEd
         description: "Your shows have been saved successfully.",
       });
 
-      onSave();
+      // No need to call onSave() since we're closing the editor
+      // onSave();
     } catch (error: any) {
       toast({
         title: "Error",

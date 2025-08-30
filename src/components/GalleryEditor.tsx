@@ -349,7 +349,8 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
         description: "Gallery updated successfully.",
       });
 
-      onSave();
+      // No need to call onSave() since we're closing the editor
+      // onSave();
     } catch (error: any) {
       console.error("Gallery save error:", error);
       toast({

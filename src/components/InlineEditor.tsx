@@ -124,7 +124,7 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
         description: "Your changes have been saved.",
       });
 
-      // Call onSave to refresh the data but don't close the editor
+      // Update parent with new data instead of triggering refetch
       onSave();
     } catch (error: any) {
       toast({

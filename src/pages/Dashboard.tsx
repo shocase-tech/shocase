@@ -189,9 +189,13 @@ export default function Dashboard() {
     }
   };
 
-  const handleProfileUpdated = () => {
-    fetchProfile();
-  };
+  const handleProfileUpdated = useCallback((updatedData?: Partial<DashboardArtistProfile>) => {
+    // Update local state instead of refetching from database
+    if (updatedData && profile) {
+      setProfile({ ...profile, ...updatedData });
+    }
+    // No fetchProfile() call to prevent page reloads
+  }, [profile]);
 
   const togglePublishStatus = async () => {
     if (!profile || !user) return;

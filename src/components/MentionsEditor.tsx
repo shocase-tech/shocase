@@ -144,7 +144,8 @@ export default function MentionsEditor({ profile, user, onSave, onCancel }: Ment
         description: "Your press mentions and quotes have been saved.",
       });
 
-      onSave();
+      // No need to call onSave() since we're closing the editor
+      // onSave();
     } catch (error: any) {
       toast({
         title: "Error",
