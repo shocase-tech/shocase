@@ -1,20 +1,21 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import { AutoSaveInput } from "@/components/ui/auto-save-input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { Save, X, GripVertical, Upload, AlertTriangle, Edit } from "lucide-react";
+import { Save, X, GripVertical, Upload, AlertTriangle, Edit, Loader2 } from "lucide-react";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { ImageStorageService } from "@/lib/imageStorage";
 import PrivateImage from "@/components/PrivateImage";
+import { useClickOutside } from "@/hooks/useClickOutside";
 
 interface GalleryEditorProps {
   profile: any;
@@ -114,17 +115,19 @@ function SortablePhoto({ photo, index, onDelete, onUpdateCaption }: SortablePhot
       <div className="p-3 bg-white/5 border-t border-white/10">
         {isEditingCaption ? (
           <div className="space-y-3">
-            <Input
+            <AutoSaveInput
               value={captionValue}
               onChange={(e) => setCaptionValue(e.target.value)}
+              onAutoSave={async (value) => {
+                onUpdateCaption(index, value);
+                setIsEditingCaption(false);
+              }}
               placeholder="Press Enter to save caption"
               className="text-sm h-9 bg-background border-input focus:ring-2 focus:ring-ring focus:border-transparent"
               maxLength={100}
               autoFocus
               onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleSaveCaption();
-                } else if (e.key === 'Escape') {
+                if (e.key === 'Escape') {
                   handleCancelCaption();
                 }
               }}
@@ -157,6 +160,7 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
   const sensors = useSensors(
@@ -353,16 +357,41 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
         description: error.message,
         variant: "destructive",
       });
+      throw error; // Re-throw for handleAutoSaveAndClose error handling
     } finally {
       setLoading(false);
     }
   };
 
+  // Auto-save and close handler
+  const handleAutoSaveAndClose = useCallback(async () => {
+    if (isSaving || loading) return;
+    try {
+      setIsSaving(true);
+      await handleSave();
+      onCancel();
+    } catch (error) {
+      // Error already handled in handleSave
+    } finally {
+      setIsSaving(false);
+    }
+  }, [isSaving, loading, onCancel]);
+  
+  // Click outside detection
+  const editorRef = useClickOutside<HTMLDivElement>(handleAutoSaveAndClose);
+
   const progressPercentage = (photos.length / MAX_PHOTOS) * 100;
 
   return (
-    <Card className="border-primary/20 bg-primary/5">
+    <Card ref={editorRef} className="border-primary/20 bg-primary/5">
       <CardContent className="pt-6 space-y-6">
+        {isSaving && (
+          <div className="flex items-center justify-center gap-2 p-2 bg-muted/30 rounded-lg">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span className="text-sm">Saving gallery...</span>
+          </div>
+        )}
+        
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold">Gallery Photos</h3>
           <Badge variant="outline">
@@ -459,12 +488,6 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
             <p>No photos in gallery yet. Upload your first photo above!</p>
           </div>
         )}
-
-        <div className="flex justify-center pt-4 border-t border-white/10">
-          <Button variant="outline" onClick={onCancel}>
-            Done Editing
-          </Button>
-        </div>
       </CardContent>
     </Card>
   );

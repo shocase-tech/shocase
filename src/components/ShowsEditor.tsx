@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
+import { AutoSaveInput } from "@/components/ui/auto-save-input";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -9,13 +10,14 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { Save, X, Plus, Calendar as CalendarIcon, MapPin, Ticket, GripVertical, ArrowUpDown } from "lucide-react";
+import { Save, X, Plus, Calendar as CalendarIcon, MapPin, Ticket, GripVertical, ArrowUpDown, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useClickOutside } from "@/hooks/useClickOutside";
 
 interface ShowsEditorProps {
   profile: any;
@@ -211,6 +213,7 @@ function SortableShow({ show, index, onDelete, onEdit }: SortableShowProps) {
 export default function ShowsEditor({ profile, user, onSave, onCancel }: ShowsEditorProps) {
   const [shows, setShows] = useState<Show[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
   const sensors = useSensors(
@@ -276,14 +279,17 @@ export default function ShowsEditor({ profile, user, onSave, onCancel }: ShowsEd
 
       const { error } = await supabase
         .from('artist_profiles')
-        .update({ upcoming_shows: shows as any })
+        .update({
+          upcoming_shows: shows.filter(show => new Date(show.date) >= new Date()) as any,
+          past_shows: shows.filter(show => new Date(show.date) < new Date()) as any,
+        })
         .eq('user_id', user.id);
 
       if (error) throw error;
 
       toast({
-        title: "Success!",
-        description: "Shows updated successfully.",
+        title: "Shows updated",
+        description: "Your shows have been saved successfully.",
       });
 
       onSave();
@@ -293,14 +299,39 @@ export default function ShowsEditor({ profile, user, onSave, onCancel }: ShowsEd
         description: error.message,
         variant: "destructive",
       });
+      throw error; // Re-throw for handleAutoSaveAndClose error handling
     } finally {
       setLoading(false);
     }
   };
 
+  // Auto-save and close handler
+  const handleAutoSaveAndClose = useCallback(async () => {
+    if (isSaving || loading) return;
+    try {
+      setIsSaving(true);
+      await handleSave();
+      onCancel();
+    } catch (error) {
+      // Error already handled in handleSave
+    } finally {
+      setIsSaving(false);
+    }
+  }, [isSaving, loading, onCancel]);
+  
+  // Click outside detection
+  const editorRef = useClickOutside<HTMLDivElement>(handleAutoSaveAndClose);
+
   return (
-    <Card className="border-primary/20 bg-primary/5">
+    <Card ref={editorRef} className="border-primary/20 bg-primary/5">
       <CardContent className="pt-6 space-y-6">
+        {isSaving && (
+          <div className="flex items-center justify-center gap-2 p-2 bg-muted/30 rounded-lg">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span className="text-sm">Saving shows...</span>
+          </div>
+        )}
+        
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold">Upcoming Shows</h3>
           <div className="flex gap-2">
@@ -347,12 +378,6 @@ export default function ShowsEditor({ profile, user, onSave, onCancel }: ShowsEd
             No shows added yet. Click "Add Show" to get started.
           </div>
         )}
-
-        <div className="flex justify-center pt-4 border-t border-white/10">
-          <Button variant="outline" onClick={onCancel}>
-            Done Editing
-          </Button>
-        </div>
       </CardContent>
     </Card>
   );

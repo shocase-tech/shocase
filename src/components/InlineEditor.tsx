@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
+import { AutoSaveInput, AutoSaveTextarea } from "@/components/ui/auto-save-input";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -11,12 +12,13 @@ import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { X, Save, Lightbulb, Upload, Camera } from "lucide-react";
+import { X, Save, Lightbulb, Upload, Camera, Loader2 } from "lucide-react";
 import GenreInput from "@/components/GenreInput";
 import StreamingLinksInput from "@/components/StreamingLinksInput";
 import PhotoUpload from "@/components/PhotoUpload";
 import PrivateImage from "@/components/PrivateImage";
 import { ImageStorageService } from "@/lib/imageStorage";
+import { useClickOutside } from "@/hooks/useClickOutside";
 
 interface InlineEditorProps {
   sectionId: string;
@@ -29,6 +31,7 @@ interface InlineEditorProps {
 export default function InlineEditor({ sectionId, profile, user, onSave, onCancel }: InlineEditorProps) {
   const [formData, setFormData] = useState<any>({});
   const [loading, setLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -129,10 +132,28 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
         description: error.message,
         variant: "destructive",
       });
+      throw error; // Re-throw for handleAutoSaveAndClose error handling
     } finally {
       setLoading(false);
     }
   };
+
+  // Auto-save and close handler
+  const handleAutoSaveAndClose = useCallback(async () => {
+    if (isSaving) return; // Prevent multiple saves
+    try {
+      setIsSaving(true);
+      await handleSave();
+      onCancel(); // Close the editor
+    } catch (error) {
+      // Error already handled in handleSave
+    } finally {
+      setIsSaving(false);
+    }
+  }, [isSaving, onCancel]);
+  
+  // Click outside detection
+  const editorRef = useClickOutside<HTMLDivElement>(handleAutoSaveAndClose);
 
   const addGenre = (genre: string) => {
     if (genre && !(formData.genre || []).includes(genre)) {
@@ -758,16 +779,14 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
   };
 
   return (
-    <div className="space-y-4">
+    <div ref={editorRef} className="space-y-4">
+      {isSaving && (
+        <div className="flex items-center justify-center gap-2 p-2 bg-muted/30 rounded-lg">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          <span className="text-sm">Saving...</span>
+        </div>
+      )}
       {renderSection()}
-      
-      <Separator />
-      
-      <div className="flex justify-center">
-        <Button variant="outline" onClick={onCancel}>
-          Done Editing
-        </Button>
-      </div>
     </div>
   );
 }

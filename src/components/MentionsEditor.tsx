@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
+import { AutoSaveInput } from "@/components/ui/auto-save-input";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -8,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { Save, X, Plus, ExternalLink, Loader2, Quote } from "lucide-react";
 import PressQuotesEditor from "@/components/PressQuotesEditor";
+import { useClickOutside } from "@/hooks/useClickOutside";
 
 interface MentionsEditorProps {
   profile: any;
@@ -31,6 +33,7 @@ export default function MentionsEditor({ profile, user, onSave, onCancel }: Ment
   const [newUrl, setNewUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [fetchingMetadata, setFetchingMetadata] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -128,17 +131,17 @@ export default function MentionsEditor({ profile, user, onSave, onCancel }: Ment
 
       const { error } = await supabase
         .from('artist_profiles')
-        .update({ 
+        .update({
           press_mentions: mentions as any,
-          press_quotes: quotes as any
+          press_quotes: quotes as any,
         })
         .eq('user_id', user.id);
 
       if (error) throw error;
 
       toast({
-        title: "Success!",
-        description: "Press mentions and quotes updated successfully.",
+        title: "Press mentions updated",
+        description: "Your press mentions and quotes have been saved.",
       });
 
       onSave();
@@ -148,14 +151,39 @@ export default function MentionsEditor({ profile, user, onSave, onCancel }: Ment
         description: error.message,
         variant: "destructive",
       });
+      throw error; // Re-throw for handleAutoSaveAndClose error handling
     } finally {
       setLoading(false);
     }
   };
 
+  // Auto-save and close handler
+  const handleAutoSaveAndClose = useCallback(async () => {
+    if (isSaving || loading || fetchingMetadata) return;
+    try {
+      setIsSaving(true);
+      await handleSave();
+      onCancel();
+    } catch (error) {
+      // Error already handled in handleSave
+    } finally {
+      setIsSaving(false);
+    }
+  }, [isSaving, loading, fetchingMetadata, onCancel]);
+  
+  // Click outside detection
+  const editorRef = useClickOutside<HTMLDivElement>(handleAutoSaveAndClose);
+
   return (
-    <Card className="border-primary/20 bg-primary/5">
+    <Card ref={editorRef} className="border-primary/20 bg-primary/5">
       <CardContent className="pt-6 space-y-8">
+        {isSaving && (
+          <div className="flex items-center justify-center gap-2 p-2 bg-muted/30 rounded-lg">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span className="text-sm">Saving press mentions...</span>
+          </div>
+        )}
+        
         <h3 className="text-lg font-semibold">Press Coverage</h3>
 
         {/* Press Quotes Section */}
@@ -176,16 +204,17 @@ export default function MentionsEditor({ profile, user, onSave, onCancel }: Ment
           <div className="space-y-2">
             <Label htmlFor="mention-url">Add Press Mention URL</Label>
             <div className="flex gap-2">
-              <Input
+              <AutoSaveInput
                 id="mention-url"
                 value={newUrl}
                 onChange={(e) => setNewUrl(e.target.value)}
-                placeholder="https://example.com/article"
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    handleAddMention();
+                onAutoSave={async (url) => {
+                  if (url.trim()) {
+                    await handleAddMention();
                   }
                 }}
+                placeholder="https://example.com/article"
+                disabled={fetchingMetadata}
               />
               <Button
                 onClick={handleAddMention}
@@ -275,12 +304,6 @@ export default function MentionsEditor({ profile, user, onSave, onCancel }: Ment
               <p className="text-sm">No press mentions yet. Add links to your media coverage!</p>
             </div>
           )}
-        </div>
-
-        <div className="flex justify-center pt-4 border-t border-white/10">
-          <Button variant="outline" onClick={onCancel}>
-            Done Editing
-          </Button>
         </div>
       </CardContent>
     </Card>
