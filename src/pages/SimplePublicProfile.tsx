@@ -30,12 +30,26 @@ export default function SimplePublicProfile() {
       try {
         console.log("Fetching profile for identifier:", identifier);
         
-        const { data, error: queryError } = await supabase
+        // Try by URL slug first
+        let { data, error: queryError } = await supabase
           .from('artist_profiles')
           .select('*')
           .eq('is_published', true)
-          .or(`url_slug.eq.${identifier},id.eq.${identifier}`)
+          .eq('url_slug', identifier)
           .maybeSingle();
+
+        // If not found, try by ID
+        if (!data && !queryError) {
+          const result = await supabase
+            .from('artist_profiles')
+            .select('*')
+            .eq('is_published', true)
+            .eq('id', identifier)
+            .maybeSingle();
+          
+          data = result.data;
+          queryError = result.error;
+        }
 
         console.log("Query result:", { data, error: queryError });
 
