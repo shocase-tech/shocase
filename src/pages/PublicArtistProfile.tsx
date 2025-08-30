@@ -50,11 +50,13 @@ export default function PublicArtistProfile() {
       console.log("Fetching profile for identifier:", identifier);
 
       try {
+        console.log("Starting fetch for identifier:", identifier);
+        
         // Create Supabase client without auth requirement for public data
         const { data, error } = await supabase
           .rpc("get_public_artist_profile", { profile_identifier: identifier });
 
-        console.log("RPC response:", { data, error });
+        console.log("RPC response:", { data, error, identifier });
 
         if (error) {
           console.error("Error fetching profile:", error);

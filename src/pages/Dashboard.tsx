@@ -174,17 +174,30 @@ export default function Dashboard() {
   const togglePublishStatus = async () => {
     if (!profile || !user) return;
 
+    // Show confirmation dialog
+    const confirmed = window.confirm(
+      profile.is_published 
+        ? "Are you sure you want to unpublish your EPK? It will no longer be accessible to the public."
+        : "Are you sure you want to publish your EPK? It will be accessible to anyone with the link."
+    );
+
+    if (!confirmed) return;
+
     try {
       const newStatus = !profile.is_published;
       let urlSlug = profile.url_slug;
 
       if (newStatus && !urlSlug) {
+        console.log("Generating URL slug for:", profile.artist_name);
         const { data: slugData, error: slugError } = await supabase
           .rpc('generate_url_slug', { artist_name: profile.artist_name });
         
         if (slugError) throw slugError;
         urlSlug = slugData;
+        console.log("Generated slug:", urlSlug);
       }
+
+      console.log("Updating profile publish status:", { newStatus, urlSlug });
 
       const { error } = await supabase
         .from('artist_profiles')
@@ -205,6 +218,7 @@ export default function Dashboard() {
           : "Your press kit is now private",
       });
     } catch (error: any) {
+      console.error("Toggle publish error:", error);
       toast({
         title: "Error",
         description: "Failed to update publish status: " + error.message,
@@ -234,7 +248,9 @@ export default function Dashboard() {
 
   const previewProfile = () => {
     if (!profile) return;
-    window.open(`/artist/${profile.url_slug || profile.id}`, '_blank');
+    const previewUrl = `/artist/${profile.url_slug || profile.id}`;
+    console.log("Opening preview URL:", previewUrl);
+    window.open(previewUrl, '_blank');
   };
 
   if (loading) {
