@@ -268,19 +268,22 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
                 Max {MAX_FILE_SIZE / 1024 / 1024}MB • JPG, PNG, WebP only • Up to {MAX_PHOTOS} photos
               </p>
               
-              <Label htmlFor="gallery-upload" className="cursor-pointer">
-                <input
-                  id="gallery-upload"
-                  type="file"
-                  accept={ALLOWED_TYPES.join(',')}
-                  onChange={handleFileSelect}
-                  className="hidden"
-                  disabled={uploading}
-                />
-                <Button className="mt-2" disabled={uploading}>
-                  {uploading ? "Uploading..." : "Choose Files"}
-                </Button>
-              </Label>
+              <input
+                id="gallery-upload"
+                type="file"
+                accept={ALLOWED_TYPES.join(',')}
+                onChange={handleFileSelect}
+                className="hidden"
+                disabled={uploading}
+              />
+              
+              <Button 
+                className="mt-2" 
+                disabled={uploading}
+                onClick={() => document.getElementById('gallery-upload')?.click()}
+              >
+                {uploading ? "Uploading..." : "Choose Files"}
+              </Button>
             </div>
 
             {/* Upload Progress */}
