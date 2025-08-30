@@ -3,15 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { Save, X, GripVertical, Upload } from "lucide-react";
+import { Save, X, GripVertical, Upload, AlertTriangle } from "lucide-react";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import PhotoUpload from "@/components/PhotoUpload";
+import { ImageStorageService } from "@/lib/imageStorage";
 
 interface GalleryEditorProps {
   profile: any;
@@ -87,6 +88,9 @@ function SortablePhoto({ photo, index, onDelete }: SortablePhotoProps) {
 export default function GalleryEditor({ profile, user, onSave, onCancel }: GalleryEditorProps) {
   const [photos, setPhotos] = useState<{ url: string; label?: string }[]>([]);
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const sensors = useSensors(
@@ -95,6 +99,11 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+
+  // File validation constants
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+  const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+  const MAX_PHOTOS = 12;
 
   useEffect(() => {
     if (profile?.gallery_photos) {
@@ -115,15 +124,83 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
     }
   };
 
-  const handlePhotoUpload = (url: string) => {
-    if (photos.length < 12) {
-      setPhotos([...photos, { url }]);
-    } else {
+  const validateFile = (file: File): string | null => {
+    if (file.size > MAX_FILE_SIZE) {
+      return `File size too large. Maximum size is ${MAX_FILE_SIZE / 1024 / 1024}MB.`;
+    }
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return 'Invalid file type. Please upload JPG, PNG, or WebP images only.';
+    }
+
+    if (photos.length >= MAX_PHOTOS) {
+      return `Maximum ${MAX_PHOTOS} photos allowed in gallery.`;
+    }
+
+    return null;
+  };
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    setUploadError(null);
+    
+    const validationError = validateFile(file);
+    if (validationError) {
+      setUploadError(validationError);
       toast({
-        title: "Maximum reached",
-        description: "You can upload up to 12 photos in your gallery.",
+        title: "Upload failed",
+        description: validationError,
         variant: "destructive",
       });
+      e.target.value = "";
+      return;
+    }
+
+    setUploading(true);
+    setUploadProgress(0);
+
+    try {
+      // Simulate progress for better UX
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return 90;
+          }
+          return prev + 10;
+        });
+      }, 200);
+
+      const storagePath = await ImageStorageService.uploadFile(file, 'gallery', user.id);
+      
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+
+      const newPhoto = { url: storagePath, label: "" };
+      setPhotos([...photos, newPhoto]);
+
+      toast({
+        title: "Photo uploaded",
+        description: "Photo uploaded successfully to gallery.",
+      });
+
+      setTimeout(() => {
+        setUploadProgress(0);
+      }, 1000);
+
+    } catch (error: any) {
+      const errorMessage = error.message || "Failed to upload photo. Please try again.";
+      setUploadError(errorMessage);
+      toast({
+        title: "Upload failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+      e.target.value = "";
     }
   };
 
@@ -161,7 +238,7 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
     }
   };
 
-  const progressPercentage = (photos.length / 12) * 100;
+  const progressPercentage = (photos.length / MAX_PHOTOS) * 100;
 
   return (
     <Card className="border-primary/20 bg-primary/5">
@@ -169,7 +246,7 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold">Gallery Photos</h3>
           <Badge variant="outline">
-            {photos.length} / 12
+            {photos.length} / {MAX_PHOTOS}
           </Badge>
         </div>
 
@@ -181,16 +258,53 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
           <Progress value={progressPercentage} className="h-2" />
         </div>
 
-        {photos.length < 12 && (
-          <div className="border-2 border-dashed border-primary/30 bg-primary/5 p-6 text-center rounded-lg">
-            <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">Upload gallery photos</p>
-            <Button className="mt-2" onClick={() => {}}>
-              Choose Files
-            </Button>
+        {/* File Upload Section */}
+        {photos.length < MAX_PHOTOS && (
+          <div className="space-y-4">
+            <div className="border-2 border-dashed border-primary/30 bg-primary/5 p-6 text-center rounded-lg">
+              <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground mb-2">Upload gallery photos</p>
+              <p className="text-xs text-muted-foreground mb-4">
+                Max {MAX_FILE_SIZE / 1024 / 1024}MB • JPG, PNG, WebP only • Up to {MAX_PHOTOS} photos
+              </p>
+              
+              <Label htmlFor="gallery-upload" className="cursor-pointer">
+                <input
+                  id="gallery-upload"
+                  type="file"
+                  accept={ALLOWED_TYPES.join(',')}
+                  onChange={handleFileSelect}
+                  className="hidden"
+                  disabled={uploading}
+                />
+                <Button className="mt-2" disabled={uploading}>
+                  {uploading ? "Uploading..." : "Choose Files"}
+                </Button>
+              </Label>
+            </div>
+
+            {/* Upload Progress */}
+            {uploading && (
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Uploading photo...</span>
+                  <span>{uploadProgress}%</span>
+                </div>
+                <Progress value={uploadProgress} className="h-2" />
+              </div>
+            )}
+
+            {/* Upload Error */}
+            {uploadError && (
+              <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+                <AlertTriangle className="w-4 h-4 text-red-500" />
+                <p className="text-sm text-red-600">{uploadError}</p>
+              </div>
+            )}
           </div>
         )}
 
+        {/* Photos Grid */}
         {photos.length > 0 && (
           <DndContext
             sensors={sensors}
@@ -213,6 +327,13 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
               </div>
             </SortableContext>
           </DndContext>
+        )}
+
+        {photos.length === 0 && (
+          <div className="text-center py-8 text-muted-foreground">
+            <Upload className="w-12 h-12 mx-auto mb-4 opacity-50" />
+            <p>No photos in gallery yet. Upload your first photo above!</p>
+          </div>
         )}
 
         <div className="flex justify-between pt-4 border-t border-white/10">
