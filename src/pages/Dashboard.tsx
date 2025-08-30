@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,8 +10,6 @@ import { User } from "@supabase/supabase-js";
 import { Copy, ExternalLink, Edit3, Eye, EyeOff, CheckCircle, Circle } from "lucide-react";
 import LivePreviewEditor from "@/components/LivePreviewEditor";
 import FloatingProgressIndicator from "@/components/FloatingProgressIndicator";
-import FloatingActionButton from "@/components/FloatingActionButton";
-import { useAutoSave } from "@/hooks/useAutoSave";
 import { useScrollVisibility } from "@/hooks/useScrollVisibility";
 
 interface DashboardArtistProfile {
@@ -50,53 +48,6 @@ export default function Dashboard() {
   
   // Show floating indicators when user scrolls past main progress card
   const isProgressCardVisible = useScrollVisibility(progressCardRef);
-
-  // Auto-save functionality
-  const saveProfile = useCallback(async (profileData: DashboardArtistProfile) => {
-    if (!user || !profileData) return;
-    
-    // Transform the data to match Supabase schema
-    const supabaseData = {
-      ...profileData,
-      gallery_photos: profileData.gallery_photos?.map(photo => 
-        typeof photo === 'string' ? photo : photo.url
-      ) || [],
-      genre: Array.isArray(profileData.genre) ? JSON.stringify(profileData.genre) : profileData.genre
-    };
-    
-    const { error } = await supabase
-      .from('artist_profiles')
-      .update(supabaseData)
-      .eq('user_id', user.id);
-      
-    if (error) throw error;
-  }, [user]);
-
-  const {
-    hasUnsavedChanges,
-    isSaving,
-    triggerSave,
-    setUnsavedChanges
-  } = useAutoSave({
-    data: profile,
-    onSave: saveProfile,
-    delay: 500,
-    enabled: !!user && !!profile
-  });
-
-  // Beforeunload warning for unsaved changes
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (hasUnsavedChanges) {
-        e.preventDefault();
-        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
-        return 'You have unsaved changes. Are you sure you want to leave?';
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [hasUnsavedChanges]);
 
   useEffect(() => {
     const getSession = async () => {
@@ -224,14 +175,9 @@ export default function Dashboard() {
     }
   };
 
-  const handleProfileUpdated = useCallback((updatedProfile?: DashboardArtistProfile) => {
-    if (updatedProfile) {
-      setProfile(updatedProfile);
-      setUnsavedChanges(false);
-    } else {
-      fetchProfile();
-    }
-  }, [setUnsavedChanges]);
+  const handleProfileUpdated = () => {
+    fetchProfile();
+  };
 
   const togglePublishStatus = async () => {
     if (!profile || !user) return;
@@ -336,9 +282,9 @@ export default function Dashboard() {
     );
   }
 
-  const completionPercentage = useMemo(() => calculateCompletionPercentage(), [profile]);
-  const milestones = useMemo(() => getCompletionMilestones(), [profile]);
-  const completedMilestones = useMemo(() => milestones.filter(m => m.completed).length, [milestones]);
+  const completionPercentage = calculateCompletionPercentage();
+  const milestones = getCompletionMilestones();
+  const completedMilestones = milestones.filter(m => m.completed).length;
 
   const getStatusBadge = () => {
     if (!profile) return null;
@@ -441,24 +387,16 @@ export default function Dashboard() {
             profile={profile} 
             onProfileUpdated={handleProfileUpdated}
             user={user}
-            onDataChange={setUnsavedChanges}
           />
         </div>
         
-        {/* Floating Components */}
+        {/* Floating Progress Indicator */}
         {profile && (
-          <>
-            <FloatingProgressIndicator
-              completionPercentage={completionPercentage}
-              milestones={milestones}
-              isVisible={isProgressCardVisible}
-            />
-            <FloatingActionButton
-              onSave={triggerSave}
-              hasUnsavedChanges={hasUnsavedChanges}
-              isVisible={true}
-            />
-          </>
+          <FloatingProgressIndicator
+            completionPercentage={completionPercentage}
+            milestones={milestones}
+            isVisible={isProgressCardVisible}
+          />
         )}
       </main>
     </div>
