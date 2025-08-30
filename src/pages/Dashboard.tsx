@@ -248,8 +248,18 @@ export default function Dashboard() {
 
   const previewProfile = () => {
     if (!profile) return;
-    const previewUrl = `/artist/${profile.url_slug || profile.id}`;
-    console.log("Opening preview URL:", previewUrl);
+    
+    // Generate URL slug if needed for preview
+    const identifier = profile.url_slug || profile.id;
+    const previewUrl = `/artist/${identifier}`;
+    
+    console.log("Opening preview URL:", previewUrl, "Profile:", { 
+      id: profile.id, 
+      slug: profile.url_slug, 
+      published: profile.is_published,
+      artistName: profile.artist_name 
+    });
+    
     window.open(previewUrl, '_blank');
   };
 

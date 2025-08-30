@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { useParams, Navigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
+import { User } from "@supabase/supabase-js";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,10 +39,22 @@ export default function PublicArtistProfile() {
   const [profile, setProfile] = useState<PublicArtistProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [isOwnerPreview, setIsOwnerPreview] = useState(false);
+
+  useEffect(() => {
+    // Check if user is authenticated
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user || null);
+    };
+    checkAuth();
+  }, []);
 
   useEffect(() => {
     const fetchProfile = async () => {
       if (!identifier) {
+        console.log("No identifier provided");
         setError("No artist identifier provided");
         setLoading(false);
         return;
@@ -50,31 +63,51 @@ export default function PublicArtistProfile() {
       console.log("Fetching profile for identifier:", identifier);
 
       try {
-        console.log("Starting fetch for identifier:", identifier);
+        console.log("Making RPC call with identifier:", identifier);
         
-        // Create Supabase client without auth requirement for public data
+        // First try to get published profile
         const { data, error } = await supabase
           .rpc("get_public_artist_profile", { profile_identifier: identifier });
 
-        console.log("RPC response:", { data, error, identifier });
+        console.log("RPC response:", { data, error, identifier, dataLength: data?.length });
 
         if (error) {
-          console.error("Error fetching profile:", error);
-          setError("Artist not found");
+          console.error("RPC error:", error);
+          setError("Failed to load artist profile");
           return;
         }
 
-        if (!data || data.length === 0) {
-          console.log("No data returned for identifier:", identifier);
-          setError("Artist not found");
+        if (data && data.length > 0) {
+          const profileData = data[0] as PublicArtistProfile;
+          console.log("Published profile loaded:", { artistName: profileData.artist_name });
+          setProfile(profileData);
+          setError(null);
           return;
         }
 
-        console.log("Profile found:", data[0]);
-        setProfile(data[0] as PublicArtistProfile);
-        setError(null);
+        // If no published profile found and user is authenticated, try to get their own unpublished profile
+        if (user) {
+          console.log("No published profile found, checking if this is owner's unpublished profile");
+          const { data: userProfile, error: userError } = await supabase
+            .from('artist_profiles')
+            .select('*')
+            .eq('user_id', user.id)
+            .or(`id.eq.${identifier},url_slug.eq.${identifier}`)
+            .single();
+
+          if (!userError && userProfile) {
+            console.log("Owner viewing unpublished profile:", userProfile.artist_name);
+            setProfile(userProfile as PublicArtistProfile);
+            setIsOwnerPreview(true);
+            setError(null);
+            return;
+          }
+        }
+
+        console.log("No profile found for identifier:", identifier);
+        setError("This artist's profile is not available or has not been published");
       } catch (err) {
-        console.error("Catch error:", err);
+        console.error("Fetch error:", err);
         setError("Failed to load artist profile");
       } finally {
         setLoading(false);
@@ -82,7 +115,7 @@ export default function PublicArtistProfile() {
     };
 
     fetchProfile();
-  }, [identifier]);
+  }, [identifier, user]);
 
   if (loading) {
     return (
@@ -98,7 +131,22 @@ export default function PublicArtistProfile() {
   }
 
   if (error || !profile) {
-    return <Navigate to="/not-found" replace />;
+    return (
+      <div className="min-h-screen bg-gradient-dark flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-6">
+          <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-red-500/20 flex items-center justify-center">
+            <Music className="w-12 h-12 text-red-400" />
+          </div>
+          <h1 className="text-3xl font-bold text-foreground mb-4">Profile Not Available</h1>
+          <p className="text-lg text-muted-foreground mb-8">
+            {error || "This artist's profile is not available or has not been published"}
+          </p>
+          <Button asChild variant="default">
+            <a href="/">← Back to Home</a>
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   // Parse genre from comma-separated string or array
@@ -125,6 +173,21 @@ export default function PublicArtistProfile() {
       </Helmet>
 
       <div className="min-h-screen bg-gradient-dark">
+        {/* Owner Preview Banner */}
+        {isOwnerPreview && !profile.is_published && (
+          <div className="bg-yellow-600/90 backdrop-blur-sm border-b border-yellow-500/50 sticky top-0 z-50">
+            <div className="container mx-auto px-4 py-3">
+              <div className="flex items-center justify-center gap-3 text-yellow-100">
+                <Star className="w-5 h-5" />
+                <span className="font-medium">
+                  Preview Mode - This EPK is not published yet. Only you can see this page.
+                </span>
+                <Star className="w-5 h-5" />
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Hero Section */}
         <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
           {profile.hero_photo_url && (
