@@ -388,28 +388,8 @@ export default function PublicArtistProfile() {
                   <Mail className="w-6 h-6 text-primary" />
                   Booking Contact
                 </h2>
-                <div className="space-y-4">
-                  {profile.contact_info && (profile.contact_info as any).email && (
-                    <Button asChild className="w-full" variant="hero">
-                      <a href={`mailto:${(profile.contact_info as any).email}`}>
-                        <Mail className="w-4 h-4 mr-2" />
-                        Email for Booking
-                      </a>
-                    </Button>
-                  )}
-                  
-                  {profile.contact_info && (profile.contact_info as any).phone && (
-                    <Button asChild className="w-full" variant="outline">
-                      <a href={`tel:${(profile.contact_info as any).phone}`}>
-                        <Phone className="w-4 h-4 mr-2" />
-                        {(profile.contact_info as any).phone}
-                      </a>
-                    </Button>
-                  )}
-                  
-                </div>
                 
-                <p className="text-sm text-muted-foreground mt-4 p-3 bg-white/5 rounded-lg border-l-4 border-accent">
+                <p className="text-sm text-muted-foreground p-3 bg-white/5 rounded-lg border-l-4 border-accent">
                   Professional booking inquiries welcome. Fast response guaranteed.
                 </p>
               </section>
