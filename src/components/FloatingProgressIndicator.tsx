@@ -1,18 +1,23 @@
 import { useState, useEffect } from "react";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle, Circle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CheckCircle, Circle, Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface FloatingProgressIndicatorProps {
   completionPercentage: number;
   milestones: Array<{ label: string; completed: boolean }>;
   isVisible: boolean;
+  profile?: any;
+  onTogglePublish?: () => void;
 }
 
 export default function FloatingProgressIndicator({ 
   completionPercentage, 
   milestones, 
-  isVisible 
+  isVisible,
+  profile,
+  onTogglePublish
 }: FloatingProgressIndicatorProps) {
   const incompleteMilestones = milestones.filter(m => !m.completed).slice(0, 2);
   const completedCount = milestones.filter(m => m.completed).length;
@@ -63,9 +68,29 @@ export default function FloatingProgressIndicator({
         )}
 
         {completionPercentage === 100 && (
-          <div className="flex items-center gap-2 text-xs text-accent">
+          <div className="flex items-center gap-2 text-xs text-accent mb-3">
             <CheckCircle className="w-3 h-3" />
             <span>EPK Complete!</span>
+          </div>
+        )}
+
+        {/* Compact Publish Toggle */}
+        {profile && onTogglePublish && (
+          <div className="border-t border-white/10 pt-3">
+            <Button
+              onClick={onTogglePublish}
+              variant={profile.is_published ? "outline" : "default"}
+              size="sm"
+              className={cn(
+                "w-full flex items-center gap-2 text-xs",
+                profile.is_published 
+                  ? "border-orange-500/50 text-orange-600 hover:bg-orange-500/10" 
+                  : "bg-green-600 hover:bg-green-700 text-white"
+              )}
+            >
+              {profile.is_published ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+              {profile.is_published ? "Unpublish" : "Publish"}
+            </Button>
           </div>
         )}
       </div>

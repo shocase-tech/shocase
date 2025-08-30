@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { Copy, ExternalLink, Edit3, Eye, EyeOff, CheckCircle, Circle } from "lucide-react";
+import { cn } from "@/lib/utils";
 import LivePreviewEditor from "@/components/LivePreviewEditor";
 import FloatingProgressIndicator from "@/components/FloatingProgressIndicator";
 import { useScrollVisibility } from "@/hooks/useScrollVisibility";
@@ -309,37 +310,15 @@ export default function Dashboard() {
           </div>
           <div className="flex items-center gap-3">
             {profile && (
-              <>
-                <Button
-                  onClick={previewProfile}
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  {profile.is_published ? "View EPK" : "Preview"}
-                </Button>
-                {profile.is_published ? (
-                  <Button
-                    onClick={copyPublicLink}
-                    variant="secondary"
-                    size="sm"
-                    className="flex items-center gap-2"
-                  >
-                    <Copy className="w-4 h-4" />
-                    Copy Link
-                  </Button>
-                ) : null}
-                <Button
-                  onClick={togglePublishStatus}
-                  variant={profile.is_published ? "outline" : "default"}
-                  size="sm"
-                  className="flex items-center gap-2"
-                >
-                  {profile.is_published ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  {profile.is_published ? "Unpublish" : "Publish"}
-                </Button>
-              </>
+              <Button
+                onClick={previewProfile}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <ExternalLink className="w-4 h-4" />
+                {profile.is_published ? "View EPK" : "Preview"}
+              </Button>
             )}
             <Button variant="outline" size="sm" onClick={handleSignOut}>
               Sign Out
@@ -350,7 +329,7 @@ export default function Dashboard() {
 
       <main className="container mx-auto px-4 py-6">
         <div className="max-w-4xl mx-auto space-y-6">
-          {/* Progress Section */}
+          {/* Progress Section with Publish Controls */}
           {profile && (
             <Card ref={progressCardRef} className="glass-card border-white/10">
               <CardContent className="pt-6">
@@ -364,7 +343,7 @@ export default function Dashboard() {
                   <div className="text-2xl font-bold text-primary">{completionPercentage}%</div>
                 </div>
                 <Progress value={completionPercentage} className="mb-4" />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-6">
                   {milestones.map((milestone, index) => (
                     <div key={index} className="flex items-center gap-2 text-sm">
                       {milestone.completed ? (
@@ -378,6 +357,58 @@ export default function Dashboard() {
                     </div>
                   ))}
                 </div>
+                
+                {/* Publish Controls */}
+                <div className="border-t border-white/10 pt-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium mb-1">EPK Publication</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {profile.is_published 
+                          ? "Your EPK is live and publicly accessible"
+                          : "Complete your EPK and publish it to make it live"
+                        }
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {profile.is_published && (
+                        <>
+                          <Button
+                            onClick={copyPublicLink}
+                            variant="outline"
+                            size="sm"
+                            className="flex items-center gap-2"
+                          >
+                            <Copy className="w-4 h-4" />
+                            Copy Link
+                          </Button>
+                          <Button
+                            onClick={previewProfile}
+                            variant="outline"
+                            size="sm"
+                            className="flex items-center gap-2"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            View EPK
+                          </Button>
+                        </>
+                      )}
+                      <Button
+                        onClick={togglePublishStatus}
+                        variant={profile.is_published ? "outline" : "default"}
+                        className={cn(
+                          "flex items-center gap-2 font-medium px-6",
+                          profile.is_published 
+                            ? "border-orange-500/50 text-orange-600 hover:bg-orange-500/10" 
+                            : "bg-green-600 hover:bg-green-700 text-white"
+                        )}
+                      >
+                        {profile.is_published ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        {profile.is_published ? "Unpublish EPK" : "Publish EPK"}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           )}
@@ -390,12 +421,14 @@ export default function Dashboard() {
           />
         </div>
         
-        {/* Floating Progress Indicator */}
+        {/* Floating Progress Indicator with Publish Toggle */}
         {profile && (
           <FloatingProgressIndicator
             completionPercentage={completionPercentage}
             milestones={milestones}
             isVisible={isProgressCardVisible}
+            profile={profile}
+            onTogglePublish={togglePublishStatus}
           />
         )}
       </main>

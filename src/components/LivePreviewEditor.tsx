@@ -8,6 +8,9 @@ import InlineEditor from "@/components/InlineEditor";
 import GalleryEditor from "@/components/GalleryEditor";
 import MentionsEditor from "@/components/MentionsEditor";
 import ShowsEditor from "@/components/ShowsEditor";
+import SaveIndicator from "@/components/SaveIndicator";
+import { useAutoSave } from "@/hooks/useAutoSave";
+import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 
 interface LivePreviewEditorProps {
@@ -19,6 +22,30 @@ interface LivePreviewEditorProps {
 export default function LivePreviewEditor({ profile, onProfileUpdated, user }: LivePreviewEditorProps) {
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const scrollPositionRef = useRef<number>(0);
+
+  // Auto-save functionality for live editing
+  const saveProfile = async (profileData: any) => {
+    if (!user || !profileData?.id) return;
+    
+    const { error } = await supabase
+      .from('artist_profiles')
+      .update(profileData)
+      .eq('user_id', user.id);
+    
+    if (error) throw error;
+  };
+
+  const {
+    hasUnsavedChanges,
+    isSaving,
+    lastSaved,
+    setUnsavedChanges,
+  } = useAutoSave({
+    data: profile,
+    onSave: saveProfile,
+    delay: 300,
+    enabled: !!user && !!profile
+  });
 
   // Persist state when user switches tabs
   useEffect(() => {
@@ -46,8 +73,9 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
     // Save current scroll position
     const currentScrollY = window.scrollY;
     
-    // Update the profile data
+    // Update the profile data and trigger auto-save
     onProfileUpdated();
+    setUnsavedChanges(true);
     
     // Don't close editing section, maintain scroll position
     setTimeout(() => {
@@ -181,13 +209,21 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
             </div>
           )}
           {hasContent && (
-            <Button
-              size="sm"
-              variant="outline"
-              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm"
-            >
-              <Edit3 className="w-3 h-3" />
-            </Button>
+            <div className="absolute top-2 right-2 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <SaveIndicator 
+                isSaving={isSaving}
+                lastSaved={lastSaved}
+                hasUnsavedChanges={hasUnsavedChanges}
+                className="bg-background/80 backdrop-blur-sm px-2 py-1 rounded"
+              />
+              <Button
+                size="sm"
+                variant="outline"
+                className="bg-background/80 backdrop-blur-sm"
+              >
+                <Edit3 className="w-3 h-3" />
+              </Button>
+            </div>
           )}
         </div>
       </div>
