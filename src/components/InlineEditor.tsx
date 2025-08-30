@@ -24,7 +24,7 @@ interface InlineEditorProps {
   sectionId: string;
   profile: any;
   user: User | null;
-  onSave: () => void;
+  onSave: (updatedData?: any) => void;
   onCancel: () => void;
 }
 
@@ -125,7 +125,7 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
       });
 
       // Update parent with new data instead of triggering refetch
-      onSave();
+      onSave(formData);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -140,17 +140,24 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
 
   // Auto-save and close handler
   const handleAutoSaveAndClose = useCallback(async () => {
+    console.log("🔍 InlineEditor: Click-outside detected, handleAutoSaveAndClose called");
     if (isSaving) return; // Prevent multiple saves
+    
+    console.log("🔍 InlineEditor: Current form data before save:", formData);
+    
     try {
       setIsSaving(true);
+      console.log("🔍 InlineEditor: Calling handleSave()");
       await handleSave();
+      console.log("🔍 InlineEditor: handleSave() completed, closing editor");
       onCancel(); // Close the editor
     } catch (error) {
+      console.error("🔍 InlineEditor: handleSave() failed:", error);
       // Error already handled in handleSave
     } finally {
       setIsSaving(false);
     }
-  }, [isSaving, onCancel]);
+  }, [isSaving, onCancel, formData]);
   
   // Click outside detection
   const editorRef = useClickOutside<HTMLDivElement>(handleAutoSaveAndClose);

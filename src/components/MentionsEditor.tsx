@@ -14,7 +14,7 @@ import { useClickOutside } from "@/hooks/useClickOutside";
 interface MentionsEditorProps {
   profile: any;
   user: User | null;
-  onSave: () => void;
+  onSave: (updatedData?: any) => void;
   onCancel: () => void;
 }
 
@@ -124,7 +124,14 @@ export default function MentionsEditor({ profile, user, onSave, onCancel }: Ment
   };
 
   const handleSave = async () => {
+    console.log("🔍 TEST OPTION 3: handleSave() called");
     if (!user) return;
+
+    console.log("🔍 TEST OPTION 4: Data being saved to database:", {
+      press_mentions: mentions,
+      press_quotes: quotes,
+      user_id: user.id
+    });
 
     try {
       setLoading(true);
@@ -137,16 +144,23 @@ export default function MentionsEditor({ profile, user, onSave, onCancel }: Ment
         })
         .eq('user_id', user.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("🔍 TEST OPTION 3: Supabase update failed:", error);
+        throw error;
+      }
+
+      console.log("🔍 TEST OPTION 3: Supabase update successful");
 
       toast({
         title: "Press mentions updated",
         description: "Your press mentions and quotes have been saved.",
       });
 
-      // No need to call onSave() since we're closing the editor
-      // onSave();
+      // Update parent component with new data instead of refetching
+      console.log("🔍 TEST OPTION 5: Calling onSave() to update parent state");
+      onSave({ press_mentions: mentions, press_quotes: quotes });
     } catch (error: any) {
+      console.error("🔍 TEST OPTION 3: Save operation failed:", error);
       toast({
         title: "Error",
         description: error.message,
@@ -160,17 +174,24 @@ export default function MentionsEditor({ profile, user, onSave, onCancel }: Ment
 
   // Auto-save and close handler
   const handleAutoSaveAndClose = useCallback(async () => {
+    console.log("🔍 TEST OPTION 1 & 2: Click-outside detected, handleAutoSaveAndClose called");
     if (isSaving || loading || fetchingMetadata) return;
+    
+    console.log("🔍 TEST OPTION 4: Current form data before save:", { mentions, quotes });
+    
     try {
       setIsSaving(true);
+      console.log("🔍 TEST OPTION 2: Calling handleSave()");
       await handleSave();
+      console.log("🔍 TEST OPTION 3: handleSave() completed successfully, closing editor");
       onCancel();
     } catch (error) {
+      console.error("🔍 TEST OPTION 3: handleSave() failed:", error);
       // Error already handled in handleSave
     } finally {
       setIsSaving(false);
     }
-  }, [isSaving, loading, fetchingMetadata, onCancel]);
+  }, [isSaving, loading, fetchingMetadata, onCancel, mentions, quotes]);
   
   // Click outside detection
   const editorRef = useClickOutside<HTMLDivElement>(handleAutoSaveAndClose);

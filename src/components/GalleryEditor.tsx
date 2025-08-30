@@ -20,7 +20,7 @@ import { useClickOutside } from "@/hooks/useClickOutside";
 interface GalleryEditorProps {
   profile: any;
   user: User | null;
-  onSave: () => void;
+  onSave: (updatedData?: any) => void;
   onCancel: () => void;
 }
 
@@ -349,8 +349,8 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
         description: "Gallery updated successfully.",
       });
 
-      // No need to call onSave() since we're closing the editor
-      // onSave();
+      // Update parent component with new data
+      onSave({ gallery_photos: photoData });
     } catch (error: any) {
       console.error("Gallery save error:", error);
       toast({
@@ -366,17 +366,24 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
 
   // Auto-save and close handler
   const handleAutoSaveAndClose = useCallback(async () => {
+    console.log("🔍 GalleryEditor: Click-outside detected, handleAutoSaveAndClose called");
     if (isSaving || loading) return;
+    
+    console.log("🔍 GalleryEditor: Current photos data before save:", photos);
+    
     try {
       setIsSaving(true);
+      console.log("🔍 GalleryEditor: Calling handleSave()");
       await handleSave();
+      console.log("🔍 GalleryEditor: handleSave() completed, closing editor");
       onCancel();
     } catch (error) {
+      console.error("🔍 GalleryEditor: handleSave() failed:", error);
       // Error already handled in handleSave
     } finally {
       setIsSaving(false);
     }
-  }, [isSaving, loading, onCancel]);
+  }, [isSaving, loading, onCancel, photos]);
   
   // Click outside detection
   const editorRef = useClickOutside<HTMLDivElement>(handleAutoSaveAndClose);

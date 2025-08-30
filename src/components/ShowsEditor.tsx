@@ -22,7 +22,7 @@ import { useClickOutside } from "@/hooks/useClickOutside";
 interface ShowsEditorProps {
   profile: any;
   user: User | null;
-  onSave: () => void;
+  onSave: (updatedData?: any) => void;
   onCancel: () => void;
 }
 
@@ -292,8 +292,11 @@ export default function ShowsEditor({ profile, user, onSave, onCancel }: ShowsEd
         description: "Your shows have been saved successfully.",
       });
 
-      // No need to call onSave() since we're closing the editor
-      // onSave();
+      // Update parent component with new data
+      onSave({ 
+        upcoming_shows: shows.filter(show => new Date(show.date) >= new Date()),
+        past_shows: shows.filter(show => new Date(show.date) < new Date()) 
+      });
     } catch (error: any) {
       toast({
         title: "Error",
@@ -308,17 +311,24 @@ export default function ShowsEditor({ profile, user, onSave, onCancel }: ShowsEd
 
   // Auto-save and close handler
   const handleAutoSaveAndClose = useCallback(async () => {
+    console.log("🔍 ShowsEditor: Click-outside detected, handleAutoSaveAndClose called");
     if (isSaving || loading) return;
+    
+    console.log("🔍 ShowsEditor: Current shows data before save:", shows);
+    
     try {
       setIsSaving(true);
+      console.log("🔍 ShowsEditor: Calling handleSave()");
       await handleSave();
+      console.log("🔍 ShowsEditor: handleSave() completed, closing editor");
       onCancel();
     } catch (error) {
+      console.error("🔍 ShowsEditor: handleSave() failed:", error);
       // Error already handled in handleSave
     } finally {
       setIsSaving(false);
     }
-  }, [isSaving, loading, onCancel]);
+  }, [isSaving, loading, onCancel, shows]);
   
   // Click outside detection
   const editorRef = useClickOutside<HTMLDivElement>(handleAutoSaveAndClose);
