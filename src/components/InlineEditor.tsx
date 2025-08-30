@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { X, Save, Lightbulb } from "lucide-react";
+import { X, Save, Lightbulb, Upload } from "lucide-react";
 import PhotoUpload from "@/components/PhotoUpload";
 
 interface InlineEditorProps {
@@ -98,10 +98,10 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
   };
 
   const addGenre = (genre: string) => {
-    if (genre && !formData.genre.includes(genre)) {
+    if (genre && !(formData.genre || []).includes(genre)) {
       setFormData({
         ...formData,
-        genre: [...formData.genre, genre]
+        genre: [...(formData.genre || []), genre]
       });
     }
   };
@@ -109,15 +109,15 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
   const removeGenre = (genreToRemove: string) => {
     setFormData({
       ...formData,
-      genre: formData.genre.filter((g: string) => g !== genreToRemove)
+      genre: (formData.genre || []).filter((g: string) => g !== genreToRemove)
     });
   };
 
   const addVideo = (videoUrl: string) => {
-    if (videoUrl && !formData.show_videos.includes(videoUrl)) {
+    if (videoUrl && !(formData.show_videos || []).includes(videoUrl)) {
       setFormData({
         ...formData,
-        show_videos: [...formData.show_videos, videoUrl]
+        show_videos: [...(formData.show_videos || []), videoUrl]
       });
     }
   };
@@ -125,7 +125,7 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
   const removeVideo = (index: number) => {
     setFormData({
       ...formData,
-      show_videos: formData.show_videos.filter((_: any, i: number) => i !== index)
+      show_videos: (formData.show_videos || []).filter((_: any, i: number) => i !== index)
     });
   };
 
@@ -177,7 +177,7 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
       <div>
         <Label>Genres</Label>
         <div className="flex flex-wrap gap-2 mb-2">
-          {formData.genre.map((genre: string, index: number) => (
+          {(formData.genre || []).map((genre: string, index: number) => (
             <Badge key={index} variant="secondary" className="cursor-pointer" onClick={() => removeGenre(genre)}>
               {genre} <X className="w-3 h-3 ml-1" />
             </Badge>
@@ -310,7 +310,7 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
       <h3 className="text-lg font-semibold">Videos</h3>
       
       <div className="space-y-2">
-        {formData.show_videos.map((video: string, index: number) => (
+        {(formData.show_videos || []).map((video: string, index: number) => (
           <div key={index} className="flex items-center gap-2">
             <Input value={video} readOnly />
             <Button
