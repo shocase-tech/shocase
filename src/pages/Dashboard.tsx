@@ -283,7 +283,7 @@ export default function Dashboard() {
                   className="flex items-center gap-2"
                 >
                   <ExternalLink className="w-4 h-4" />
-                  Preview
+                  {profile.is_published ? "View EPK" : "Preview"}
                 </Button>
                 {profile.is_published ? (
                   <Button
