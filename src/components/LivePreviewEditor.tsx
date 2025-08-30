@@ -12,11 +12,12 @@ import { User } from "@supabase/supabase-js";
 
 interface LivePreviewEditorProps {
   profile: any;
-  onProfileUpdated: () => void;
+  onProfileUpdated: (updatedProfile?: any) => void;
   user: User | null;
+  onDataChange?: (hasChanges: boolean) => void;
 }
 
-export default function LivePreviewEditor({ profile, onProfileUpdated, user }: LivePreviewEditorProps) {
+export default function LivePreviewEditor({ profile, onProfileUpdated, user, onDataChange }: LivePreviewEditorProps) {
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const scrollPositionRef = useRef<number>(0);
 
@@ -48,6 +49,11 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
     
     // Update the profile data
     onProfileUpdated();
+    
+    // Notify parent about data changes for auto-save
+    if (onDataChange) {
+      onDataChange(true);
+    }
     
     // Don't close editing section, maintain scroll position
     setTimeout(() => {

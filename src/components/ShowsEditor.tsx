@@ -348,13 +348,9 @@ export default function ShowsEditor({ profile, user, onSave, onCancel }: ShowsEd
           </div>
         )}
 
-        <div className="flex justify-between pt-4 border-t border-white/10">
+        <div className="flex justify-center pt-4 border-t border-white/10">
           <Button variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave} disabled={loading}>
-            <Save className="w-4 h-4 mr-2" />
-            {loading ? "Saving..." : "Save Shows"}
+            Done Editing
           </Button>
         </div>
       </CardContent>

@@ -717,13 +717,9 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
       
       <Separator />
       
-      <div className="flex justify-between gap-3">
-        <Button variant="outline" onClick={onCancel} className="flex-1">
+      <div className="flex justify-center">
+        <Button variant="outline" onClick={onCancel}>
           Done Editing
-        </Button>
-        <Button onClick={handleSave} disabled={loading} className="flex-1">
-          <Save className="w-4 h-4 mr-2" />
-          {loading ? "Saving..." : "Save Changes"}
         </Button>
       </div>
     </div>
