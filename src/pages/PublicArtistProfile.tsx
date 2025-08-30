@@ -19,7 +19,7 @@ type PublicArtistProfile = {
   press_photos: string[] | null;
   hero_photo_url: string | null;
   show_videos: string[] | null;
-  gallery_photos: string[] | null;
+  gallery_photos: (string | { url: string; caption?: string })[] | null;
   press_quotes: any;
   press_mentions: any;
   streaming_links: any;
@@ -87,7 +87,12 @@ export default function PublicArtistProfile() {
     return <Navigate to="/not-found" replace />;
   }
 
-  const genreArray = Array.isArray(profile.genre) ? profile.genre : [profile.genre];
+  // Parse genre from comma-separated string or array
+  const genreArray = Array.isArray(profile.genre) 
+    ? profile.genre 
+    : profile.genre 
+      ? profile.genre.split(',').map(g => g.trim()).filter(Boolean)
+      : [];
 
   return (
     <>
@@ -266,14 +271,26 @@ export default function PublicArtistProfile() {
                 <section className="glass-card border-glass p-8 rounded-xl">
                   <h2 className="text-3xl font-bold mb-6">Photo Gallery</h2>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {profile.gallery_photos.map((photo, index) => (
-                      <PublicImage
-                        key={index}
-                        storagePath={photo}
-                        alt={`${profile.artist_name} gallery ${index + 1}`}
-                        className="w-full h-40 object-cover rounded-lg border border-white/20 hover:scale-105 transition-transform cursor-pointer shadow-lg"
-                      />
-                    ))}
+                    {profile.gallery_photos.map((photo, index) => {
+                      // Handle both string and object formats
+                      const imagePath = typeof photo === 'string' ? photo : photo?.url || '';
+                      const caption = typeof photo === 'object' && photo?.caption ? photo.caption : '';
+                      
+                      return (
+                        <div key={index} className="relative group">
+                          <PublicImage
+                            storagePath={imagePath}
+                            alt={caption || `${profile.artist_name} gallery ${index + 1}`}
+                            className="w-full h-40 object-cover rounded-lg border border-white/20 hover:scale-105 transition-transform cursor-pointer shadow-lg"
+                          />
+                          {caption && (
+                            <div className="absolute bottom-0 left-0 right-0 bg-black/80 text-white text-sm p-2 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                              {caption}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </section>
               )}
@@ -385,10 +402,11 @@ export default function PublicArtistProfile() {
                     <Button asChild className="w-full" variant="outline">
                       <a href={`tel:${(profile.contact_info as any).phone}`}>
                         <Phone className="w-4 h-4 mr-2" />
-                        Call: {(profile.contact_info as any).phone}
+                        {(profile.contact_info as any).phone}
                       </a>
                     </Button>
                   )}
+                  
                 </div>
                 
                 <p className="text-sm text-muted-foreground mt-4 p-3 bg-white/5 rounded-lg border-l-4 border-accent">
