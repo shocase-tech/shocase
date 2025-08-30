@@ -221,17 +221,29 @@ export default function PublicArtistProfile() {
   return (
     <>
       <Helmet>
-        <title>{profile.artist_name} - Electronic Press Kit | SHOCASE</title>
-        <meta name="description" content={profile.bio ? profile.bio.substring(0, 160) : `${profile.artist_name} - Professional artist press kit featuring music, videos, gallery, and booking information.`} />
-        <meta property="og:title" content={`${profile.artist_name} - Electronic Press Kit`} />
-        <meta property="og:description" content={profile.bio ? profile.bio.substring(0, 160) : `${profile.artist_name} press kit`} />
-        <meta property="og:image" content={profile.hero_photo_url || profile.profile_photo_url || ''} />
+        <title>{profile?.artist_name || 'Artist'} - Electronic Press Kit | SHOCASE</title>
+        <meta name="description" content={
+          profile?.bio && typeof profile.bio === 'string' 
+            ? profile.bio.substring(0, 160) 
+            : `${profile?.artist_name || 'Artist'} - Professional artist press kit featuring music, videos, gallery, and booking information.`
+        } />
+        <meta property="og:title" content={`${profile?.artist_name || 'Artist'} - Electronic Press Kit`} />
+        <meta property="og:description" content={
+          profile?.bio && typeof profile.bio === 'string' 
+            ? profile.bio.substring(0, 160) 
+            : `${profile?.artist_name || 'Artist'} press kit`
+        } />
+        <meta property="og:image" content={profile?.hero_photo_url || profile?.profile_photo_url || '/favicon.png'} />
         <meta property="og:type" content="profile" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={`${profile.artist_name} - Electronic Press Kit`} />
-        <meta name="twitter:description" content={profile.bio ? profile.bio.substring(0, 160) : `${profile.artist_name} press kit`} />
-        <meta name="twitter:image" content={profile.hero_photo_url || profile.profile_photo_url || ''} />
-        <link rel="canonical" href={`${window.location.origin}/artist/${profile.url_slug || profile.id}`} />
+        <meta name="twitter:title" content={`${profile?.artist_name || 'Artist'} - Electronic Press Kit`} />
+        <meta name="twitter:description" content={
+          profile?.bio && typeof profile.bio === 'string' 
+            ? profile.bio.substring(0, 160) 
+            : `${profile?.artist_name || 'Artist'} press kit`
+        } />
+        <meta name="twitter:image" content={profile?.hero_photo_url || profile?.profile_photo_url || '/favicon.png'} />
+        <link rel="canonical" href={`${window.location.origin}/artist/${profile?.url_slug || profile?.id || 'unknown'}`} />
       </Helmet>
 
       <div className="min-h-screen bg-gradient-dark">
