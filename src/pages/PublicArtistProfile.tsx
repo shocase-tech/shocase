@@ -63,33 +63,60 @@ export default function PublicArtistProfile() {
       console.log("Fetching profile for identifier:", identifier);
 
       try {
-        console.log("Making RPC call with identifier:", identifier);
+        console.log("=== EPK Debug Info ===");
+        console.log("Identifier received:", identifier);
+        console.log("Identifier type:", typeof identifier);
         
-        // Query published profiles directly
-        const { data, error } = await supabase
+        // First try by url_slug
+        console.log("Trying to find by url_slug...");
+        let { data, error } = await supabase
           .from('artist_profiles')
           .select('*')
           .eq('is_published', true)
-          .or(`url_slug.eq.${identifier},id.eq.${identifier}`)
-          .single();
+          .eq('url_slug', identifier)
+          .maybeSingle();
 
-        console.log("Direct query response:", { data, error, identifier });
+        console.log("URL slug query result:", { data, error });
+
+        // If not found by slug, try by ID
+        if (!data && !error) {
+          console.log("Not found by slug, trying by ID...");
+          const result = await supabase
+            .from('artist_profiles')
+            .select('*')
+            .eq('is_published', true)
+            .eq('id', identifier)
+            .maybeSingle();
+          
+          data = result.data;
+          error = result.error;
+          console.log("ID query result:", { data, error });
+        }
 
         if (error) {
-          console.error("Query error:", error);
-          if (error.code === 'PGRST116') {
-            // No rows found
-            console.log("No published profile found");
-          } else {
-            setError("Failed to load artist profile");
-            return;
-          }
-        } else {
-          console.log("Published profile loaded:", { artistName: data.artist_name });
-          setProfile(data as PublicArtistProfile);
-          setError(null);
+          console.error("Database query error:", error);
+          setError("Failed to load artist profile");
           return;
         }
+
+        if (!data) {
+          console.log("No published profile found for identifier:", identifier);
+          setError("Profile not available");
+          return;
+        }
+
+        console.log("Profile found! Data structure:", {
+          id: data.id,
+          artist_name: data.artist_name,
+          url_slug: data.url_slug,
+          is_published: data.is_published,
+          genre: data.genre,
+          bio: data.bio,
+          dataKeys: Object.keys(data)
+        });
+
+        setProfile(data as PublicArtistProfile);
+        setError(null);
 
         // If no published profile found and user is authenticated, try to get their own unpublished profile
         if (user) {
