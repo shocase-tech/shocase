@@ -4,15 +4,17 @@ import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { Save, X, GripVertical, Upload, AlertTriangle } from "lucide-react";
+import { Save, X, GripVertical, Upload, AlertTriangle, Edit } from "lucide-react";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { ImageStorageService } from "@/lib/imageStorage";
+import PrivateImage from "@/components/PrivateImage";
 
 interface GalleryEditorProps {
   profile: any;
@@ -25,9 +27,13 @@ interface SortablePhotoProps {
   photo: { url: string; label?: string };
   index: number;
   onDelete: (index: number) => void;
+  onUpdateCaption: (index: number, caption: string) => void;
 }
 
-function SortablePhoto({ photo, index, onDelete }: SortablePhotoProps) {
+function SortablePhoto({ photo, index, onDelete, onUpdateCaption }: SortablePhotoProps) {
+  const [isEditingCaption, setIsEditingCaption] = useState(false);
+  const [captionValue, setCaptionValue] = useState(photo.label || "");
+
   const {
     attributes,
     listeners,
@@ -43,18 +49,30 @@ function SortablePhoto({ photo, index, onDelete }: SortablePhotoProps) {
     opacity: isDragging ? 0.5 : 1,
   };
 
+  const handleSaveCaption = () => {
+    onUpdateCaption(index, captionValue);
+    setIsEditingCaption(false);
+  };
+
+  const handleCancelCaption = () => {
+    setCaptionValue(photo.label || "");
+    setIsEditingCaption(false);
+  };
+
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className="relative group bg-white/5 rounded-lg overflow-hidden"
+      className="relative group bg-white/5 rounded-lg overflow-hidden border border-white/10"
     >
-      <img
-        src={typeof photo === 'string' ? photo : photo.url}
-        alt={typeof photo === 'string' ? `Gallery ${index + 1}` : photo.label || `Gallery ${index + 1}`}
+      {/* Image */}
+      <PrivateImage
+        storagePath={photo.url}
+        alt={photo.label || `Gallery ${index + 1}`}
         className="w-full h-32 object-cover"
       />
       
+      {/* Hover Controls */}
       <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
         <Button
           variant="outline"
@@ -69,6 +87,15 @@ function SortablePhoto({ photo, index, onDelete }: SortablePhotoProps) {
         <Button
           variant="outline"
           size="sm"
+          onClick={() => setIsEditingCaption(true)}
+          className="bg-blue-500/20 border-blue-400/30 text-blue-200 hover:bg-blue-500/30"
+        >
+          <Edit className="w-4 h-4" />
+        </Button>
+        
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => onDelete(index)}
           className="bg-red-500/20 border-red-400/30 text-red-200 hover:bg-red-500/30"
         >
@@ -76,10 +103,42 @@ function SortablePhoto({ photo, index, onDelete }: SortablePhotoProps) {
         </Button>
       </div>
       
+      {/* Photo Index Badge */}
       <div className="absolute top-2 left-2">
         <Badge variant="secondary" className="text-xs">
           {index + 1}
         </Badge>
+      </div>
+
+      {/* Caption Section */}
+      <div className="p-2 bg-white/5 border-t border-white/10">
+        {isEditingCaption ? (
+          <div className="space-y-2">
+            <Input
+              value={captionValue}
+              onChange={(e) => setCaptionValue(e.target.value)}
+              placeholder="Add a caption..."
+              className="text-xs h-8"
+              maxLength={100}
+            />
+            <div className="flex gap-1">
+              <Button size="sm" onClick={handleSaveCaption} className="text-xs h-6 px-2">
+                Save
+              </Button>
+              <Button size="sm" variant="outline" onClick={handleCancelCaption} className="text-xs h-6 px-2">
+                Cancel
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <p 
+            className="text-xs text-muted-foreground truncate cursor-pointer hover:text-foreground transition-colors"
+            onClick={() => setIsEditingCaption(true)}
+            title={photo.label || "Click to add caption"}
+          >
+            {photo.label || "Click to add caption"}
+          </p>
+        )}
       </div>
     </div>
   );
@@ -208,6 +267,12 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
     setPhotos(photos.filter((_, i) => i !== index));
   };
 
+  const handleUpdateCaption = (index: number, caption: string) => {
+    const updatedPhotos = [...photos];
+    updatedPhotos[index] = { ...updatedPhotos[index], label: caption };
+    setPhotos(updatedPhotos);
+  };
+
   const handleSave = async () => {
     if (!user) return;
 
@@ -325,6 +390,7 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
                     photo={photo}
                     index={index}
                     onDelete={handleDeletePhoto}
+                    onUpdateCaption={handleUpdateCaption}
                   />
                 ))}
               </div>
