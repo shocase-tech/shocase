@@ -111,34 +111,54 @@ function SortablePhoto({ photo, index, onDelete, onUpdateCaption }: SortablePhot
       </div>
 
       {/* Caption Section */}
-      <div className="p-2 bg-white/5 border-t border-white/10">
+      <div className="p-3 bg-white/5 border-t border-white/10">
         {isEditingCaption ? (
-          <div className="space-y-2">
+          <div className="space-y-3">
             <Input
               value={captionValue}
               onChange={(e) => setCaptionValue(e.target.value)}
               placeholder="Add a caption..."
-              className="text-xs h-8 bg-background border-input focus:ring-2 focus:ring-ring focus:border-transparent"
+              className="text-sm h-9 bg-background border-input focus:ring-2 focus:ring-ring focus:border-transparent"
               maxLength={100}
               autoFocus
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSaveCaption();
+                } else if (e.key === 'Escape') {
+                  handleCancelCaption();
+                }
+              }}
             />
-            <div className="flex gap-1">
-              <Button size="sm" onClick={handleSaveCaption} className="text-xs h-6 px-2">
-                Save
-              </Button>
-              <Button size="sm" variant="outline" onClick={handleCancelCaption} className="text-xs h-6 px-2">
+            <div className="flex gap-2 justify-end">
+              <Button 
+                size="sm" 
+                variant="outline" 
+                onClick={handleCancelCaption} 
+                className="h-8 px-3 text-sm"
+              >
                 Cancel
+              </Button>
+              <Button 
+                size="sm" 
+                onClick={handleSaveCaption} 
+                className="h-8 px-3 text-sm"
+              >
+                Save
               </Button>
             </div>
           </div>
         ) : (
-          <p 
-            className="text-xs text-muted-foreground truncate cursor-pointer hover:text-foreground transition-colors"
+          <div 
+            className="min-h-[2rem] flex items-center cursor-pointer hover:bg-white/5 rounded p-1 transition-colors"
             onClick={() => setIsEditingCaption(true)}
-            title={photo.label || "Click to add caption"}
           >
-            {photo.label || "Click to add caption"}
-          </p>
+            <p 
+              className="text-sm text-muted-foreground truncate"
+              title={photo.label || "Click to add caption"}
+            >
+              {photo.label || "Click to add caption"}
+            </p>
+          </div>
         )}
       </div>
     </div>
