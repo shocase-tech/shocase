@@ -117,16 +117,32 @@ export default function PublicArtistProfile() {
 
         setProfile(data as PublicArtistProfile);
         setError(null);
+        return; // EXIT HERE - Profile found successfully!
 
         // If no published profile found and user is authenticated, try to get their own unpublished profile
         if (user) {
           console.log("No published profile found, checking if this is owner's unpublished profile");
-          const { data: userProfile, error: userError } = await supabase
+          
+          // First try by url_slug
+          let { data: userProfile, error: userError } = await supabase
             .from('artist_profiles')
             .select('*')
             .eq('user_id', user.id)
-            .or(`id.eq.${identifier},url_slug.eq.${identifier}`)
-            .single();
+            .eq('url_slug', identifier)
+            .maybeSingle();
+
+          // If not found by slug, try by ID
+          if (!userProfile && !userError) {
+            const result = await supabase
+              .from('artist_profiles')
+              .select('*')
+              .eq('user_id', user.id)
+              .eq('id', identifier)
+              .maybeSingle();
+            
+            userProfile = result.data;
+            userError = result.error;
+          }
 
           if (!userError && userProfile) {
             console.log("Owner viewing unpublished profile:", userProfile.artist_name);
