@@ -11,6 +11,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { X, Save, Lightbulb, Upload, Camera } from "lucide-react";
+import GenreInput from "@/components/GenreInput";
+import StreamingLinksInput from "@/components/StreamingLinksInput";
 import PhotoUpload from "@/components/PhotoUpload";
 import PrivateImage from "@/components/PrivateImage";
 import { ImageStorageService } from "@/lib/imageStorage";
@@ -266,21 +268,16 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
           />
         </div>
 
-        <div>
+        <div className="md:col-span-2">
           <Label htmlFor="genre">Genres</Label>
-          <Input
-            id="genre"
-            value={Array.isArray(formData.genre) ? formData.genre.join(', ') : formData.genre || ''}
-            onChange={(e) => setFormData({ 
-              ...formData, 
-              genre: e.target.value.split(',').map(g => g.trim()).filter(g => g.length > 0)
-            })}
-            placeholder="Rock, Pop, Indie"
+          <GenreInput
+            genres={Array.isArray(formData.genre) ? formData.genre : []}
+            onChange={(genres) => setFormData({ ...formData, genre: genres })}
           />
         </div>
       </div>
 
-      <div>
+      <div className="space-y-3">
         <Label>Profile Photo</Label>
         {formData.profile_photo_url ? (
           <div className="relative inline-block">
@@ -331,48 +328,12 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
         )}
       </div>
 
-      <div>
-        <h4 className="text-md font-medium">Streaming Links</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="spotify_streaming">Spotify</Label>
-            <Input
-              id="spotify_streaming"
-              value={formData.streaming_links?.spotify || ''}
-              onChange={(e) => setFormData({
-                ...formData,
-                streaming_links: { ...formData.streaming_links, spotify: e.target.value }
-              })}
-              placeholder="https://open.spotify.com/..."
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="apple_music">Apple Music</Label>
-            <Input
-              id="apple_music"
-              value={formData.streaming_links?.apple_music || ''}
-              onChange={(e) => setFormData({
-                ...formData,
-                streaming_links: { ...formData.streaming_links, apple_music: e.target.value }
-              })}
-              placeholder="https://music.apple.com/..."
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="bandcamp">Bandcamp</Label>
-            <Input
-              id="bandcamp"
-              value={formData.streaming_links?.bandcamp || ''}
-              onChange={(e) => setFormData({
-                ...formData,
-                streaming_links: { ...formData.streaming_links, bandcamp: e.target.value }
-              })}
-              placeholder="https://yourband.bandcamp.com"
-            />
-          </div>
-        </div>
+      <div className="space-y-4">
+        <h4 className="text-md font-medium mb-4">Streaming Links</h4>
+        <StreamingLinksInput
+          streamingLinks={formData.streaming_links || {}}
+          onChange={(links) => setFormData({ ...formData, streaming_links: links })}
+        />
       </div>
     </div>
   );

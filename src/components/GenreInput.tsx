@@ -9,11 +9,11 @@ interface GenreInputProps {
   placeholder?: string;
 }
 
-export default function GenreInput({ genres, onChange, placeholder = "Add genres..." }: GenreInputProps) {
+export default function GenreInput({ genres, onChange, placeholder = "Type genre and press Enter to add" }: GenreInputProps) {
   const [inputValue, setInputValue] = useState("");
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" || e.key === ",") {
+    if (e.key === "Enter") {
       e.preventDefault();
       addGenre();
     } else if (e.key === "Backspace" && inputValue === "" && genres.length > 0) {
@@ -23,7 +23,7 @@ export default function GenreInput({ genres, onChange, placeholder = "Add genres
 
   const addGenre = () => {
     const newGenre = inputValue.trim();
-    if (newGenre && !genres.includes(newGenre)) {
+    if (newGenre && !genres.includes(newGenre) && genres.length < 10) {
       onChange([...genres, newGenre]);
       setInputValue("");
     }
@@ -35,31 +35,33 @@ export default function GenreInput({ genres, onChange, placeholder = "Add genres
   };
 
   return (
-    <div className="space-y-2">
-      <div className="flex flex-wrap gap-2 mb-2">
-        {genres.map((genre, index) => (
-          <Badge key={index} variant="secondary" className="gap-1">
-            {genre}
-            <button
-              type="button"
-              onClick={() => removeGenre(index)}
-              className="ml-1 hover:bg-destructive/20 rounded-sm"
-            >
-              <X className="w-3 h-3" />
-            </button>
-          </Badge>
-        ))}
-      </div>
+    <div className="space-y-3">
+      {genres.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {genres.map((genre, index) => (
+            <Badge key={index} variant="secondary" className="gap-1 px-3 py-1">
+              {genre}
+              <button
+                type="button"
+                onClick={() => removeGenre(index)}
+                className="ml-1 hover:bg-destructive/20 rounded-sm p-0.5"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </Badge>
+          ))}
+        </div>
+      )}
       <Input
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
         onKeyDown={handleKeyDown}
-        onBlur={addGenre}
-        placeholder={placeholder}
+        placeholder={genres.length >= 10 ? "Maximum 10 genres reached" : placeholder}
+        disabled={genres.length >= 10}
         className="w-full"
       />
       <p className="text-xs text-muted-foreground">
-        Type and press Enter or comma to add genres
+        Press Enter to add genre • {genres.length}/10 genres
       </p>
     </div>
   );
