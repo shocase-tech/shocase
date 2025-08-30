@@ -118,7 +118,7 @@ function SortablePhoto({ photo, index, onDelete, onUpdateCaption }: SortablePhot
               value={captionValue}
               onChange={(e) => setCaptionValue(e.target.value)}
               placeholder="Add a caption..."
-              className="text-xs h-8 bg-background/80 border-border"
+              className="text-xs h-8 bg-background border-input focus:ring-2 focus:ring-ring focus:border-transparent"
               maxLength={100}
               autoFocus
             />
@@ -167,7 +167,20 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
 
   useEffect(() => {
     if (profile?.gallery_photos) {
-      setPhotos(profile.gallery_photos);
+      // Convert from array of strings to array of objects for compatibility
+      const photoObjects = profile.gallery_photos.map((url: string | any) => {
+        // Check if it's already an object or a string
+        if (typeof url === 'object' && url?.url) {
+          return url;
+        }
+        // Handle string URLs
+        if (typeof url === 'string') {
+          return { url, label: "" };
+        }
+        // Fallback for null/undefined
+        return { url: "", label: "" };
+      }).filter(photo => photo.url); // Remove any empty URLs
+      setPhotos(photoObjects);
     }
   }, [profile]);
 
@@ -280,9 +293,12 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
     try {
       setLoading(true);
 
+      // Convert back to the format expected by the database (array of strings for now)
+      const galleryUrls = photos.map(photo => photo.url);
+
       const { error } = await supabase
         .from('artist_profiles')
-        .update({ gallery_photos: photos })
+        .update({ gallery_photos: galleryUrls })
         .eq('user_id', user.id);
 
       if (error) throw error;
