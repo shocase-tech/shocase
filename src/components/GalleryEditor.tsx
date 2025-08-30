@@ -298,7 +298,7 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
 
       const { error } = await supabase
         .from('artist_profiles')
-        .update({ gallery_photos: galleryUrls })
+        .update({ gallery_photos: galleryUrls as string[] })
         .eq('user_id', user.id);
 
       if (error) throw error;
