@@ -12,6 +12,18 @@ export function useClickOutside<T extends HTMLElement>(
 
     function handleClickOutside(event: MouseEvent) {
       console.log("🔍 useClickOutside: Click detected, checking if outside element");
+      
+      // Ignore drag events to prevent closing editor during drag operations
+      const target = event.target as Element;
+      if (target?.closest('[data-dragging="true"]') || 
+          target?.closest('.sortable-item') ||
+          event.type === 'dragstart' || 
+          event.type === 'dragend' ||
+          target?.hasAttribute('data-sortable-handle')) {
+        console.log("🔍 useClickOutside: Ignoring drag-related event");
+        return;
+      }
+      
       if (ref.current && !ref.current.contains(event.target as Node)) {
         console.log("🔍 useClickOutside: Click is outside element, calling callback");
         callback();

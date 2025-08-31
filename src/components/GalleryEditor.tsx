@@ -64,7 +64,8 @@ function SortablePhoto({ photo, index, onDelete, onUpdateCaption }: SortablePhot
     <div
       ref={setNodeRef}
       style={style}
-      className="relative group bg-white/5 rounded-lg overflow-hidden border border-white/10"
+      className="relative group bg-white/5 rounded-lg overflow-hidden border border-white/10 sortable-item"
+      data-dragging={isDragging}
     >
       {/* Image */}
       <PrivateImage
@@ -79,6 +80,7 @@ function SortablePhoto({ photo, index, onDelete, onUpdateCaption }: SortablePhot
           variant="outline"
           size="sm"
           className="bg-white/20 border-white/30 text-white hover:bg-white/30"
+          data-sortable-handle="true"
           {...attributes}
           {...listeners}
         >
@@ -177,40 +179,59 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
 
   useEffect(() => {
     if (profile?.gallery_photos) {
-      console.log("GalleryEditor: Raw gallery_photos from profile:", profile.gallery_photos);
+      console.log("🖼️ GalleryEditor: Raw gallery_photos from profile:", profile.gallery_photos);
       
       // Normalize gallery photos - extract actual storage paths from nested objects
       const photoObjects = profile.gallery_photos.map((item: any, index: number) => {
-        console.log(`Processing gallery item ${index}:`, item);
+        console.log(`🖼️ Processing gallery item ${index}:`, item);
         
-        // Handle deeply nested objects (the bug case)
-        if (typeof item === 'object' && item?.url) {
-          let url = item.url;
-          // If url is still an object, keep extracting
-          while (typeof url === 'object' && url?.url) {
-            url = url.url;
+        // Handle deeply nested objects (the bug case)  
+        if (typeof item === 'object' && item !== null) {
+          let storagePath = '';
+          
+          // Try to extract storage path from nested JSON structure
+          let current = item;
+          while (current && typeof current === 'object') {
+            if (typeof current.url === 'string') {
+              storagePath = current.url;
+              break;
+            } else if (current.url && typeof current.url === 'object') {
+              current = current.url;
+            } else {
+              break;
+            }
           }
-          console.log(`Extracted URL from nested object:`, url);
-          return { url: url || "", label: item.label || "" };
+          
+          // Fallback - search for storage path pattern in JSON string
+          if (!storagePath) {
+            const jsonStr = JSON.stringify(item);
+            const pathMatch = jsonStr.match(/[a-f0-9-]{36}\/gallery\/\d+\.(jpg|jpeg|png|JPG|JPEG|PNG|webp|WEBP)/);
+            if (pathMatch) {
+              storagePath = pathMatch[0];
+            }
+          }
+          
+          console.log(`🖼️ Extracted storage path:`, storagePath);
+          return storagePath ? { url: storagePath, label: item.label || '' } : null;
         }
         
-        // Handle string URLs (legacy format)
-        if (typeof item === 'string') {
-          console.log(`Using string URL:`, item);
+        // Handle string URLs (correct format)
+        if (typeof item === 'string' && item) {
+          console.log(`🖼️ Using string URL:`, item);
           return { url: item, label: "" };
         }
         
         // Fallback for invalid data
-        console.warn(`Invalid gallery item, skipping:`, item);
+        console.warn(`🖼️ Invalid gallery item, skipping:`, item);
         return null;
       }).filter(photo => photo && photo.url); // Remove invalid entries
       
-      console.log("GalleryEditor: Normalized photo objects:", photoObjects);
+      console.log("🖼️ GalleryEditor: Normalized photo objects:", photoObjects);
       setPhotos(photoObjects);
     }
   }, [profile]);
 
-  const handleDragEnd = (event: any) => {
+  const handleDragEnd = async (event: any) => {
     const { active, over } = event;
 
     if (active.id !== over.id) {
@@ -219,11 +240,53 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
         const overIndex = items.findIndex((_, index) => `photo-${index}` === over.id);
 
         const newOrder = arrayMove(items, activeIndex, overIndex);
-        console.log("Drag ended, new order:", newOrder);
+        console.log("🔄 Gallery: Drag ended, new order:", newOrder);
         
-        // Auto-save the new order immediately to database
-        setTimeout(() => {
-          handleSave();
+        // Save reordered photos immediately to database
+        setTimeout(async () => {
+          try {
+            // Convert to simple string array of storage paths
+            const galleryArray = newOrder.map(photo => photo.url).filter(url => url);
+            
+            console.log("💾 Gallery: Saving reordered array to database:", galleryArray);
+            
+            const { error } = await supabase
+              .from('artist_profiles')
+              .update({ 
+                gallery_photos: galleryArray,
+                updated_at: new Date().toISOString()
+              })
+              .eq('user_id', user?.id);
+
+            if (error) {
+              console.error("❌ Gallery: Error saving reordered photos:", error);
+              toast({
+                title: "Error saving photo order",
+                description: "Please try again.",
+                variant: "destructive",
+              });
+              return;
+            }
+            
+            console.log("✅ Gallery: Reordered photos saved successfully");
+            
+            // Update parent component state
+            const updatedProfile = {
+              ...profile,
+              gallery_photos: galleryArray
+            };
+            
+            console.log("📤 Gallery: Calling onSave with updated profile after reorder");
+            onSave(updatedProfile);
+            
+          } catch (error) {
+            console.error("❌ Gallery: Failed to save reordered photos:", error);
+            toast({
+              title: "Error saving photo order",
+              description: "Please try again.",
+              variant: "destructive",
+            });
+          }
         }, 100);
         
         return newOrder;
@@ -327,19 +390,19 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
     try {
       setLoading(true);
       
-      console.log("GalleryEditor saving photos:", photos);
+      console.log("💾 GalleryEditor: Saving photos:", photos);
 
-      // Store as objects with both url and label to preserve order and captions
-      const photoData = photos.map(photo => ({
-        url: photo.url,
-        label: photo.label || ""
-      }));
+      // Save as simple string array of storage paths to avoid nesting issues
+      const galleryArray = photos.map(photo => photo.url).filter(url => url);
 
-      console.log("GalleryEditor saving photo data:", photoData);
+      console.log("💾 GalleryEditor: Saving gallery array (strings only):", galleryArray);
 
       const { error } = await supabase
         .from('artist_profiles')
-        .update({ gallery_photos: photoData as any })
+        .update({ 
+          gallery_photos: galleryArray,
+          updated_at: new Date().toISOString()
+        })
         .eq('user_id', user.id);
 
       if (error) throw error;
@@ -350,9 +413,15 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
       });
 
       // Update parent component with new data
-      onSave({ gallery_photos: photoData });
+      const updatedProfile = {
+        ...profile,
+        gallery_photos: galleryArray
+      };
+      
+      console.log("📤 GalleryEditor: Calling onSave with updated profile:", updatedProfile);
+      onSave(updatedProfile);
     } catch (error: any) {
-      console.error("Gallery save error:", error);
+      console.error("❌ GalleryEditor: Save error:", error);
       toast({
         title: "Error",
         description: error.message,

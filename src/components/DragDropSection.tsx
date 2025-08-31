@@ -35,7 +35,8 @@ export default function DragDropSection({
     <div
       ref={setNodeRef}
       style={style}
-      className={`group relative ${isDragging ? 'z-50' : ''}`}
+      className={`group relative ${isDragging ? 'z-50' : ''} sortable-item`}
+      data-dragging={isDragging}
     >
       {/* Drag handle and delete button */}
       {(isDraggable || onDelete) && (
