@@ -13,10 +13,29 @@ serve(async (req) => {
   }
 
   try {
-    const { artist_name, genre, influences, location, vibe, existing_bio, is_remix, notable_performances, musical_background } = await req.json();
+    const requestBody = await req.json();
+    console.log('Received request body:', JSON.stringify(requestBody, null, 2));
+    
+    const { 
+      artist_name, 
+      genre, 
+      influences, 
+      location, 
+      vibe, 
+      existing_bio, 
+      is_remix, 
+      notable_performances, 
+      musical_background 
+    } = requestBody;
+    
+    // Validate required fields
+    if (!artist_name?.trim()) {
+      throw new Error('Artist name is required');
+    }
     
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
     if (!openAIApiKey) {
+      console.error('OpenAI API key not found in environment');
       throw new Error('OpenAI API key not configured');
     }
 
@@ -60,6 +79,7 @@ Do not include placeholders or make up specific achievements, releases, or dates
     }
 
     console.log('Generating bio for:', artist_name);
+    console.log('Using prompt:', prompt);
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -81,28 +101,53 @@ Do not include placeholders or make up specific achievements, releases, or dates
       }),
     });
 
+    console.log('OpenAI response status:', response.status);
+
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('OpenAI API error:', errorText);
-      throw new Error(`OpenAI API error: ${response.status}`);
+      console.error('OpenAI API error details:', errorText);
+      
+      // Handle specific error types
+      if (response.status === 429) {
+        throw new Error('OpenAI API rate limit exceeded. Please try again in a moment or check your API quota.');
+      } else if (response.status === 401) {
+        throw new Error('OpenAI API authentication failed. Please check your API key.');
+      } else if (response.status === 403) {
+        throw new Error('OpenAI API access forbidden. Please check your API key permissions.');
+      } else {
+        throw new Error(`OpenAI API error (${response.status}): ${errorText}`);
+      }
     }
 
     const data = await response.json();
-    const generatedBio = data.choices[0]?.message?.content;
+    console.log('OpenAI response data:', JSON.stringify(data, null, 2));
+    
+    const generatedBio = data.choices?.[0]?.message?.content?.trim();
 
     if (!generatedBio) {
-      throw new Error('No bio generated');
+      console.error('No bio content in response:', data);
+      throw new Error('Failed to generate bio content. Please try again.');
     }
 
-    console.log('Bio generated successfully');
+    console.log('Bio generated successfully, length:', generatedBio.length);
 
     return new Response(JSON.stringify({ bio: generatedBio }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
     console.error('Error in generate-bio function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
+    
+    // Return more specific error messages
+    const errorMessage = error.message || 'An unexpected error occurred while generating the bio';
+    const statusCode = error.message?.includes('rate limit') ? 429 : 
+                      error.message?.includes('authentication') ? 401 :
+                      error.message?.includes('quota') ? 402 : 500;
+    
+    return new Response(JSON.stringify({ 
+      error: errorMessage,
+      details: error.stack || 'No additional details available'
+    }), {
+      status: statusCode,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }

@@ -229,21 +229,35 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
     try {
       setGeneratingBio(true);
 
+      const requestBody = {
+        artist_name: formData.artist_name,
+        genre: bioConfig.genres || formData.genre,
+        influences: bioConfig.influences,
+        location: bioConfig.location,
+        vibe: bioConfig.style,
+        notable_performances: bioConfig.notable_performances,
+        musical_background: bioConfig.musical_background,
+        existing_bio: isRemix ? formData.bio : null,
+        is_remix: isRemix
+      };
+
+      console.log('Sending bio generation request:', requestBody);
+
       const { data, error } = await supabase.functions.invoke('generate-bio', {
-        body: {
-          artist_name: formData.artist_name,
-          genre: bioConfig.genres || formData.genre,
-          influences: bioConfig.influences,
-          location: bioConfig.location,
-          vibe: bioConfig.style,
-          notable_performances: bioConfig.notable_performances,
-          musical_background: bioConfig.musical_background,
-          existing_bio: isRemix ? formData.bio : null,
-          is_remix: isRemix
-        }
+        body: requestBody
       });
 
-      if (error) throw error;
+      console.log('Bio generation response:', { data, error });
+
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw error;
+      }
+
+      if (data?.error) {
+        console.error('Edge function returned error:', data.error);
+        throw new Error(data.error);
+      }
 
       if (data?.bio) {
         setGeneratedBioPreview(data.bio);
@@ -251,11 +265,14 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
           title: "Bio generated!",
           description: `Your ${isRemix ? 'remixed' : 'new'} bio has been created. Review it below.`,
         });
+      } else {
+        throw new Error('No bio content received from the API');
       }
     } catch (error: any) {
+      console.error('Bio generation failed:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to generate bio",
+        description: error.message || "Failed to generate bio. Please check your OpenAI API quota and try again.",
         variant: "destructive",
       });
     } finally {
