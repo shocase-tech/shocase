@@ -356,10 +356,16 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
                   </div>
                 )}
                 {profile.contact_info?.email && (
-                  <p className="text-sm text-muted-foreground mt-1">{profile.contact_info.email}</p>
+                  <div className="mt-1">
+                    <span className="text-xs text-muted-foreground/70">Email: </span>
+                    <span className="text-sm text-muted-foreground">{profile.contact_info.email}</span>
+                  </div>
                 )}
                 {profile.contact_info?.phone && (
-                  <p className="text-sm text-muted-foreground">{profile.contact_info.phone}</p>
+                  <div>
+                    <span className="text-xs text-muted-foreground/70">Phone: </span>
+                    <span className="text-sm text-muted-foreground">{profile.contact_info.phone}</span>
+                  </div>
                 )}
                 
                 {/* Streaming Links */}
@@ -372,10 +378,13 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
                           href={profile.streaming_links.spotify}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-1 px-2 py-1 text-xs rounded-md bg-green-600 hover:bg-green-700 text-white transition-colors"
+                          className="p-1 rounded-md hover:bg-white/10 transition-colors"
                         >
-                          <Music className="w-3 h-3" />
-                          Spotify
+                          <img 
+                            src="/src/assets/streaming/spotify-color.png" 
+                            alt="Spotify" 
+                            className="w-6 h-6"
+                          />
                         </a>
                       )}
                       {profile.streaming_links.apple_music && (
@@ -383,10 +392,13 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
                           href={profile.streaming_links.apple_music}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-1 px-2 py-1 text-xs rounded-md bg-gray-800 hover:bg-gray-900 text-white transition-colors"
+                          className="p-1 rounded-md hover:bg-white/10 transition-colors"
                         >
-                          <Music className="w-3 h-3" />
-                          Apple Music
+                          <img 
+                            src="/src/assets/streaming/apple-music-color.svg" 
+                            alt="Apple Music" 
+                            className="w-6 h-6"
+                          />
                         </a>
                       )}
                       {profile.streaming_links.bandcamp && (
@@ -394,10 +406,27 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
                           href={profile.streaming_links.bandcamp}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-1 px-2 py-1 text-xs rounded-md bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+                          className="p-1 rounded-md hover:bg-white/10 transition-colors"
                         >
-                          <Music className="w-3 h-3" />
-                          Bandcamp
+                          <img 
+                            src="/src/assets/streaming/bandcamp-color.png" 
+                            alt="Bandcamp" 
+                            className="w-6 h-6"
+                          />
+                        </a>
+                      )}
+                      {profile.streaming_links.soundcloud && (
+                        <a
+                          href={profile.streaming_links.soundcloud}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-1 rounded-md hover:bg-white/10 transition-colors"
+                        >
+                          <img 
+                            src="/src/assets/streaming/soundcloud-color.png" 
+                            alt="SoundCloud" 
+                            className="w-6 h-6"
+                          />
                         </a>
                       )}
                     </div>

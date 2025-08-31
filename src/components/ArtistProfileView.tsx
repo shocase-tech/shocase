@@ -73,7 +73,16 @@ export default function ArtistProfileView({ profile }: ArtistProfileViewProps) {
                 </div>
               )}
               {profile.contact_info?.email && (
-                <p className="text-sm text-muted-foreground mt-1">{profile.contact_info.email}</p>
+                <div className="mt-1">
+                  <span className="text-xs text-muted-foreground/70">Email: </span>
+                  <span className="text-sm text-muted-foreground">{profile.contact_info.email}</span>
+                </div>
+              )}
+              {profile.contact_info?.phone && (
+                <div>
+                  <span className="text-xs text-muted-foreground/70">Phone: </span>
+                  <span className="text-sm text-muted-foreground">{profile.contact_info.phone}</span>
+                </div>
               )}
             </div>
             {profile.profile_photo_url && (
@@ -337,11 +346,13 @@ export default function ArtistProfileView({ profile }: ArtistProfileViewProps) {
                               href={profile.streaming_links.spotify}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center gap-2 px-4 py-3 rounded-lg bg-green-600 hover:bg-green-700 text-white transition-colors"
+                              className="p-2 rounded-lg hover:bg-white/10 transition-colors"
                             >
-                              <Music className="w-5 h-5" />
-                              Spotify
-                              <ExternalLink className="w-4 h-4" />
+                              <img 
+                                src="/src/assets/streaming/spotify-color.png" 
+                                alt="Spotify" 
+                                className="w-8 h-8"
+                              />
                             </a>
                           )}
                           {profile.streaming_links.apple_music && (
@@ -349,11 +360,13 @@ export default function ArtistProfileView({ profile }: ArtistProfileViewProps) {
                               href={profile.streaming_links.apple_music}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center gap-2 px-4 py-3 rounded-lg bg-black hover:bg-gray-800 text-white transition-colors"
+                              className="p-2 rounded-lg hover:bg-white/10 transition-colors"
                             >
-                              <Music className="w-5 h-5" />
-                              Apple Music
-                              <ExternalLink className="w-4 h-4" />
+                              <img 
+                                src="/src/assets/streaming/apple-music-color.svg" 
+                                alt="Apple Music" 
+                                className="w-8 h-8"
+                              />
                             </a>
                           )}
                           {profile.streaming_links.bandcamp && (
@@ -361,11 +374,27 @@ export default function ArtistProfileView({ profile }: ArtistProfileViewProps) {
                               href={profile.streaming_links.bandcamp}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center gap-2 px-4 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+                              className="p-2 rounded-lg hover:bg-white/10 transition-colors"
                             >
-                              <Music className="w-5 h-5" />
-                              Bandcamp
-                              <ExternalLink className="w-4 h-4" />
+                              <img 
+                                src="/src/assets/streaming/bandcamp-color.png" 
+                                alt="Bandcamp" 
+                                className="w-8 h-8"
+                              />
+                            </a>
+                          )}
+                          {profile.streaming_links.soundcloud && (
+                            <a
+                              href={profile.streaming_links.soundcloud}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                            >
+                              <img 
+                                src="/src/assets/streaming/soundcloud-color.png" 
+                                alt="SoundCloud" 
+                                className="w-8 h-8"
+                              />
                             </a>
                           )}
                         </div>
