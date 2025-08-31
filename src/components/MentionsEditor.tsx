@@ -251,62 +251,26 @@ export default function MentionsEditor({ profile, user, onSave, onCancel }: Ment
                 {mentions.map((mention, index) => (
                   <div
                     key={index}
-                    className="flex items-start gap-3 p-3 rounded-lg bg-white/5 border border-white/10"
+                    className="relative flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
                   >
                     {mention.favicon && (
-                      <img
-                        src={mention.favicon}
-                        alt=""
-                        className="w-4 h-4 mt-1 flex-shrink-0"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = 'none';
-                        }}
-                      />
+                      <img src={mention.favicon} alt="" className="w-4 h-4" />
                     )}
-                    
-                    <div className="flex-1 min-w-0 overflow-hidden">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0 flex-1">
-                          <p className="font-medium text-sm truncate">
-                            {mention.title || mention.publication}
-                          </p>
-                          {mention.description && (
-                            <p className="text-xs text-muted-foreground mt-1 line-clamp-2 break-words">
-                              {mention.description}
-                            </p>
-                          )}
-                          <a
-                            href={mention.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs text-primary hover:underline flex items-center gap-1 mt-1 break-all"
-                          >
-                            <span className="truncate">{mention.publication}</span>
-                            <ExternalLink className="w-3 h-3 flex-shrink-0" />
-                          </a>
-                        </div>
-                        
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDeleteMention(index)}
-                          className="flex-shrink-0"
-                        >
-                          <X className="w-3 h-3" />
-                        </Button>
-                      </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-sm truncate">
+                        {mention.title || mention.publication}
+                      </p>
                     </div>
+                    <ExternalLink className="w-3 h-3 opacity-50" />
                     
-                    {mention.image && (
-                      <img
-                        src={mention.image}
-                        alt=""
-                        className="w-12 h-12 object-cover rounded flex-shrink-0"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = 'none';
-                        }}
-                      />
-                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDeleteMention(index)}
+                      className="absolute top-2 right-2 opacity-0 hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm"
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
                   </div>
                 ))}
               </div>
