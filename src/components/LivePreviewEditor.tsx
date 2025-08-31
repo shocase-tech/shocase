@@ -15,7 +15,7 @@ import { User } from "@supabase/supabase-js";
 
 interface LivePreviewEditorProps {
   profile: any;
-  onProfileUpdated: () => void;
+  onProfileUpdated: (updatedData?: any) => void;
   user: User | null;
 }
 
@@ -69,13 +69,19 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
     setEditingSection(editingSection === sectionId ? null : sectionId);
   };
 
-  const handleSectionSave = (callback?: () => void) => {
+  const handleSectionSave = (updatedData?: any, callback?: () => void) => {
     // Save current scroll position
     const currentScrollY = window.scrollY;
     
     // Update the profile data and trigger auto-save
-    onProfileUpdated();
+    onProfileUpdated(updatedData);
     setUnsavedChanges(true);
+    
+    // Close the editor when auto-saving from click-outside
+    // Only close if no specific callback is provided (meaning it's from auto-save)
+    if (!callback) {
+      setEditingSection(null);
+    }
     
     // Don't close editing section, maintain scroll position
     setTimeout(() => {
@@ -187,7 +193,7 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
             sectionId={sectionId}
             profile={profile}
             user={user}
-            onSave={() => handleSectionSave()}
+            onSave={(updatedData) => handleSectionSave(updatedData)}
             onCancel={() => setEditingSection(null)}
           />
         </div>
@@ -247,7 +253,7 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
                 sectionId="basic"
                 profile={null}
                 user={user}
-                onSave={() => handleSectionSave(() => setEditingSection(null))}
+                onSave={(updatedData) => handleSectionSave(updatedData, () => setEditingSection(null))}
                 onCancel={() => setEditingSection(null)}
               />
             </div>
@@ -419,7 +425,7 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
               <GalleryEditor
                 profile={profile}
                 user={user}
-                onSave={() => handleSectionSave()}
+                onSave={(updatedData) => handleSectionSave(updatedData)}
                 onCancel={() => setEditingSection(null)}
               />
             </div>
@@ -501,7 +507,7 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
                   <MentionsEditor
                     profile={profile}
                     user={user}
-                    onSave={() => handleSectionSave()}
+                    onSave={(updatedData) => handleSectionSave(updatedData)}
                     onCancel={() => setEditingSection(null)}
                   />
                 </div>
@@ -560,7 +566,7 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
                   <ShowsEditor
                     profile={profile}
                     user={user}
-                    onSave={() => handleSectionSave()}
+                    onSave={(updatedData) => handleSectionSave(updatedData)}
                     onCancel={() => setEditingSection(null)}
                   />
                 </div>
