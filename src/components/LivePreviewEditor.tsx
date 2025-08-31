@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket, Edit3, Plus, Quote } from "lucide-react";
+import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket, Edit3, Plus, Quote, Star } from "lucide-react";
 import PrivateImage from "@/components/PrivateImage";
 import InlineEditor from "@/components/InlineEditor";
 import PressQuotesEditor from "@/components/PressQuotesEditor";
@@ -93,9 +93,10 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
     if (callback) callback();
   };
 
-  // Function to render shows with automatic date-based sorting
+  // Function to render shows with smart display logic
   const renderShowsSection = () => {
-    const allShows = profile.upcoming_shows || [];
+    // Get all shows from both upcoming and past arrays
+    const allShows = [...(profile.upcoming_shows || []), ...(profile.past_shows || [])];
     
     if (allShows.length === 0) {
       return (
@@ -106,28 +107,76 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
       );
     }
 
-    const currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0); // Set to start of day for accurate comparison
+    // Separate highlighted shows
+    const highlightedShows = allShows.filter(show => show.is_highlighted);
+    const regularShows = allShows.filter(show => !show.is_highlighted);
     
-    // Separate and sort shows
-    const upcomingShows = allShows
-      .filter((show: any) => new Date(show.date) >= currentDate)
-      .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    // Separate regular shows by date
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     
-    const pastShows = allShows
-      .filter((show: any) => new Date(show.date) < currentDate)
-      .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const regularUpcoming = regularShows
+      .filter(show => new Date(show.date) >= today)
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .slice(0, 3);
+      
+    const regularPast = regularShows
+      .filter(show => new Date(show.date) < today)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 3);
+    
+    const totalShows = allShows.length;
+    const displayedShows = highlightedShows.length + regularUpcoming.length + regularPast.length;
+    const remainingShows = totalShows - displayedShows;
 
     return (
       <div>
         <h3 className="font-semibold mb-4">Shows</h3>
         <div className="space-y-6">
+          {/* Highlighted Shows */}
+          {highlightedShows.length > 0 && (
+            <div>
+              <h4 className="text-sm font-medium text-primary mb-3">Featured Shows</h4>
+              <div className="space-y-2">
+                {highlightedShows.map((show: any, index: number) => (
+                  <div key={`highlighted-${index}`} className="flex items-center justify-between p-3 bg-primary/10 rounded-md border border-primary/30 shadow-sm">
+                    <div className="flex items-center gap-3">
+                      <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                      <Calendar className="w-5 h-5 text-primary" />
+                      <div>
+                        <p className="font-medium flex items-center gap-2">
+                          {show.venue}
+                          <Badge variant="secondary" className="text-xs">Featured</Badge>
+                        </p>
+                        <p className="text-sm text-muted-foreground flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          {show.city} • {new Date(show.date).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                    {show.ticket_link && (
+                      <a
+                        href={show.ticket_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                      >
+                        <Ticket className="w-4 h-4" />
+                        Tickets
+                      </a>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Upcoming Shows */}
-          {upcomingShows.length > 0 && (
+          {regularUpcoming.length > 0 && (
             <div>
               <h4 className="text-sm font-medium text-primary mb-3">Upcoming Shows</h4>
               <div className="space-y-2">
-                {upcomingShows.map((show: any, index: number) => (
+                {regularUpcoming.map((show: any, index: number) => (
                   <div key={`upcoming-${index}`} className="flex items-center justify-between p-3 bg-white/5 rounded-md border border-primary/20">
                     <div className="flex items-center gap-3">
                       <Calendar className="w-5 h-5 text-primary" />
@@ -156,12 +205,12 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
             </div>
           )}
 
-          {/* Past Shows - Recent 3 */}
-          {pastShows.length > 0 && (
+          {/* Recent Past Shows */}
+          {regularPast.length > 0 && (
             <div>
               <h4 className="text-sm font-medium text-muted-foreground mb-3">Recent Shows</h4>
               <div className="space-y-2">
-                {pastShows.slice(0, 3).map((show: any, index: number) => (
+                {regularPast.map((show: any, index: number) => (
                   <div key={`past-${index}`} className="flex items-center justify-between p-3 bg-white/5 rounded-md opacity-75">
                     <div className="flex items-center gap-3">
                       <Calendar className="w-5 h-5 text-muted-foreground" />
@@ -176,11 +225,15 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
                   </div>
                 ))}
               </div>
-              {pastShows.length > 3 && (
-                <p className="text-xs text-muted-foreground mt-2 text-center">
-                  Showing 3 most recent shows of {pastShows.length} total
-                </p>
-              )}
+            </div>
+          )}
+
+          {/* Show count indicator */}
+          {remainingShows > 0 && (
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground bg-white/5 rounded-full px-3 py-1 inline-block">
+                + {remainingShows} more show{remainingShows > 1 ? 's' : ''}
+              </p>
             </div>
           )}
         </div>

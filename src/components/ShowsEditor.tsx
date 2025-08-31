@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { Save, X, Plus, Calendar as CalendarIcon, MapPin, Ticket, GripVertical, ArrowUpDown, Loader2 } from "lucide-react";
+import { Save, X, Plus, Calendar as CalendarIcon, MapPin, Ticket, GripVertical, ArrowUpDown, Loader2, Star } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
@@ -31,6 +31,7 @@ interface Show {
   city: string;
   date: string;
   ticket_link?: string;
+  is_highlighted?: boolean;
 }
 
 interface SortableShowProps {
@@ -38,9 +39,10 @@ interface SortableShowProps {
   index: number;
   onDelete: (index: number) => void;
   onEdit: (index: number, show: Show) => void;
+  onToggleHighlight: (index: number) => void;
 }
 
-function SortableShow({ show, index, onDelete, onEdit }: SortableShowProps) {
+function SortableShow({ show, index, onDelete, onEdit, onToggleHighlight }: SortableShowProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState(show);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
@@ -152,7 +154,12 @@ function SortableShow({ show, index, onDelete, onEdit }: SortableShowProps) {
     <div
       ref={setNodeRef}
       style={style}
-      className="group flex items-center justify-between p-3 bg-white/5 rounded-md border border-white/10"
+      className={cn(
+        "group flex items-center justify-between p-3 rounded-md border transition-all",
+        show.is_highlighted 
+          ? "bg-primary/10 border-primary/50 shadow-lg" 
+          : "bg-white/5 border-white/10"
+      )}
     >
       <div className="flex items-center gap-3">
         <Button
@@ -165,9 +172,17 @@ function SortableShow({ show, index, onDelete, onEdit }: SortableShowProps) {
           <GripVertical className="w-4 h-4" />
         </Button>
         
+        {show.is_highlighted && (
+          <Star className="w-4 h-4 text-yellow-500 fill-current" />
+        )}
         <CalendarIcon className="w-5 h-5 text-primary" />
         <div>
-          <p className="font-medium">{show.venue}</p>
+          <p className="font-medium flex items-center gap-2">
+            {show.venue}
+            {show.is_highlighted && (
+              <Badge variant="secondary" className="text-xs">Featured</Badge>
+            )}
+          </p>
           <p className="text-sm text-muted-foreground flex items-center gap-1">
             <MapPin className="w-3 h-3" />
             {show.city} • {format(new Date(show.date), 'MMM d, yyyy')}
@@ -190,6 +205,18 @@ function SortableShow({ show, index, onDelete, onEdit }: SortableShowProps) {
         )}
         
         <div className="opacity-0 group-hover:opacity-100 flex gap-1">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onToggleHighlight(index)}
+            className={cn(
+              show.is_highlighted 
+                ? "bg-yellow-500/20 text-yellow-600 border-yellow-500/50" 
+                : "hover:bg-yellow-500/10"
+            )}
+          >
+            <Star className={cn("w-3 h-3", show.is_highlighted && "fill-current")} />
+          </Button>
           <Button
             variant="outline"
             size="sm"
@@ -247,7 +274,8 @@ export default function ShowsEditor({ profile, user, onSave, onCancel }: ShowsEd
       venue: '',
       city: '',
       date: format(new Date(), 'yyyy-MM-dd'),
-      ticket_link: ''
+      ticket_link: '',
+      is_highlighted: false
     };
     setShows([...shows, newShow]);
     
@@ -268,6 +296,15 @@ export default function ShowsEditor({ profile, user, onSave, onCancel }: ShowsEd
   const handleEditShow = (index: number, updatedShow: Show) => {
     const updatedShows = [...shows];
     updatedShows[index] = updatedShow;
+    setShows(updatedShows);
+  };
+
+  const handleToggleHighlight = (index: number) => {
+    const updatedShows = [...shows];
+    updatedShows[index] = { 
+      ...updatedShows[index], 
+      is_highlighted: !updatedShows[index].is_highlighted 
+    };
     setShows(updatedShows);
   };
 
@@ -377,7 +414,7 @@ export default function ShowsEditor({ profile, user, onSave, onCancel }: ShowsEd
         )}
         
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Upcoming Shows</h3>
+          <h3 className="text-lg font-semibold">Shows Management</h3>
           <div className="flex gap-2">
             {shows.length > 1 && (
               <Button variant="outline" size="sm" onClick={handleSortByDate}>
@@ -410,6 +447,7 @@ export default function ShowsEditor({ profile, user, onSave, onCancel }: ShowsEd
                       index={index}
                       onDelete={handleDeleteShow}
                       onEdit={handleEditShow}
+                      onToggleHighlight={handleToggleHighlight}
                     />
                   </div>
                 ))}
