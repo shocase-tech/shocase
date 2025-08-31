@@ -1,7 +1,16 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { Music, Music2, Disc3, Volume2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+// Import streaming service icons
+import appleLight from "@/assets/streaming/apple-music-light.svg";
+import appleColor from "@/assets/streaming/apple-music-color.svg";
+import bandcampLight from "@/assets/streaming/bandcamp-light.png";
+import bandcampColor from "@/assets/streaming/bandcamp-color.png";
+import soundcloudLight from "@/assets/streaming/soundcloud-light.png";
+import soundcloudColor from "@/assets/streaming/soundcloud-color.png";
+import spotifyLight from "@/assets/streaming/spotify-light.png";
+import spotifyColor from "@/assets/streaming/spotify-color.png";
 
 interface StreamingLinksInputProps {
   streamingLinks: {
@@ -21,33 +30,29 @@ export default function StreamingLinksInput({ streamingLinks, onChange }: Stream
     {
       key: "spotify",
       name: "Spotify",
-      icon: Music,
-      color: "text-green-500",
-      activeColor: "text-green-500 bg-green-500/10",
+      lightIcon: spotifyLight,
+      colorIcon: spotifyColor,
       placeholder: "Enter Spotify URL"
     },
     {
       key: "apple_music",
       name: "Apple Music",
-      icon: Music2,
-      color: "text-gray-900 dark:text-white",
-      activeColor: "text-gray-900 dark:text-white bg-gray-900/10 dark:bg-white/10",
+      lightIcon: appleLight,
+      colorIcon: appleColor,
       placeholder: "Enter Apple Music URL"
     },
     {
       key: "bandcamp",
       name: "Bandcamp",
-      icon: Disc3,
-      color: "text-blue-500",
-      activeColor: "text-blue-500 bg-blue-500/10",
+      lightIcon: bandcampLight,
+      colorIcon: bandcampColor,
       placeholder: "Enter Bandcamp URL"
     },
     {
       key: "soundcloud",
       name: "SoundCloud",
-      icon: Volume2,
-      color: "text-orange-500",
-      activeColor: "text-orange-500 bg-orange-500/10",
+      lightIcon: soundcloudLight,
+      colorIcon: soundcloudColor,
       placeholder: "Enter SoundCloud URL"
     }
   ];
@@ -92,9 +97,9 @@ export default function StreamingLinksInput({ streamingLinks, onChange }: Stream
       {/* Platform Icons */}
       <div className="flex gap-4">
         {platforms.map((platform) => {
-          const Icon = platform.icon;
           const hasUrl = streamingLinks[platform.key as keyof typeof streamingLinks];
           const isActive = activeInput === platform.key;
+          const iconSrc = (hasUrl && isValidUrl(hasUrl)) ? platform.colorIcon : platform.lightIcon;
           
           return (
             <button
@@ -102,14 +107,20 @@ export default function StreamingLinksInput({ streamingLinks, onChange }: Stream
               type="button"
               onClick={() => handleIconClick(platform.key)}
               className={cn(
-                "p-3 rounded-lg border-2 transition-all duration-200 hover:scale-105",
-                isActive || (hasUrl && isValidUrl(hasUrl))
-                  ? `${platform.activeColor} border-current`
-                  : "text-muted-foreground border-muted-foreground/30 hover:border-muted-foreground/50"
+                "p-3 rounded-lg border-2 transition-all duration-200 hover:scale-105 bg-background",
+                isActive 
+                  ? "border-primary/50 bg-primary/5"
+                  : (hasUrl && isValidUrl(hasUrl))
+                    ? "border-primary/30 bg-primary/5"
+                    : "border-muted-foreground/30 hover:border-muted-foreground/50"
               )}
               title={platform.name}
             >
-              <Icon className="w-6 h-6" />
+              <img 
+                src={iconSrc} 
+                alt={platform.name}
+                className="w-6 h-6 object-contain"
+              />
             </button>
           );
         })}
