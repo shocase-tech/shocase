@@ -211,23 +211,49 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
   });
   const [generatingBio, setGeneratingBio] = useState(false);
   const [bioMode, setBioMode] = useState<'manual' | 'ai'>('manual');
+  const [lastGenerationTime, setLastGenerationTime] = useState(0);
+  const GENERATION_COOLDOWN = 3000; // 3 seconds between requests
   const [generatedBioPreview, setGeneratedBioPreview] = useState('');
   
   // Character counter for bio
   const bioWordCount = formData.bio ? formData.bio.trim().split(/\s+/).filter(word => word.length > 0).length : 0;
 
   const generateBio = async (isRemix = false) => {
-    if (!user || !formData.artist_name) {
+    // Check cooldown to prevent rapid requests
+    const now = Date.now();
+    const timeSinceLastGeneration = now - lastGenerationTime;
+    
+    if (timeSinceLastGeneration < GENERATION_COOLDOWN) {
+      const remainingTime = Math.ceil((GENERATION_COOLDOWN - timeSinceLastGeneration) / 1000);
       toast({
-        title: "Error",
-        description: "Artist name is required to generate bio",
+        title: "Please wait",
+        description: `Please wait ${remainingTime} more seconds before generating another bio.`,
+        variant: "default",
+      });
+      return;
+    }
+
+    if (!formData.artist_name.trim()) {
+      toast({
+        title: "Artist name required",
+        description: "Please enter an artist name before generating a bio.",
         variant: "destructive",
+      });
+      return;
+    }
+
+    if (generatingBio) {
+      toast({
+        title: "Generation in progress",
+        description: "Please wait for the current bio generation to complete.",
+        variant: "default",
       });
       return;
     }
 
     try {
       setGeneratingBio(true);
+      setLastGenerationTime(now);
 
       const requestBody = {
         artist_name: formData.artist_name,
@@ -256,7 +282,22 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
 
       if (data?.error) {
         console.error('Edge function returned error:', data.error);
-        throw new Error(data.error);
+        
+        // Handle rate limiting with retry option
+        if (data.retryable) {
+          toast({
+            title: "Service Busy",
+            description: data.error + " You can try again in a few moments.",
+            variant: "default",
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: data.error,
+            variant: "destructive",
+          });
+        }
+        return;
       }
 
       if (data?.bio) {
@@ -270,11 +311,21 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
       }
     } catch (error: any) {
       console.error('Bio generation failed:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to generate bio. Please check your OpenAI API quota and try again.",
-        variant: "destructive",
-      });
+      
+      // Handle different error types
+      if (error.message?.includes('429') || error.message?.includes('rate limit') || error.message?.includes('temporarily busy')) {
+        toast({
+          title: "Service Busy",
+          description: "AI service is temporarily busy. Please wait a moment and try again.",
+          variant: "default",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: error.message || "Failed to generate bio. Please try again later.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setGeneratingBio(false);
     }
