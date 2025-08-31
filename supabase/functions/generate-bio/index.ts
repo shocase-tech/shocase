@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { artist_name, genre, influences, location, vibe, existing_bio, is_remix } = await req.json();
+    const { artist_name, genre, influences, location, vibe, existing_bio, is_remix, notable_performances, musical_background } = await req.json();
     
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
     if (!openAIApiKey) {
@@ -32,6 +32,8 @@ Rework it using these style guidelines:
 - Influences: ${influences || 'Not specified'}
 - Location: ${location || 'Not specified'}
 - Writing Style: ${vibe || 'Not specified'}
+- Notable Performances: ${notable_performances || 'Not specified'}
+- Musical Background: ${musical_background || 'Not specified'}
 
 Keep the core information but improve the writing, flow, and style. Make it more engaging while maintaining authenticity. Keep it 150-200 words and written in third person.`;
     } else {
@@ -42,11 +44,14 @@ Context:
 - Influences: ${influences || 'Not specified'}
 - Location: ${location || 'Not specified'}
 - Writing Style: ${vibe || 'Not specified'}
+- Notable Performances: ${notable_performances || 'Not specified'}
+- Musical Background: ${musical_background || 'Not specified'}
 
 The bio should be:
 - 150-200 words long
 - Professional yet engaging
 - Include their musical style and influences if provided
+- Incorporate notable performances and musical background to establish credibility
 - Highlight what makes them unique
 - Suitable for press kits and promotional materials
 - Written in third person

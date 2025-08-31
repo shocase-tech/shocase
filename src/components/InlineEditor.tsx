@@ -205,7 +205,9 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
     style: '',
     genres: '',
     influences: '',
-    location: ''
+    location: '',
+    notable_performances: '',
+    musical_background: ''
   });
   const [generatingBio, setGeneratingBio] = useState(false);
   const [bioMode, setBioMode] = useState<'manual' | 'ai'>('manual');
@@ -234,6 +236,8 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
           influences: bioConfig.influences,
           location: bioConfig.location,
           vibe: bioConfig.style,
+          notable_performances: bioConfig.notable_performances,
+          musical_background: bioConfig.musical_background,
           existing_bio: isRemix ? formData.bio : null,
           is_remix: isRemix
         }
@@ -452,7 +456,7 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
             </div>
 
             {/* AI Configuration Inputs */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="ai_genres">Genres</Label>
                 <Input
@@ -471,8 +475,35 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
                   onChange={(e) => setBioConfig({ ...bioConfig, influences: e.target.value })}
                   placeholder="Radiohead, Aphex Twin, Miles Davis"
                 />
+                <p className="text-xs text-muted-foreground mt-1">Artists or styles that inspire your music</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="ai_notable_performances">Notable Performances (Optional)</Label>
+                <Input
+                  id="ai_notable_performances"
+                  value={bioConfig.notable_performances}
+                  onChange={(e) => setBioConfig({ ...bioConfig, notable_performances: e.target.value })}
+                  placeholder="e.g., Coachella 2023, sold out Madison Square Garden, opened for [Artist Name]"
+                />
+                <p className="text-xs text-muted-foreground mt-1">Major venues, festivals, tours, or memorable shows</p>
               </div>
 
+              <div>
+                <Label htmlFor="ai_musical_background">Musical Background (Optional)</Label>
+                <Input
+                  id="ai_musical_background"
+                  value={bioConfig.musical_background}
+                  onChange={(e) => setBioConfig({ ...bioConfig, musical_background: e.target.value })}
+                  placeholder="e.g., Berklee College of Music, 10+ years touring, classically trained pianist"
+                />
+                <p className="text-xs text-muted-foreground mt-1">Education, training, years of experience, or career highlights</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="ai_location">Location</Label>
                 <Input
