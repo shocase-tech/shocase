@@ -156,12 +156,12 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
             </div>
           )}
 
-          {/* Past Shows */}
+          {/* Past Shows - Recent 3 */}
           {pastShows.length > 0 && (
             <div>
-              <h4 className="text-sm font-medium text-muted-foreground mb-3">Past Shows</h4>
+              <h4 className="text-sm font-medium text-muted-foreground mb-3">Recent Shows</h4>
               <div className="space-y-2">
-                {pastShows.map((show: any, index: number) => (
+                {pastShows.slice(0, 3).map((show: any, index: number) => (
                   <div key={`past-${index}`} className="flex items-center justify-between p-3 bg-white/5 rounded-md opacity-75">
                     <div className="flex items-center gap-3">
                       <Calendar className="w-5 h-5 text-muted-foreground" />
@@ -176,6 +176,11 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
                   </div>
                 ))}
               </div>
+              {pastShows.length > 3 && (
+                <p className="text-xs text-muted-foreground mt-2 text-center">
+                  Showing 3 most recent shows of {pastShows.length} total
+                </p>
+              )}
             </div>
           )}
         </div>

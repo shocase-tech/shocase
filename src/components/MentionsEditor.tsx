@@ -208,13 +208,6 @@ export default function MentionsEditor({ profile, user, onSave, onCancel }: Ment
         
         <h3 className="text-lg font-semibold">Press Coverage</h3>
 
-        {/* Press Quotes Section */}
-        <div className="space-y-4">
-          <PressQuotesEditor 
-            quotes={quotes}
-            onUpdate={setQuotes}
-          />
-        </div>
 
         {/* Press Mentions Section */}
         <div className="space-y-4">
@@ -271,14 +264,14 @@ export default function MentionsEditor({ profile, user, onSave, onCancel }: Ment
                       />
                     )}
                     
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0 overflow-hidden">
                       <div className="flex items-start justify-between gap-2">
-                        <div>
+                        <div className="min-w-0 flex-1">
                           <p className="font-medium text-sm truncate">
                             {mention.title || mention.publication}
                           </p>
                           {mention.description && (
-                            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                            <p className="text-xs text-muted-foreground mt-1 line-clamp-2 break-words">
                               {mention.description}
                             </p>
                           )}
@@ -286,10 +279,10 @@ export default function MentionsEditor({ profile, user, onSave, onCancel }: Ment
                             href={mention.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-xs text-primary hover:underline flex items-center gap-1 mt-1"
+                            className="text-xs text-primary hover:underline flex items-center gap-1 mt-1 break-all"
                           >
-                            {mention.publication}
-                            <ExternalLink className="w-3 h-3" />
+                            <span className="truncate">{mention.publication}</span>
+                            <ExternalLink className="w-3 h-3 flex-shrink-0" />
                           </a>
                         </div>
                         
