@@ -2,9 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket, Edit3, Plus } from "lucide-react";
+import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket, Edit3, Plus, Quote } from "lucide-react";
 import PrivateImage from "@/components/PrivateImage";
 import InlineEditor from "@/components/InlineEditor";
+import PressQuotesEditor from "@/components/PressQuotesEditor";
 import GalleryEditor from "@/components/GalleryEditor";
 import MentionsEditor from "@/components/MentionsEditor";
 import ShowsEditor from "@/components/ShowsEditor";
@@ -498,9 +499,65 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
             !!(profile.show_videos && profile.show_videos.length > 0)
           )}
 
-          {/* Two Column Layout: Press Mentions & Shows */}
+          {/* Two Column Layout: Press Quotes & Press Mentions/Shows */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Left Column: Press Mentions */}
+            {/* Left Column: Press Quotes */}
+            <div>
+              {editingSection === 'quotes' ? (
+                <div className="space-y-4">
+                  <Card className="border-primary/20 bg-primary/5">
+                    <CardContent className="pt-6">
+                      <PressQuotesEditor
+                        quotes={profile?.press_quotes || []}
+                        onUpdate={(quotes) => {
+                          const updatedProfile = { ...profile, press_quotes: quotes };
+                          handleSectionSave(updatedProfile);
+                        }}
+                      />
+                      <div className="flex justify-end gap-2 mt-4 pt-4 border-t">
+                        <Button variant="outline" onClick={() => setEditingSection(null)}>
+                          Cancel
+                        </Button>
+                        <Button onClick={() => setEditingSection(null)}>
+                          Done
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              ) : (
+                renderEditableSection(
+                  'quotes',
+                  profile.press_quotes && profile.press_quotes.length > 0 ? (
+                    <div>
+                      <h3 className="font-semibold mb-3">Press Quotes</h3>
+                      <div className="space-y-4">
+                        {profile.press_quotes.map((quote: any, index: number) => (
+                          <Card key={index} className="border-l-4 border-l-primary bg-muted/30">
+                            <CardContent className="pt-4">
+                              <div className="flex items-start gap-3">
+                                <Quote className="w-5 h-5 text-primary flex-shrink-0 mt-1" />
+                                <div className="flex-1">
+                                  <blockquote className="text-sm italic leading-relaxed mb-2">
+                                    "{quote.text}"
+                                  </blockquote>
+                                  <cite className="text-sm font-medium text-muted-foreground">
+                                    — {quote.source}
+                                  </cite>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null,
+                  !!(profile.press_quotes && profile.press_quotes.length > 0)
+                )
+              )}
+            </div>
+            
+            {/* Right Column: Press Mentions */}
             <div>
               {editingSection === 'mentions' ? (
                 <div className="space-y-4">
@@ -558,36 +615,36 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
                 </div>
               )}
             </div>
+          </div>
 
-            {/* Right Column: Shows */}
-            <div>
-              {editingSection === 'shows' ? (
-                <div className="space-y-4">
-                  <ShowsEditor
-                    profile={profile}
-                    user={user}
-                    onSave={(updatedData) => handleSectionSave(updatedData)}
-                    onCancel={() => setEditingSection(null)}
-                  />
-                </div>
-              ) : (
-                <div className="group relative">
-                  <div 
-                    className="cursor-pointer transition-all duration-200 hover:bg-white/5 rounded-lg p-2"
-                    onClick={() => handleSectionClick('shows')}
+          {/* Shows Section */}
+          <div>
+            {editingSection === 'shows' ? (
+              <div className="space-y-4">
+                <ShowsEditor
+                  profile={profile}
+                  user={user}
+                  onSave={(updatedData) => handleSectionSave(updatedData)}
+                  onCancel={() => setEditingSection(null)}
+                />
+              </div>
+            ) : (
+              <div className="group relative">
+                <div 
+                  className="cursor-pointer transition-all duration-200 hover:bg-white/5 rounded-lg p-2"
+                  onClick={() => handleSectionClick('shows')}
+                >
+                  {renderShowsSection()}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm"
                   >
-                    {renderShowsSection()}
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm"
-                    >
-                      <Edit3 className="w-3 h-3" />
-                    </Button>
-                  </div>
+                    <Edit3 className="w-3 h-3" />
+                  </Button>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
         </CardContent>

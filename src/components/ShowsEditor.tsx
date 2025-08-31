@@ -250,6 +250,15 @@ export default function ShowsEditor({ profile, user, onSave, onCancel }: ShowsEd
       ticket_link: ''
     };
     setShows([...shows, newShow]);
+    
+    // Scroll to the new show for immediate editing
+    setTimeout(() => {
+      const lastShowIndex = shows.length;
+      const lastShowElement = document.querySelector(`[data-show-index="${lastShowIndex}"]`);
+      if (lastShowElement) {
+        lastShowElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
   };
 
   const handleDeleteShow = (index: number) => {
@@ -274,14 +283,33 @@ export default function ShowsEditor({ profile, user, onSave, onCancel }: ShowsEd
   const handleSave = async () => {
     if (!user) return;
 
+    // Validate shows data before saving
+    const validShows = shows.filter(show => 
+      show.venue.trim() && 
+      show.city.trim() && 
+      show.date
+    );
+
+    if (validShows.length !== shows.length) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill out all required fields (venue, city, date) for each show.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setLoading(true);
+      
+      console.log("💾 ShowsEditor: Saving shows:", validShows);
 
       const { error } = await supabase
         .from('artist_profiles')
         .update({
-          upcoming_shows: shows.filter(show => new Date(show.date) >= new Date()) as any,
-          past_shows: shows.filter(show => new Date(show.date) < new Date()) as any,
+          upcoming_shows: validShows.filter(show => new Date(show.date) >= new Date()) as any,
+          past_shows: validShows.filter(show => new Date(show.date) < new Date()) as any,
+          updated_at: new Date().toISOString()
         })
         .eq('user_id', user.id);
 
@@ -293,11 +321,16 @@ export default function ShowsEditor({ profile, user, onSave, onCancel }: ShowsEd
       });
 
       // Update parent component with new data
-      onSave({ 
-        upcoming_shows: shows.filter(show => new Date(show.date) >= new Date()),
-        past_shows: shows.filter(show => new Date(show.date) < new Date()) 
-      });
+      const updatedProfile = {
+        ...profile,
+        upcoming_shows: validShows.filter(show => new Date(show.date) >= new Date()),
+        past_shows: validShows.filter(show => new Date(show.date) < new Date())
+      };
+      
+      console.log("📤 ShowsEditor: Calling onSave with updated profile:", updatedProfile);
+      onSave(updatedProfile);
     } catch (error: any) {
+      console.error("❌ ShowsEditor: Save error:", error);
       toast({
         title: "Error",
         description: error.message,
@@ -371,13 +404,14 @@ export default function ShowsEditor({ profile, user, onSave, onCancel }: ShowsEd
             >
               <div className="space-y-3">
                 {shows.map((show, index) => (
-                  <SortableShow
-                    key={`show-${index}`}
-                    show={show}
-                    index={index}
-                    onDelete={handleDeleteShow}
-                    onEdit={handleEditShow}
-                  />
+                  <div key={`show-${index}`} data-show-index={index}>
+                    <SortableShow
+                      show={show}
+                      index={index}
+                      onDelete={handleDeleteShow}
+                      onEdit={handleEditShow}
+                    />
+                  </div>
                 ))}
               </div>
             </SortableContext>

@@ -19,8 +19,16 @@ export function useClickOutside<T extends HTMLElement>(
           target?.closest('.sortable-item') ||
           event.type === 'dragstart' || 
           event.type === 'dragend' ||
-          target?.hasAttribute('data-sortable-handle')) {
-        console.log("🔍 useClickOutside: Ignoring drag-related event");
+          target?.hasAttribute('data-sortable-handle') ||
+          // Ignore date picker and calendar elements
+          target?.closest('.react-datepicker') ||
+          target?.closest('.react-datepicker-popper') ||
+          target?.closest('[role="dialog"]') ||
+          target?.closest('[data-radix-popper-content-wrapper]') ||
+          target?.closest('.calendar') ||
+          target?.closest('[data-state="open"]') ||
+          target?.closest('[aria-expanded="true"]')) {
+        console.log("🔍 useClickOutside: Ignoring drag/calendar-related event");
         return;
       }
       
