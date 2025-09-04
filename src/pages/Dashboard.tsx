@@ -13,6 +13,7 @@ import LivePreviewEditor from "@/components/LivePreviewEditor";
 import FloatingProgressIndicator from "@/components/FloatingProgressIndicator";
 import { useScrollVisibility } from "@/hooks/useScrollVisibility";
 import { useScrollPosition } from "@/hooks/useScrollPosition";
+import { useTabStateManager } from "@/hooks/useTabStateManager";
 
 interface DashboardArtistProfile {
   id: string;
@@ -44,6 +45,9 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  // Tab state management for preventing tab reload issues
+  useTabStateManager();
   
   // Refs for scroll visibility detection
   const progressCardRef = useRef<HTMLDivElement>(null);
@@ -317,7 +321,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/80">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/80 pb-20">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-white/10 backdrop-blur-sm bg-background/80">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">

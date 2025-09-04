@@ -10,7 +10,7 @@ interface UseAutoSaveInputOptions {
 
 export function useAutoSaveInput({ 
   onSave, 
-  delay = 500,
+  delay = 1000, // Increased from 500ms to 1000ms to reduce memory pressure
   showSuccessIndicator = true 
 }: UseAutoSaveInputOptions) {
   const { toast } = useToast();
