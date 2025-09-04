@@ -251,17 +251,22 @@ export default function MentionsEditor({ profile, user, onSave, onCancel }: Ment
                 {mentions.map((mention, index) => (
                   <div
                     key={index}
-                    className="relative flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+                    className="relative flex items-start gap-3 p-3 pr-10 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
                   >
                     {mention.favicon && (
-                      <img src={mention.favicon} alt="" className="w-4 h-4" />
+                      <img src={mention.favicon} alt="" className="w-4 h-4 flex-shrink-0 mt-0.5" />
                     )}
-                    <div className="flex-1">
-                      <p className="font-medium text-sm truncate">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm break-words leading-relaxed">
                         {mention.title || mention.publication}
                       </p>
+                      {mention.description && (
+                        <p className="text-xs text-muted-foreground mt-1 break-words line-clamp-2">
+                          {mention.description}
+                        </p>
+                      )}
                     </div>
-                    <ExternalLink className="w-3 h-3 opacity-50" />
+                    <ExternalLink className="w-3 h-3 opacity-50 flex-shrink-0 mt-0.5" />
                     
                     <Button
                       variant="outline"
