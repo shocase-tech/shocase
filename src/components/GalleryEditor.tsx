@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { Save, X, GripVertical, Upload, AlertTriangle, Edit, Loader2 } from "lucide-react";
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragStartEvent, DragEndEvent, DragOverEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -29,9 +29,12 @@ interface SortablePhotoProps {
   index: number;
   onDelete: (index: number) => void;
   onUpdateCaption: (index: number, caption: string) => void;
+  isDragActive: boolean;
+  draggedIndex: number | null;
+  previewOrder: { url: string; label?: string }[] | null;
 }
 
-function SortablePhoto({ photo, index, onDelete, onUpdateCaption }: SortablePhotoProps) {
+function SortablePhoto({ photo, index, onDelete, onUpdateCaption, isDragActive, draggedIndex, previewOrder }: SortablePhotoProps) {
   const [isEditingCaption, setIsEditingCaption] = useState(false);
   const [captionValue, setCaptionValue] = useState(photo.label || "");
 
@@ -44,10 +47,16 @@ function SortablePhoto({ photo, index, onDelete, onUpdateCaption }: SortablePhot
     isDragging,
   } = useSortable({ id: `photo-${index}` });
 
+  // Calculate preview position if drag is active
+  const previewIndex = previewOrder ? previewOrder.findIndex(p => p.url === photo.url) : index;
+  const isMoving = isDragActive && !isDragging && previewIndex !== index;
+
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
+    transition: isDragging ? 'none' : isMoving ? 'transform 0.2s ease-in-out, opacity 0.2s ease-in-out' : transition,
+    opacity: isDragging ? 0.7 : 1,
+    scale: isDragging ? '1.05' : '1',
+    zIndex: isDragging ? 50 : 1,
   };
 
   const handleSaveCaption = () => {
@@ -64,7 +73,13 @@ function SortablePhoto({ photo, index, onDelete, onUpdateCaption }: SortablePhot
     <div
       ref={setNodeRef}
       style={style}
-      className="relative group bg-white/5 rounded-lg overflow-hidden border border-white/10 sortable-item"
+      className={`relative group bg-white/5 rounded-lg overflow-hidden border sortable-item ${
+        isDragging 
+          ? 'border-primary/50 shadow-lg shadow-primary/20' 
+          : isMoving 
+            ? 'border-primary/30' 
+            : 'border-white/10'
+      }`}
       data-dragging={isDragging}
     >
       {/* Image */}
@@ -163,6 +178,9 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDragActive, setIsDragActive] = useState(false);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [previewOrder, setPreviewOrder] = useState<{ url: string; label?: string }[] | null>(null);
   const { toast } = useToast();
 
   const sensors = useSensors(
@@ -231,10 +249,40 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
     }
   }, [profile]);
 
-  const handleDragEnd = async (event: any) => {
-    const { active, over } = event;
+  const handleDragStart = (event: DragStartEvent) => {
+    const activeIndex = photos.findIndex((_, index) => `photo-${index}` === event.active.id);
+    setIsDragActive(true);
+    setDraggedIndex(activeIndex);
+    console.log("🎯 Gallery: Drag started, active index:", activeIndex);
+  };
 
-    if (active.id !== over.id) {
+  const handleDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+    
+    if (!over || active.id === over.id) {
+      setPreviewOrder(null);
+      return;
+    }
+
+    const activeIndex = photos.findIndex((_, index) => `photo-${index}` === active.id);
+    const overIndex = photos.findIndex((_, index) => `photo-${index}` === over.id);
+
+    if (activeIndex !== -1 && overIndex !== -1) {
+      const newOrder = arrayMove(photos, activeIndex, overIndex);
+      setPreviewOrder(newOrder);
+      console.log("👁️ Gallery: Drag over preview, new order:", newOrder);
+    }
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    // Reset drag state
+    setIsDragActive(false);
+    setDraggedIndex(null);
+    setPreviewOrder(null);
+
+    if (active.id !== over?.id) {
       setPhotos((items) => {
         const activeIndex = items.findIndex((_, index) => `photo-${index}` === active.id);
         const overIndex = items.findIndex((_, index) => `photo-${index}` === over.id);
@@ -436,7 +484,12 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
   // Auto-save and close handler
   const handleAutoSaveAndClose = useCallback(async () => {
     console.log("🔍 GalleryEditor: Click-outside detected, handleAutoSaveAndClose called");
-    if (isSaving || loading) return;
+    
+    // Prevent closing during drag operations
+    if (isDragActive || isSaving || loading) {
+      console.log("🔍 GalleryEditor: Ignoring click-outside during drag or save operation");
+      return;
+    }
     
     console.log("🔍 GalleryEditor: Current photos data before save:", photos);
     
@@ -452,10 +505,10 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
     } finally {
       setIsSaving(false);
     }
-  }, [isSaving, loading, onCancel, photos]);
+  }, [isDragActive, isSaving, loading, onCancel, photos]);
   
-  // Click outside detection
-  const editorRef = useClickOutside<HTMLDivElement>(handleAutoSaveAndClose);
+  // Click outside detection with drag state awareness
+  const editorRef = useClickOutside<HTMLDivElement>(handleAutoSaveAndClose, !isDragActive);
 
   const progressPercentage = (photos.length / MAX_PHOTOS) * 100;
 
@@ -538,6 +591,8 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
           >
             <SortableContext
@@ -545,15 +600,21 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
               strategy={verticalListSortingStrategy}
             >
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {photos.map((photo, index) => (
-                  <SortablePhoto
-                    key={`photo-${index}`}
-                    photo={photo}
-                    index={index}
-                    onDelete={handleDeletePhoto}
-                    onUpdateCaption={handleUpdateCaption}
-                  />
-                ))}
+                {(previewOrder || photos).map((photo, index) => {
+                  const originalIndex = photos.findIndex(p => p.url === photo.url);
+                  return (
+                    <SortablePhoto
+                      key={`photo-${originalIndex}`}
+                      photo={photo}
+                      index={originalIndex}
+                      onDelete={handleDeletePhoto}
+                      onUpdateCaption={handleUpdateCaption}
+                      isDragActive={isDragActive}
+                      draggedIndex={draggedIndex}
+                      previewOrder={previewOrder}
+                    />
+                  );
+                })}
               </div>
             </SortableContext>
           </DndContext>
