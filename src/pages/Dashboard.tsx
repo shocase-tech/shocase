@@ -49,6 +49,55 @@ export default function Dashboard() {
   // Tab state management for preventing tab reload issues
   useTabStateManager();
   
+  // DEBUG: Page load tracking
+  useEffect(() => {
+    console.log('🔄 Dashboard component mounted at:', new Date().toISOString());
+    const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+    console.log('🔄 Navigation type:', navEntries[0]?.type || 'unknown');
+    
+    // Debug listeners for tab switching
+    const handleFocus = () => {
+      console.log('🎯 Tab focused at:', new Date().toISOString());
+    };
+    
+    const handleBlur = () => {
+      console.log('👋 Tab blurred at:', new Date().toISOString());
+    };
+    
+    const handleVisibilityChange = () => {
+      console.log('👁️ Visibility changed:', document.visibilityState, 'at:', new Date().toISOString());
+    };
+    
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      console.log('⚠️ Page unloading triggered by:', e.type, 'at:', new Date().toISOString());
+      // Only prevent if there are actual unsaved changes
+      const hasUnsavedChanges = document.querySelector('[data-unsaved="true"]');
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        return 'You have unsaved changes';
+      }
+    };
+    
+    // Track navigation events that might cause reloads
+    const handlePopState = (e: PopStateEvent) => {
+      console.log('🔙 PopState event:', e.state, 'at:', new Date().toISOString());
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('blur', handleBlur);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('popstate', handlePopState);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('blur', handleBlur);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+  
   // Refs for scroll visibility detection
   const progressCardRef = useRef<HTMLDivElement>(null);
   
@@ -69,25 +118,33 @@ export default function Dashboard() {
 
   useEffect(() => {
     const getSession = async () => {
+      console.log('🔐 Checking auth session...');
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) {
+        console.log('❌ No session found, navigating to auth');
         navigate("/auth");
         return;
       }
+      console.log('✅ Session found for user:', session.user.email);
       setUser(session.user);
     };
 
     getSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('🔐 Auth state changed:', event, session?.user?.email || 'no user');
       if (!session?.user) {
+        console.log('❌ Auth lost, navigating to auth');
         navigate("/auth");
         return;
       }
       setUser(session.user);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      console.log('🧹 Cleaning up auth subscription');
+      subscription.unsubscribe();
+    };
   }, [navigate]);
 
   useEffect(() => {
@@ -194,11 +251,12 @@ export default function Dashboard() {
   };
 
   const handleProfileUpdated = useCallback((updatedData?: Partial<DashboardArtistProfile>) => {
-    // Update local state instead of refetching from database
+    console.log('📝 Profile updated locally:', Object.keys(updatedData || {}));
+    // Update local state instead of refetching from database to prevent reloads
     if (updatedData && profile) {
       setProfile({ ...profile, ...updatedData });
     }
-    // No fetchProfile() call to prevent page reloads
+    // CRITICAL: No fetchProfile() call to prevent page reloads
   }, [profile]);
 
   const togglePublishStatus = async () => {

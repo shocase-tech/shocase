@@ -19,7 +19,7 @@ interface UseAutoSaveReturn {
 export function useAutoSave({ 
   data, 
   onSave, 
-  delay = 500, 
+  delay = 1000, // Increased from 500ms to reduce memory pressure and prevent excessive saves
   enabled = true 
 }: UseAutoSaveOptions): UseAutoSaveReturn {
   const { toast } = useToast();
@@ -35,6 +35,7 @@ export function useAutoSave({
   const performSave = useCallback(async (dataToSave: any, isManual = false) => {
     if (isSaving) return;
     
+    console.log('💾 Auto-save triggered:', { isManual, hasData: !!dataToSave });
     setIsSaving(true);
     
     try {
@@ -42,6 +43,7 @@ export function useAutoSave({
       setHasUnsavedChanges(false);
       setLastSaved(new Date());
       retryCountRef.current = 0;
+      console.log('✅ Auto-save successful');
       
       if (isManual) {
         toast({

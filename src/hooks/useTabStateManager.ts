@@ -8,6 +8,7 @@ interface TabState {
 export function useTabStateManager() {
   const hasRestoredRef = useRef(false);
   const isInitialLoadRef = useRef(true);
+  const preventReloadRef = useRef(false);
 
   useEffect(() => {
     const storeState = () => {
@@ -57,18 +58,36 @@ export function useTabStateManager() {
 
     // Handle visibility changes (tab switching)
     const handleVisibilityChange = () => {
+      console.log('👁️ Tab visibility changed to:', document.visibilityState);
+      
       if (document.visibilityState === 'visible') {
         // Tab became visible - restore state
+        console.log('🔄 Tab became visible, restoring state');
+        preventReloadRef.current = false;
         restoreState();
       } else {
-        // Tab became hidden - store current state
+        // Tab became hidden - store current state and prevent reload
+        console.log('💾 Tab became hidden, storing state');
+        preventReloadRef.current = true;
         storeState();
+        
+        // Reset prevent flag after a delay
+        setTimeout(() => {
+          preventReloadRef.current = false;
+        }, 1000);
       }
     };
 
     // Handle before unload (page closing/refreshing)
-    const handleBeforeUnload = () => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      console.log('🛡️ beforeunload triggered, storing state');
       storeState();
+      
+      // Prevent accidental reloads during tab switching
+      if (preventReloadRef.current) {
+        e.preventDefault();
+        console.log('🚫 Prevented accidental reload');
+      }
     };
 
     // Handle page focus/blur for additional reliability
