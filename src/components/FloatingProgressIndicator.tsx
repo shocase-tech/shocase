@@ -49,105 +49,89 @@ export default function FloatingProgressIndicator({
   }, []);
 
   // Smart collision detection for editing interfaces
-  const detectEditingInterferences = () => {
-    const activeEditors = [
-      document.querySelector('[data-editor-active="true"]'),
-      document.querySelector('.inline-editor-active'),
-      document.querySelector('.gallery-editor-active'),
-      document.querySelector('.mentions-editor-active'),
-      document.querySelector('.shows-editor-active'),
-      document.querySelector('[role="dialog"]'),
-      document.querySelector('.sheet-content'),
-    ].filter(Boolean);
+  const getOptimalPosition = (): FloatingPosition => {
+    // Mobile: Always use bottom-center banner
+    if (screenSize === 'mobile') {
+      return 'bottom-center';
+    }
 
-    const rightSideInterferences = document.querySelectorAll(
-      '[class*="right-"], [class*="fixed"][class*="right"], .sheet-content'
-    );
+    // Check for actual obstructions
+    const isBottomRightBlocked = () => {
+      const bottomRightArea = {
+        left: window.innerWidth - 320,
+        top: window.innerHeight - 200,
+        right: window.innerWidth - 24,
+        bottom: window.innerHeight - 24
+      };
 
-    return {
-      hasActiveEditors: activeEditors.length > 0,
-      hasRightSideInterferences: rightSideInterferences.length > 0,
-      activeEditors,
-      rightSideInterferences
+      const obstructions = document.querySelectorAll(
+        '[data-editor-active="true"], .inline-editor-active, .gallery-editor-active, .mentions-editor-active, .shows-editor-active, [role="dialog"]:not([data-state="closed"]), .sheet-content'
+      );
+
+      for (const obstruction of obstructions) {
+        const rect = obstruction.getBoundingClientRect();
+        if (rect.right > bottomRightArea.left && 
+            rect.bottom > bottomRightArea.top &&
+            rect.left < bottomRightArea.right &&
+            rect.top < bottomRightArea.bottom) {
+          return true;
+        }
+      }
+      return false;
     };
+
+    const isBottomLeftBlocked = () => {
+      const bottomLeftArea = {
+        left: 24,
+        top: window.innerHeight - 200,
+        right: 344,
+        bottom: window.innerHeight - 24
+      };
+
+      const obstructions = document.querySelectorAll(
+        '[data-editor-active="true"], .inline-editor-active, .gallery-editor-active, .mentions-editor-active, .shows-editor-active, [role="dialog"]:not([data-state="closed"]), .sheet-content'
+      );
+
+      for (const obstruction of obstructions) {
+        const rect = obstruction.getBoundingClientRect();
+        if (rect.right > bottomLeftArea.left && 
+            rect.bottom > bottomLeftArea.top &&
+            rect.left < bottomLeftArea.right &&
+            rect.top < bottomLeftArea.bottom) {
+          return true;
+        }
+      }
+      return false;
+    };
+
+    // For tablets, prefer bottom-center if space is limited
+    if (screenSize === 'tablet' && window.innerWidth < 900) {
+      return 'bottom-center';
+    }
+
+    // Optimal position priority: bottom-right > bottom-left > top-right > top-left
+    if (!isBottomRightBlocked()) return 'bottom-right';
+    if (!isBottomLeftBlocked()) return 'bottom-left';
+    return 'top-right'; // Fallback to top-right
   };
 
   // Dynamic positioning logic
   useEffect(() => {
     if (!isVisible) return;
 
-    const findOptimalPosition = () => {
-      const interferences = detectEditingInterferences();
-      
-      // Mobile: Always use bottom-center banner
-      if (screenSize === 'mobile') {
-        setPosition('bottom-center');
-        return;
-      }
-
-      // Tablet positioning logic
-      if (screenSize === 'tablet') {
-        if (interferences.hasActiveEditors || interferences.hasRightSideInterferences) {
-          setPosition('bottom-center'); // Use horizontal bar when corners blocked
-        } else {
-          setPosition('bottom-right'); // Default corner position
-        }
-        return;
-      }
-
-      // Desktop positioning logic
-      const positions: Array<{pos: FloatingPosition, priority: number}> = [
-        { pos: 'bottom-right', priority: 1 },
-        { pos: 'bottom-left', priority: 2 },
-        { pos: 'top-right', priority: 3 },
-        { pos: 'top-left', priority: 4 }
-      ];
-
-      let optimalPosition: FloatingPosition = 'bottom-right';
-
-      // Check for right-side obstructions
-      if (interferences.hasRightSideInterferences) {
-        optimalPosition = 'bottom-left';
-      }
-      
-      // If active editors are detected, use fallback positions
-      if (interferences.hasActiveEditors) {
-        // Check if bottom-right area is actually obstructed
-        const bottomRightRect = {
-          left: window.innerWidth - 320, // Account for indicator width + margin
-          top: window.innerHeight - 200, // Account for indicator height + margin
-          right: window.innerWidth,
-          bottom: window.innerHeight
-        };
-
-        // Check if any active editor intersects with bottom-right area
-        let isBottomRightObstructed = false;
-        interferences.activeEditors.forEach(editor => {
-          if (editor instanceof Element) {
-            const editorRect = editor.getBoundingClientRect();
-            if (editorRect.right > bottomRightRect.left && 
-                editorRect.bottom > bottomRightRect.top) {
-              isBottomRightObstructed = true;
-            }
-          }
-        });
-
-        if (isBottomRightObstructed) {
-          optimalPosition = 'bottom-left';
-        }
-      }
-
-      setPosition(optimalPosition);
+    const updatePosition = () => {
+      const newPosition = getOptimalPosition();
+      setPosition(newPosition);
     };
 
-    findOptimalPosition();
+    updatePosition();
     
     // Re-evaluate position on resize with debouncing
     const handleResize = () => {
       if (positionTimeoutRef.current) {
         clearTimeout(positionTimeoutRef.current);
       }
-      positionTimeoutRef.current = setTimeout(findOptimalPosition, 150);
+      positionTimeoutRef.current = setTimeout(updatePosition, 150);
     };
 
     // Monitor for DOM changes that might affect positioning
@@ -155,14 +139,14 @@ export default function FloatingProgressIndicator({
       if (positionTimeoutRef.current) {
         clearTimeout(positionTimeoutRef.current);
       }
-      positionTimeoutRef.current = setTimeout(findOptimalPosition, 100);
+      positionTimeoutRef.current = setTimeout(updatePosition, 100);
     });
 
     observer.observe(document.body, {
       childList: true,
       subtree: true,
       attributes: true,
-      attributeFilter: ['class', 'data-editor-active', 'role']
+      attributeFilter: ['class', 'data-editor-active', 'role', 'data-state']
     });
 
     window.addEventListener('resize', handleResize);
@@ -176,8 +160,52 @@ export default function FloatingProgressIndicator({
     };
   }, [isVisible, screenSize]);
 
+  // SVG Progress Ring Component
+  const ProgressRing = ({ size, strokeWidth, percentage }: { size: number; strokeWidth: number; percentage: number }) => {
+    const radius = (size - strokeWidth) / 2;
+    const circumference = 2 * Math.PI * radius;
+    const strokeDashoffset = circumference - (percentage / 100) * circumference;
+    
+    return (
+      <div className="relative" style={{ width: size, height: size }}>
+        <svg
+          className="transform -rotate-90"
+          width={size}
+          height={size}
+        >
+          {/* Background circle */}
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke="currentColor"
+            strokeWidth={strokeWidth}
+            fill="transparent"
+            className="text-muted/20"
+          />
+          {/* Progress circle */}
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke="currentColor"
+            strokeWidth={strokeWidth}
+            fill="transparent"
+            strokeDasharray={circumference}
+            strokeDashoffset={strokeDashoffset}
+            strokeLinecap="round"
+            className="text-primary transition-all duration-700 ease-out"
+          />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-xs font-bold text-primary">{percentage}%</span>
+        </div>
+      </div>
+    );
+  };
+
   const getPositionClasses = () => {
-    const baseClasses = "fixed z-50 transition-all duration-500 ease-out";
+    const baseClasses = "fixed z-50 transition-all duration-300 ease-in-out";
     
     if (position === 'bottom-center') {
       return `${baseClasses} bottom-4 left-1/2 transform -translate-x-1/2`;
@@ -217,18 +245,7 @@ export default function FloatingProgressIndicator({
         <div className="backdrop-blur-md bg-background/90 border border-border/50 rounded-lg shadow-lg mx-4 px-4 py-3">
           <div className="flex items-center justify-between gap-3">
             {/* Progress Circle - Smaller for mobile */}
-            <div className="relative w-8 h-8 flex-shrink-0">
-              <div className="absolute inset-0 rounded-full border-2 border-muted/30"></div>
-              <div 
-                className="absolute inset-0 rounded-full border-2 border-primary border-t-transparent transition-transform duration-700 ease-out"
-                style={{ 
-                  transform: `rotate(${(completionPercentage / 100) * 360}deg)`,
-                }}
-              />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-xs font-bold text-primary">{completionPercentage}%</span>
-              </div>
-            </div>
+            <ProgressRing size={32} strokeWidth={2} percentage={completionPercentage} />
             
             {/* Progress Info */}
             <div className="flex-1 min-w-0">
@@ -276,18 +293,7 @@ export default function FloatingProgressIndicator({
         <div className="backdrop-blur-md bg-background/85 border border-border/40 rounded-xl shadow-elegant mx-6 p-4">
           <div className="flex items-center gap-4">
             {/* Progress Circle */}
-            <div className="relative w-10 h-10 flex-shrink-0">
-              <div className="absolute inset-0 rounded-full border-3 border-muted/20"></div>
-              <div 
-                className="absolute inset-0 rounded-full border-3 border-primary border-t-transparent transition-transform duration-700 ease-out"
-                style={{ 
-                  transform: `rotate(${(completionPercentage / 100) * 360}deg)`,
-                }}
-              />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-xs font-bold text-primary">{completionPercentage}%</span>
-              </div>
-            </div>
+            <ProgressRing size={40} strokeWidth={3} percentage={completionPercentage} />
             
             {/* Progress Details */}
             <div className="flex-1">
@@ -337,18 +343,7 @@ export default function FloatingProgressIndicator({
       <div className="backdrop-blur-md bg-background/80 border border-border/30 rounded-xl shadow-elegant min-w-[280px] p-4">
         <div className="flex items-center gap-3 mb-3">
           {/* Circular Progress Ring */}
-          <div className="relative w-12 h-12">
-            <div className="absolute inset-0 rounded-full border-4 border-muted/20"></div>
-            <div 
-              className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent transition-transform duration-700 ease-out"
-              style={{ 
-                transform: `rotate(${(completionPercentage / 100) * 360}deg)`,
-              }}
-            />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-xs font-bold text-primary">{completionPercentage}%</span>
-            </div>
-          </div>
+          <ProgressRing size={48} strokeWidth={4} percentage={completionPercentage} />
           
           <div>
             <p className="text-sm font-medium text-foreground">
