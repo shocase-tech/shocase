@@ -386,7 +386,7 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
       <div className="space-y-3">
         <Label>Profile Photo</Label>
         {formData.profile_photo_url ? (
-          <div className="relative inline-block">
+          <div className="relative block">
             <PrivateImage
               storagePath={formData.profile_photo_url}
               alt="Profile photo"
