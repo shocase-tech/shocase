@@ -277,10 +277,18 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     
-    // Reset drag state
-    setIsDragActive(false);
+    console.log("🎯 Gallery: Drag ended, active:", active.id, "over:", over?.id);
+    
+    // Reset preview order and dragged index immediately
     setDraggedIndex(null);
     setPreviewOrder(null);
+    
+    // Delay resetting isDragActive to prevent click-outside from triggering
+    // during the mouseup event that ends the drag
+    setTimeout(() => {
+      console.log("🎯 Gallery: Resetting drag active state");
+      setIsDragActive(false);
+    }, 100);
 
     if (active.id !== over?.id) {
       setPhotos((items) => {
@@ -484,10 +492,17 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
   // Auto-save and close handler
   const handleAutoSaveAndClose = useCallback(async () => {
     console.log("🔍 GalleryEditor: Click-outside detected, handleAutoSaveAndClose called");
+    console.log("🔍 GalleryEditor: Current state - isDragActive:", isDragActive, "isSaving:", isSaving, "loading:", loading);
     
-    // Prevent closing during drag operations
+    // Prevent closing during drag operations or recent drag completion
     if (isDragActive || isSaving || loading) {
       console.log("🔍 GalleryEditor: Ignoring click-outside during drag or save operation");
+      return;
+    }
+    
+    // Additional check for any drag-related elements still present
+    if (document.querySelector('[data-dragging="true"]')) {
+      console.log("🔍 GalleryEditor: Found dragging element, ignoring click-outside");
       return;
     }
     

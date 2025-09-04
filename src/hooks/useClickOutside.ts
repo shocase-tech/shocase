@@ -11,15 +11,27 @@ export function useClickOutside<T extends HTMLElement>(
     if (!enabled) return;
 
     function handleClickOutside(event: MouseEvent) {
-      console.log("🔍 useClickOutside: Click detected, checking if outside element");
+      console.log("🔍 useClickOutside: Click detected, event type:", event.type, "target:", event.target);
       
       // Ignore drag events to prevent closing editor during drag operations
       const target = event.target as Element;
-      if (target?.closest('[data-dragging="true"]') || 
+      
+      // Enhanced drag detection - check for any ongoing drag state
+      const isDragRelated = target?.closest('[data-dragging="true"]') || 
           target?.closest('.sortable-item') ||
+          target?.hasAttribute('data-sortable-handle') ||
+          target?.closest('[data-sortable-handle="true"]') ||
+          // Check if target is within a dnd-kit drag overlay
+          target?.closest('.dnd-sortable') ||
+          target?.closest('[role="button"][draggable]') ||
+          // Check for recent drag operations (within 200ms)
+          document.querySelector('[data-dragging="true"]') !== null;
+      
+      if (isDragRelated ||
           event.type === 'dragstart' || 
           event.type === 'dragend' ||
-          target?.hasAttribute('data-sortable-handle') ||
+          event.type === 'drag' ||
+          event.type === 'dragover' ||
           // Ignore date picker and calendar elements
           target?.closest('.react-datepicker') ||
           target?.closest('.react-datepicker-popper') ||
@@ -28,7 +40,7 @@ export function useClickOutside<T extends HTMLElement>(
           target?.closest('.calendar') ||
           target?.closest('[data-state="open"]') ||
           target?.closest('[aria-expanded="true"]')) {
-        console.log("🔍 useClickOutside: Ignoring drag/calendar-related event");
+        console.log("🔍 useClickOutside: Ignoring drag/calendar-related event, isDragRelated:", isDragRelated);
         return;
       }
       
