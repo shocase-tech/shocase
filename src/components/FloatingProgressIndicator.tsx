@@ -5,8 +5,8 @@ import { CheckCircle, Circle, Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-type FloatingPosition = 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left' | 'bottom-center';
-type ScreenSize = 'mobile' | 'tablet' | 'desktop';
+type FloatingPosition = 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
+type DisplayMode = 'corner' | 'banner';
 
 interface FloatingProgressIndicatorProps {
   completionPercentage: number;
@@ -24,122 +24,145 @@ export default function FloatingProgressIndicator({
   onTogglePublish
 }: FloatingProgressIndicatorProps) {
   const [position, setPosition] = useState<FloatingPosition>('bottom-right');
-  const [screenSize, setScreenSize] = useState<ScreenSize>('desktop');
+  const [displayMode, setDisplayMode] = useState<DisplayMode>('corner');
   const positionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isMobile = useIsMobile();
   const incompleteMilestones = milestones.filter(m => !m.completed).slice(0, 2);
   const completedCount = milestones.filter(m => m.completed).length;
 
-  // Detect screen size
-  useEffect(() => {
-    const updateScreenSize = () => {
-      const width = window.innerWidth;
-      if (width < 640) {
-        setScreenSize('mobile');
-      } else if (width < 1024) {
-        setScreenSize('tablet');
-      } else {
-        setScreenSize('desktop');
-      }
-    };
-
-    updateScreenSize();
-    window.addEventListener('resize', updateScreenSize);
-    return () => window.removeEventListener('resize', updateScreenSize);
-  }, []);
-
-  // Smart collision detection for editing interfaces
-  const getOptimalPosition = (): FloatingPosition => {
-    // Mobile: Always use bottom-center banner
-    if (screenSize === 'mobile') {
-      return 'bottom-center';
+  // Calculate safe corner areas
+  const getCornerBounds = (corner: FloatingPosition) => {
+    const width = 320; // indicator width
+    const height = 200; // indicator height
+    const margin = 24; // margin from edges
+    
+    switch (corner) {
+      case 'bottom-right':
+        return {
+          left: window.innerWidth - width - margin,
+          top: window.innerHeight - height - margin,
+          right: window.innerWidth - margin,
+          bottom: window.innerHeight - margin
+        };
+      case 'bottom-left':
+        return {
+          left: margin,
+          top: window.innerHeight - height - margin,
+          right: margin + width,
+          bottom: window.innerHeight - margin
+        };
+      case 'top-right':
+        return {
+          left: window.innerWidth - width - margin,
+          top: margin,
+          right: window.innerWidth - margin,
+          bottom: margin + height
+        };
+      case 'top-left':
+        return {
+          left: margin,
+          top: margin,
+          right: margin + width,
+          bottom: margin + height
+        };
     }
-
-    // Check for actual obstructions
-    const isBottomRightBlocked = () => {
-      const bottomRightArea = {
-        left: window.innerWidth - 320,
-        top: window.innerHeight - 200,
-        right: window.innerWidth - 24,
-        bottom: window.innerHeight - 24
-      };
-
-      const obstructions = document.querySelectorAll(
-        '[data-editor-active="true"], .inline-editor-active, .gallery-editor-active, .mentions-editor-active, .shows-editor-active, [role="dialog"]:not([data-state="closed"]), .sheet-content'
-      );
-
-      for (const obstruction of obstructions) {
-        const rect = obstruction.getBoundingClientRect();
-        if (rect.right > bottomRightArea.left && 
-            rect.bottom > bottomRightArea.top &&
-            rect.left < bottomRightArea.right &&
-            rect.top < bottomRightArea.bottom) {
-          return true;
-        }
-      }
-      return false;
-    };
-
-    const isBottomLeftBlocked = () => {
-      const bottomLeftArea = {
-        left: 24,
-        top: window.innerHeight - 200,
-        right: 344,
-        bottom: window.innerHeight - 24
-      };
-
-      const obstructions = document.querySelectorAll(
-        '[data-editor-active="true"], .inline-editor-active, .gallery-editor-active, .mentions-editor-active, .shows-editor-active, [role="dialog"]:not([data-state="closed"]), .sheet-content'
-      );
-
-      for (const obstruction of obstructions) {
-        const rect = obstruction.getBoundingClientRect();
-        if (rect.right > bottomLeftArea.left && 
-            rect.bottom > bottomLeftArea.top &&
-            rect.left < bottomLeftArea.right &&
-            rect.top < bottomLeftArea.bottom) {
-          return true;
-        }
-      }
-      return false;
-    };
-
-    // For tablets, prefer bottom-center if space is limited
-    if (screenSize === 'tablet' && window.innerWidth < 900) {
-      return 'bottom-center';
-    }
-
-    // Optimal position priority: bottom-right > bottom-left > top-right > top-left
-    if (!isBottomRightBlocked()) return 'bottom-right';
-    if (!isBottomLeftBlocked()) return 'bottom-left';
-    return 'top-right'; // Fallback to top-right
   };
 
-  // Dynamic positioning logic
+  // Check if corner position is blocked by editing elements
+  const isCornerBlocked = (corner: FloatingPosition): boolean => {
+    const cornerBounds = getCornerBounds(corner);
+    
+    // Query for active editing elements that might block the indicator
+    const obstructions = document.querySelectorAll([
+      '[data-editor-active="true"]',
+      '.inline-editor-active', 
+      '.gallery-editor-active', 
+      '.mentions-editor-active', 
+      '.shows-editor-active',
+      '[role="dialog"]:not([data-state="closed"])',
+      '.sheet-content',
+      '.popover-content',
+      '.dropdown-content',
+      '.toast-viewport'
+    ].join(', '));
+
+    for (const obstruction of obstructions) {
+      const rect = obstruction.getBoundingClientRect();
+      
+      // Check for overlap
+      if (rect.right > cornerBounds.left && 
+          rect.bottom > cornerBounds.top &&
+          rect.left < cornerBounds.right &&
+          rect.top < cornerBounds.bottom) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  // Determine optimal display mode and position
+  const getOptimalDisplay = (): { mode: DisplayMode; position: FloatingPosition } => {
+    const screenWidth = window.innerWidth;
+    
+    // Mobile: Always use banner mode
+    if (screenWidth < 768) {
+      return { mode: 'banner', position: 'bottom-right' };
+    }
+
+    // Check available corner space - priority order
+    const cornerPriority: FloatingPosition[] = ['bottom-right', 'bottom-left', 'top-right', 'top-left'];
+    
+    for (const corner of cornerPriority) {
+      if (!isCornerBlocked(corner)) {
+        return { mode: 'corner', position: corner };
+      }
+    }
+
+    // If all corners blocked or narrow screen, use banner
+    if (screenWidth < 900) {
+      return { mode: 'banner', position: 'bottom-right' };
+    }
+
+    // Fallback to top-right corner even if partially blocked
+    return { mode: 'corner', position: 'top-right' };
+  };
+
+  // Dynamic positioning and mode logic
   useEffect(() => {
     if (!isVisible) return;
 
-    const updatePosition = () => {
-      const newPosition = getOptimalPosition();
-      setPosition(newPosition);
+    const updateDisplay = () => {
+      const { mode, position } = getOptimalDisplay();
+      setDisplayMode(mode);
+      setPosition(position);
+      
+      // Add/remove body padding for banner mode
+      const mainContent = document.querySelector('main');
+      if (mainContent) {
+        if (mode === 'banner') {
+          mainContent.style.paddingBottom = '80px';
+        } else {
+          mainContent.style.paddingBottom = '';
+        }
+      }
     };
 
-    updatePosition();
+    updateDisplay();
     
-    // Re-evaluate position on resize with debouncing
+    // Re-evaluate on resize with debouncing
     const handleResize = () => {
       if (positionTimeoutRef.current) {
         clearTimeout(positionTimeoutRef.current);
       }
-      positionTimeoutRef.current = setTimeout(updatePosition, 150);
+      positionTimeoutRef.current = setTimeout(updateDisplay, 150);
     };
 
-    // Monitor for DOM changes that might affect positioning
+    // Monitor DOM changes for editing states
     const observer = new MutationObserver(() => {
       if (positionTimeoutRef.current) {
         clearTimeout(positionTimeoutRef.current);
       }
-      positionTimeoutRef.current = setTimeout(updatePosition, 100);
+      positionTimeoutRef.current = setTimeout(updateDisplay, 100);
     });
 
     observer.observe(document.body, {
@@ -157,8 +180,14 @@ export default function FloatingProgressIndicator({
       if (positionTimeoutRef.current) {
         clearTimeout(positionTimeoutRef.current);
       }
+      
+      // Clean up body padding
+      const mainContent = document.querySelector('main');
+      if (mainContent) {
+        mainContent.style.paddingBottom = '';
+      }
     };
-  }, [isVisible, screenSize]);
+  }, [isVisible]);
 
   // SVG Progress Ring Component
   const ProgressRing = ({ size, strokeWidth, percentage }: { size: number; strokeWidth: number; percentage: number }) => {
@@ -192,7 +221,7 @@ export default function FloatingProgressIndicator({
             strokeWidth={strokeWidth}
             fill="transparent"
             strokeDasharray={circumference}
-            strokeDashoffset={strokeDashoffset}
+            strokeDashoffset={percentage >= 100 ? 0 : strokeDashoffset}
             strokeLinecap="round"
             className="text-primary transition-all duration-700 ease-out"
           />
@@ -207,8 +236,8 @@ export default function FloatingProgressIndicator({
   const getPositionClasses = () => {
     const baseClasses = "fixed z-50 transition-all duration-300 ease-in-out";
     
-    if (position === 'bottom-center') {
-      return `${baseClasses} bottom-4 left-1/2 transform -translate-x-1/2`;
+    if (displayMode === 'banner') {
+      return `${baseClasses} bottom-0 left-0 right-0`;
     }
     
     const positions = {
@@ -218,12 +247,12 @@ export default function FloatingProgressIndicator({
       'top-left': 'top-6 left-6'
     };
     
-    return `${baseClasses} ${positions[position as keyof typeof positions]}`;
+    return `${baseClasses} ${positions[position]}`;
   };
 
   const getTransformClasses = () => {
     if (!isVisible) {
-      if (position === 'bottom-center') {
+      if (displayMode === 'banner') {
         return "opacity-0 scale-95 pointer-events-none translate-y-8";
       }
       return "opacity-0 scale-95 pointer-events-none " + 
@@ -232,105 +261,50 @@ export default function FloatingProgressIndicator({
     return "opacity-100 scale-100 translate-x-0 translate-y-0";
   };
 
-  // Mobile banner design
-  if (screenSize === 'mobile' && position === 'bottom-center') {
-    return (
-      <div 
-        className={cn(
-          getPositionClasses(), 
-          getTransformClasses(),
-          "pb-safe" // Account for mobile browser UI
-        )}
-      >
-        <div className="backdrop-blur-md bg-background/90 border border-border/50 rounded-lg shadow-lg mx-4 px-4 py-3">
-          <div className="flex items-center justify-between gap-3">
-            {/* Progress Circle - Smaller for mobile */}
-            <ProgressRing size={32} strokeWidth={2} percentage={completionPercentage} />
-            
-            {/* Progress Info */}
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">
-                EPK Progress ({completedCount}/{milestones.length})
-              </p>
-              {completionPercentage === 100 ? (
-                <p className="text-xs text-accent">Complete!</p>
-              ) : (
-                <p className="text-xs text-muted-foreground truncate">
-                  {incompleteMilestones[0]?.label || 'Keep going!'}
-                </p>
-              )}
-            </div>
-
-            {/* Publish Button */}
-            {profile && onTogglePublish && (
-              <Button
-                onClick={onTogglePublish}
-                variant={profile.is_published ? "outline" : "default"}
-                size="sm"
-                className={cn(
-                  "flex items-center gap-1 text-xs px-3 py-2 transition-all duration-200 flex-shrink-0",
-                  profile.is_published 
-                    ? "border-orange-500/50 text-orange-600 hover:bg-orange-500/10" 
-                    : "bg-green-600 hover:bg-green-700 text-white"
-                )}
-              >
-                {profile.is_published ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                <span className="hidden xs:inline">
-                  {profile.is_published ? "Unpublish" : "Publish"}
-                </span>
-              </Button>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Tablet horizontal bar design
-  if (screenSize === 'tablet' && position === 'bottom-center') {
+  // Bottom banner mode for mobile and constrained layouts
+  if (displayMode === 'banner') {
     return (
       <div className={cn(getPositionClasses(), getTransformClasses())}>
-        <div className="backdrop-blur-md bg-background/85 border border-border/40 rounded-xl shadow-elegant mx-6 p-4">
-          <div className="flex items-center gap-4">
-            {/* Progress Circle */}
-            <ProgressRing size={40} strokeWidth={3} percentage={completionPercentage} />
-            
-            {/* Progress Details */}
-            <div className="flex-1">
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-sm font-medium text-foreground">EPK Progress</p>
-                <p className="text-xs text-muted-foreground">{completedCount} of {milestones.length} complete</p>
-              </div>
-              
-              {completionPercentage === 100 ? (
-                <div className="flex items-center gap-2 text-xs text-accent">
-                  <CheckCircle className="w-3 h-3" />
-                  <span>EPK Complete!</span>
+        <div className="backdrop-blur-md bg-background/95 border-t border-border/50 shadow-lg">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between gap-4">
+              {/* Progress Info */}
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <ProgressRing size={36} strokeWidth={3} percentage={completionPercentage} />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-foreground truncate">
+                    EPK Progress ({completedCount}/{milestones.length})
+                  </p>
+                  {completionPercentage === 100 ? (
+                    <p className="text-xs text-green-600">Complete!</p>
+                  ) : (
+                    <p className="text-xs text-muted-foreground truncate">
+                      Next: {incompleteMilestones[0]?.label || 'Keep going!'}
+                    </p>
+                  )}
                 </div>
-              ) : (
-                <p className="text-xs text-muted-foreground">
-                  Next: {incompleteMilestones[0]?.label || 'Finish remaining steps'}
-                </p>
+              </div>
+
+              {/* Publish Button */}
+              {profile && onTogglePublish && (
+                <Button
+                  onClick={onTogglePublish}
+                  variant={profile.is_published ? "outline" : "default"}
+                  size="sm"
+                  className={cn(
+                    "flex items-center gap-2 text-xs px-4 py-2 transition-all duration-200 flex-shrink-0",
+                    profile.is_published 
+                      ? "border-orange-500/50 text-orange-600 hover:bg-orange-500/10" 
+                      : "bg-green-600 hover:bg-green-700 text-white"
+                  )}
+                >
+                  {profile.is_published ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                  <span className="hidden sm:inline">
+                    {profile.is_published ? "Unpublish" : "Publish"}
+                  </span>
+                </Button>
               )}
             </div>
-
-            {/* Publish Button */}
-            {profile && onTogglePublish && (
-              <Button
-                onClick={onTogglePublish}
-                variant={profile.is_published ? "outline" : "default"}
-                size="sm"
-                className={cn(
-                  "flex items-center gap-2 text-xs px-4 py-2 transition-all duration-200 flex-shrink-0",
-                  profile.is_published 
-                    ? "border-orange-500/50 text-orange-600 hover:bg-orange-500/10" 
-                    : "bg-green-600 hover:bg-green-700 text-white"
-                )}
-              >
-                {profile.is_published ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                {profile.is_published ? "Unpublish" : "Publish"}
-              </Button>
-            )}
           </div>
         </div>
       </div>
