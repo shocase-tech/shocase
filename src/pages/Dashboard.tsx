@@ -302,7 +302,7 @@ export default function Dashboard() {
       toast({
         title: newStatus ? "Press kit published!" : "Press kit unpublished",
         description: newStatus 
-          ? `Your press kit is now live at ${window.location.origin}/artist/${urlSlug}`
+          ? `Your press kit is now live at ${window.location.origin}/${urlSlug}`
           : "Your press kit is now private",
       });
     } catch (error: any) {
@@ -318,7 +318,7 @@ export default function Dashboard() {
   const copyPublicLink = async () => {
     if (!profile || !profile.is_published) return;
     
-    const publicUrl = `${window.location.origin}/artist/${profile.url_slug || profile.id}`;
+    const publicUrl = `${window.location.origin}/${profile.url_slug || profile.id}`;
     try {
       await navigator.clipboard.writeText(publicUrl);
       toast({
@@ -339,7 +339,7 @@ export default function Dashboard() {
     
     // Generate URL slug if needed for preview
     const identifier = profile.url_slug || profile.id;
-    const previewUrl = `/artist/${identifier}`;
+    const previewUrl = `/${identifier}`;
     
     console.log("Opening preview URL:", previewUrl, "Profile:", { 
       id: profile.id, 

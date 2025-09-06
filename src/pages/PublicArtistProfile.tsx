@@ -243,7 +243,7 @@ export default function PublicArtistProfile() {
             : `${profile?.artist_name || 'Artist'} press kit`
         } />
         <meta name="twitter:image" content={profile?.hero_photo_url || profile?.profile_photo_url || '/favicon.png'} />
-        <link rel="canonical" href={`${window.location.origin}/artist/${profile?.url_slug || profile?.id || 'unknown'}`} />
+        <link rel="canonical" href={`${window.location.origin}/${profile?.url_slug || profile?.id || 'unknown'}`} />
       </Helmet>
 
       <div className="min-h-screen bg-gradient-dark">

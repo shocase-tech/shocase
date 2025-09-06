@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { User } from "@supabase/supabase-js";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,6 +33,17 @@ export default function SimplePublicProfile() {
   const [profile, setProfile] = useState<SimpleProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [isOwnerPreview, setIsOwnerPreview] = useState(false);
+
+  useEffect(() => {
+    // Check if user is authenticated
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user || null);
+    };
+    checkAuth();
+  }, []);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -75,6 +87,41 @@ export default function SimplePublicProfile() {
         }
 
         if (!data) {
+          // If no published profile found and user is authenticated, try to get their own unpublished profile
+          if (user) {
+            console.log("No published profile found, checking if this is owner's unpublished profile");
+            
+            // First try by url_slug
+            let { data: userProfile, error: userError } = await supabase
+              .from('artist_profiles')
+              .select('*')
+              .eq('user_id', user.id)
+              .eq('url_slug', identifier)
+              .maybeSingle();
+
+            // If not found by slug, try by ID
+            if (!userProfile && !userError) {
+              const result = await supabase
+                .from('artist_profiles')
+                .select('*')
+                .eq('user_id', user.id)
+                .eq('id', identifier)
+                .maybeSingle();
+              
+              userProfile = result.data;
+              userError = result.error;
+            }
+
+            if (!userError && userProfile) {
+              console.log("Owner viewing unpublished profile:", userProfile.artist_name);
+              setProfile(userProfile);
+              setIsOwnerPreview(true);
+              setError(null);
+              setLoading(false);
+              return;
+            }
+          }
+          
           console.log("No profile found");
           setError("Profile not found or not published");
           setLoading(false);
@@ -92,7 +139,7 @@ export default function SimplePublicProfile() {
     };
 
     fetchProfile();
-  }, [identifier]);
+  }, [identifier, user]);
 
   if (loading) {
     return (
@@ -150,6 +197,21 @@ export default function SimplePublicProfile() {
 
   return (
     <div className="min-h-screen bg-gradient-dark">
+      {/* Owner Preview Banner */}
+      {isOwnerPreview && !profile.is_published && (
+        <div className="bg-yellow-600/90 backdrop-blur-sm border-b border-yellow-500/50 sticky top-0 z-50">
+          <div className="container mx-auto px-4 py-3">
+            <div className="flex items-center justify-center gap-3 text-yellow-100">
+              <Star className="w-5 h-5" />
+              <span className="font-medium">
+                Preview Mode - This EPK is not published yet. Only you can see this page.
+              </span>
+              <Star className="w-5 h-5" />
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Hero Section */}
       <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
         {profile.hero_photo_url && (
