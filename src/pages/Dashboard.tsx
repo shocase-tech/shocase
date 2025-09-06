@@ -339,7 +339,7 @@ export default function Dashboard() {
     
     // Generate URL slug if needed for preview
     const identifier = profile.url_slug || profile.id;
-    const previewUrl = `/${identifier}`;
+    const previewUrl = `/preview/${identifier}`;
     
     console.log("Opening preview URL:", previewUrl, "Profile:", { 
       id: profile.id, 
