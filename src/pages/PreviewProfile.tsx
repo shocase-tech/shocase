@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Music, Instagram, Globe, ExternalLink, Calendar, MapPin, Users, Ticket } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import { Helmet } from 'react-helmet-async';
 
 interface PreviewProfile {
@@ -37,6 +38,7 @@ interface PreviewProfile {
 const PreviewProfile = () => {
   const { identifier } = useParams<{ identifier: string }>();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [profile, setProfile] = useState<PreviewProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -121,6 +123,19 @@ const PreviewProfile = () => {
     fetchProfile();
   }, [identifier, user, navigate]);
 
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-dark">
@@ -189,26 +204,39 @@ const PreviewProfile = () => {
       </Helmet>
 
       <div className="min-h-screen bg-gradient-dark">
-        {/* Preview Banner */}
-        <div className="bg-yellow-500/20 border-b border-yellow-500/30 px-4 py-3">
-          <div className="container mx-auto max-w-7xl">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-100 border-yellow-500/30">
-                  Preview Mode
-                </Badge>
-                <span className="text-sm text-yellow-100">
-                  {profile.is_published ? 'This is how your published EPK appears' : 'Preview your unpublished EPK'}
-                </span>
-              </div>
+        {/* Dashboard Header */}
+        <header className="sticky top-0 z-50 border-b border-white/10 backdrop-blur-sm bg-background/80">
+          <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <h1 className="text-xl font-bold gradient-text">Press Kit Builder</h1>
+              <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-100 border-yellow-500/30">
+                Preview Mode
+              </Badge>
+            </div>
+            <div className="flex items-center gap-3">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => navigate('/dashboard')}
-                className="border-yellow-500/30 text-yellow-100 hover:bg-yellow-500/10"
+                className="flex items-center gap-2"
               >
+                <ExternalLink className="w-4 h-4" />
                 Back to Dashboard
               </Button>
+              <Button variant="outline" size="sm" onClick={handleSignOut}>
+                Sign Out
+              </Button>
+            </div>
+          </div>
+        </header>
+
+        {/* Preview Banner */}
+        <div className="bg-yellow-500/20 border-b border-yellow-500/30 px-4 py-3">
+          <div className="container mx-auto max-w-7xl">
+            <div className="flex items-center justify-center">
+              <span className="text-sm text-yellow-100">
+                {profile.is_published ? 'This is how your published EPK appears to the public' : 'Preview your unpublished EPK - only you can see this'}
+              </span>
             </div>
           </div>
         </div>
