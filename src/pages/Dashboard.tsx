@@ -337,18 +337,19 @@ export default function Dashboard() {
   const previewProfile = () => {
     if (!profile) return;
     
-    // Generate URL slug if needed for preview
     const identifier = profile.url_slug || profile.id;
-    const previewUrl = `/preview/${identifier}`;
     
-    console.log("Opening preview URL:", previewUrl, "Profile:", { 
-      id: profile.id, 
-      slug: profile.url_slug, 
-      published: profile.is_published,
-      artistName: profile.artist_name 
-    });
-    
-    window.open(previewUrl, '_blank');
+    if (profile.is_published) {
+      // For published EPKs, navigate to public page
+      const publicUrl = `/${identifier}`;
+      console.log("Opening public EPK URL:", publicUrl);
+      window.open(publicUrl, '_blank');
+    } else {
+      // For unpublished EPKs, navigate to preview page
+      const previewUrl = `/preview/${identifier}`;
+      console.log("Opening preview URL:", previewUrl);
+      window.open(previewUrl, '_blank');
+    }
   };
 
   if (loading) {
