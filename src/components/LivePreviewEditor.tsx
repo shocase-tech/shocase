@@ -14,6 +14,12 @@ import { useAutoSave } from "@/hooks/useAutoSave";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 
+// Import streaming service icons
+import spotifyIcon from "@/assets/streaming/spotify-color.png";
+import appleIcon from "@/assets/streaming/apple-music-color.svg";
+import bandcampIcon from "@/assets/streaming/bandcamp-color.png";
+import soundcloudIcon from "@/assets/streaming/soundcloud-color.png";
+
 interface LivePreviewEditorProps {
   profile: any;
   onProfileUpdated: (updatedData?: any) => void;
@@ -381,7 +387,7 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
                           className="p-1 rounded-md hover:bg-white/10 transition-colors"
                         >
                           <img 
-                            src="/src/assets/streaming/spotify-color.png" 
+                            src={spotifyIcon} 
                             alt="Spotify" 
                             className="w-6 h-6"
                           />
@@ -395,7 +401,7 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
                           className="p-1 rounded-md hover:bg-white/10 transition-colors"
                         >
                           <img 
-                            src="/src/assets/streaming/apple-music-color.svg" 
+                            src={appleIcon} 
                             alt="Apple Music" 
                             className="w-6 h-6"
                           />
@@ -409,7 +415,7 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
                           className="p-1 rounded-md hover:bg-white/10 transition-colors"
                         >
                           <img 
-                            src="/src/assets/streaming/bandcamp-color.png" 
+                            src={bandcampIcon} 
                             alt="Bandcamp" 
                             className="w-6 h-6"
                           />
@@ -423,7 +429,7 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
                           className="p-1 rounded-md hover:bg-white/10 transition-colors"
                         >
                           <img 
-                            src="/src/assets/streaming/soundcloud-color.png" 
+                            src={soundcloudIcon} 
                             alt="SoundCloud" 
                             className="w-6 h-6"
                           />

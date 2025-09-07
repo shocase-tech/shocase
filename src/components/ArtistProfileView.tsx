@@ -6,6 +6,12 @@ import DragDropSection from "@/components/DragDropSection";
 import PrivateImage from "@/components/PrivateImage";
 import { useState } from "react";
 
+// Import streaming service icons
+import spotifyIcon from "@/assets/streaming/spotify-color.png";
+import appleIcon from "@/assets/streaming/apple-music-color.svg";
+import bandcampIcon from "@/assets/streaming/bandcamp-color.png";
+import soundcloudIcon from "@/assets/streaming/soundcloud-color.png";
+
 interface ArtistProfile {
   id: string;
   user_id: string;
@@ -349,7 +355,7 @@ export default function ArtistProfileView({ profile }: ArtistProfileViewProps) {
                               className="p-2 rounded-lg hover:bg-white/10 transition-colors"
                             >
                               <img 
-                                src="/src/assets/streaming/spotify-color.png" 
+                                src={spotifyIcon} 
                                 alt="Spotify" 
                                 className="w-8 h-8"
                               />
@@ -363,7 +369,7 @@ export default function ArtistProfileView({ profile }: ArtistProfileViewProps) {
                               className="p-2 rounded-lg hover:bg-white/10 transition-colors"
                             >
                               <img 
-                                src="/src/assets/streaming/apple-music-color.svg" 
+                                src={appleIcon} 
                                 alt="Apple Music" 
                                 className="w-8 h-8"
                               />
@@ -377,7 +383,7 @@ export default function ArtistProfileView({ profile }: ArtistProfileViewProps) {
                               className="p-2 rounded-lg hover:bg-white/10 transition-colors"
                             >
                               <img 
-                                src="/src/assets/streaming/bandcamp-color.png" 
+                                src={bandcampIcon} 
                                 alt="Bandcamp" 
                                 className="w-8 h-8"
                               />
@@ -391,7 +397,7 @@ export default function ArtistProfileView({ profile }: ArtistProfileViewProps) {
                               className="p-2 rounded-lg hover:bg-white/10 transition-colors"
                             >
                               <img 
-                                src="/src/assets/streaming/soundcloud-color.png" 
+                                src={soundcloudIcon} 
                                 alt="SoundCloud" 
                                 className="w-8 h-8"
                               />
