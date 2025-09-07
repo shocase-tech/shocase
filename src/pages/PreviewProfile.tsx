@@ -43,24 +43,33 @@ const PreviewProfile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setUser(session?.user ?? null);
+        setAuthLoading(false);
       }
     );
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+      setAuthLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
+    // Don't redirect immediately - wait for auth state to load
+    if (authLoading) {
+      // Auth state is still loading, do nothing
+      return;
+    }
+    
     if (!user) {
-      // Redirect to auth if not logged in
+      // User is definitely not logged in
       navigate('/auth');
       return;
     }
@@ -121,7 +130,7 @@ const PreviewProfile = () => {
     };
 
     fetchProfile();
-  }, [identifier, user, navigate]);
+  }, [identifier, user, navigate, authLoading]);
 
   const handleSignOut = async () => {
     try {
