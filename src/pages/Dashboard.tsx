@@ -340,15 +340,15 @@ export default function Dashboard() {
     const identifier = profile.url_slug || profile.id;
     
     if (profile.is_published) {
-      // For published EPKs, navigate to public page
+      // For published EPKs, open in new tab
       const publicUrl = `/${identifier}`;
       console.log("Opening public EPK URL:", publicUrl);
       window.open(publicUrl, '_blank');
     } else {
-      // For unpublished EPKs, navigate to preview page
+      // For unpublished EPKs, navigate in same tab to preview
       const previewUrl = `/preview/${identifier}`;
-      console.log("Opening preview URL:", previewUrl);
-      window.open(previewUrl, '_blank');
+      console.log("Navigating to preview URL:", previewUrl);
+      navigate(previewUrl);
     }
   };
 
