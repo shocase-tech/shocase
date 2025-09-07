@@ -136,6 +136,7 @@ const PreviewProfile = () => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
+      navigate('/auth');
     } catch (error: any) {
       toast({
         title: "Error",
