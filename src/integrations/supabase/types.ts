@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           artist_name: string
           bio: string | null
+          blurb: string | null
           contact_info: Json | null
           created_at: string
           gallery_photos: Json[] | null
@@ -25,8 +26,10 @@ export type Database = {
           hero_photo_url: string | null
           id: string
           is_published: boolean | null
+          location: string | null
           past_shows: Json | null
           pdf_urls: string[] | null
+          performance_type: string | null
           playlists: string[] | null
           press_mentions: Json | null
           press_photos: string[] | null
@@ -34,6 +37,7 @@ export type Database = {
           profile_photo_url: string | null
           show_videos: string[] | null
           social_links: Json | null
+          spotify_track_url: string | null
           streaming_links: Json | null
           upcoming_shows: Json | null
           updated_at: string
@@ -43,6 +47,7 @@ export type Database = {
         Insert: {
           artist_name: string
           bio?: string | null
+          blurb?: string | null
           contact_info?: Json | null
           created_at?: string
           gallery_photos?: Json[] | null
@@ -50,8 +55,10 @@ export type Database = {
           hero_photo_url?: string | null
           id?: string
           is_published?: boolean | null
+          location?: string | null
           past_shows?: Json | null
           pdf_urls?: string[] | null
+          performance_type?: string | null
           playlists?: string[] | null
           press_mentions?: Json | null
           press_photos?: string[] | null
@@ -59,6 +66,7 @@ export type Database = {
           profile_photo_url?: string | null
           show_videos?: string[] | null
           social_links?: Json | null
+          spotify_track_url?: string | null
           streaming_links?: Json | null
           upcoming_shows?: Json | null
           updated_at?: string
@@ -68,6 +76,7 @@ export type Database = {
         Update: {
           artist_name?: string
           bio?: string | null
+          blurb?: string | null
           contact_info?: Json | null
           created_at?: string
           gallery_photos?: Json[] | null
@@ -75,8 +84,10 @@ export type Database = {
           hero_photo_url?: string | null
           id?: string
           is_published?: boolean | null
+          location?: string | null
           past_shows?: Json | null
           pdf_urls?: string[] | null
+          performance_type?: string | null
           playlists?: string[] | null
           press_mentions?: Json | null
           press_photos?: string[] | null
@@ -84,6 +95,7 @@ export type Database = {
           profile_photo_url?: string | null
           show_videos?: string[] | null
           social_links?: Json | null
+          spotify_track_url?: string | null
           streaming_links?: Json | null
           upcoming_shows?: Json | null
           updated_at?: string
