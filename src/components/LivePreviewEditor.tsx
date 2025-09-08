@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket, Edit3, Plus, Quote, Star } from "lucide-react";
+import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket, Edit3, Plus, Quote, Star, User as UserIcon, Users, Sparkles } from "lucide-react";
 import PrivateImage from "@/components/PrivateImage";
 import InlineEditor from "@/components/InlineEditor";
 import PressQuotesEditor from "@/components/PressQuotesEditor";
@@ -21,7 +21,13 @@ import bandcampIcon from "@/assets/streaming/bandcamp-color.png";
 import soundcloudIcon from "@/assets/streaming/soundcloud-color.png";
 
 interface LivePreviewEditorProps {
-  profile: any;
+  profile: {
+    blurb?: string;
+    performance_type?: 'Solo' | 'Duo' | 'Full Band';
+    location?: string;
+    spotify_track_url?: string;
+    [key: string]: any;
+  };
   onProfileUpdated: (updatedData?: any) => void;
   user: User | null;
 }
@@ -374,6 +380,30 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
                   </div>
                 )}
                 
+                {/* Performance Type */}
+                {profile.performance_type && (
+                  <div className="mt-2">
+                    <span className="text-xs text-muted-foreground/70">Performance: </span>
+                    <span className="text-sm text-muted-foreground flex items-center gap-1">
+                      {profile.performance_type === 'Solo' && <UserIcon className="w-3 h-3" />}
+                      {profile.performance_type === 'Duo' && <Users className="w-3 h-3" />}
+                      {profile.performance_type === 'Full Band' && <Music className="w-3 h-3" />}
+                      {profile.performance_type}
+                    </span>
+                  </div>
+                )}
+                
+                {/* Location */}
+                {profile.location && (
+                  <div className="mt-1">
+                    <span className="text-xs text-muted-foreground/70">Location: </span>
+                    <span className="text-sm text-muted-foreground flex items-center gap-1">
+                      <MapPin className="w-3 h-3" />
+                      {profile.location}
+                    </span>
+                  </div>
+                )}
+                
                 {/* Streaming Links */}
                 {profile.streaming_links && Object.keys(profile.streaming_links).length > 0 && (
                   <div className="mt-4">
@@ -435,6 +465,27 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
                           />
                         </a>
                       )}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Featured Spotify Track */}
+                {profile.spotify_track_url && (
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium mb-2">Featured Track</h4>
+                    <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Music className="w-4 h-4 text-green-500" />
+                        <span className="text-sm font-medium">Spotify Track</span>
+                      </div>
+                      <iframe
+                        src={profile.spotify_track_url.replace('open.spotify.com/track/', 'open.spotify.com/embed/track/')}
+                        width="100%"
+                        height="80"
+                        frameBorder="0"
+                        allow="encrypted-media"
+                        className="rounded"
+                      />
                     </div>
                   </div>
                 )}
@@ -511,6 +562,78 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
               </div>
             ) : null,
             !!profile.bio
+          )}
+
+          {/* Performance Type Section */}
+          {renderEditableSection(
+            'performance_type',
+            profile.performance_type ? (
+              <div>
+                <h3 className="font-semibold mb-2">Performance Type</h3>
+                <div className="flex items-center gap-2">
+                  {profile.performance_type === 'Solo' && <UserIcon className="w-4 h-4 text-primary" />}
+                  {profile.performance_type === 'Duo' && <Users className="w-4 h-4 text-primary" />}
+                  {profile.performance_type === 'Full Band' && <Music className="w-4 h-4 text-primary" />}
+                  <span className="text-muted-foreground">{profile.performance_type}</span>
+                </div>
+              </div>
+            ) : null,
+            !!profile.performance_type
+          )}
+
+          {/* Location Section */}
+          {renderEditableSection(
+            'location',
+            profile.location ? (
+              <div>
+                <h3 className="font-semibold mb-2">Location</h3>
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-primary" />
+                  <span className="text-muted-foreground">{profile.location}</span>
+                </div>
+              </div>
+            ) : null,
+            !!profile.location
+          )}
+
+          {/* Spotify Track Section */}
+          {renderEditableSection(
+            'spotify_track',
+            profile.spotify_track_url ? (
+              <div>
+                <h3 className="font-semibold mb-3">Featured Spotify Track</h3>
+                <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Music className="w-4 h-4 text-green-500" />
+                    <span className="text-sm font-medium text-green-500">Spotify</span>
+                  </div>
+                  <iframe
+                    src={profile.spotify_track_url.replace('open.spotify.com/track/', 'open.spotify.com/embed/track/')}
+                    width="100%"
+                    height="152"
+                    frameBorder="0"
+                    allow="encrypted-media"
+                    className="rounded"
+                  />
+                </div>
+              </div>
+            ) : null,
+            !!profile.spotify_track_url
+          )}
+
+          {/* Blurb Section */}
+          {renderEditableSection(
+            'blurb',
+            profile.blurb ? (
+              <div>
+                <h3 className="font-semibold mb-2">Artist Blurb</h3>
+                <p className="text-muted-foreground leading-relaxed italic">{profile.blurb}</p>
+                <p className="text-xs text-muted-foreground/70 mt-1">
+                  {profile.blurb.split(' ').filter(w => w.length > 0).length} words
+                </p>
+              </div>
+            ) : null,
+            !!profile.blurb
           )}
 
           {/* Gallery Section */}
