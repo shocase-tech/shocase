@@ -19,7 +19,7 @@ interface SimpleProfile {
   social_links: any;
   is_published: boolean;
   show_videos: any;
-  gallery_photos: any;
+  gallery_photos: { url: string; label?: string }[] | string[] | any;
   press_quotes: any;
   press_mentions: any;
   streaming_links: any;

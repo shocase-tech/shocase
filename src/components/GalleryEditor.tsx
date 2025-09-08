@@ -199,43 +199,22 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
     if (profile?.gallery_photos) {
       console.log("🖼️ GalleryEditor: Raw gallery_photos from profile:", profile.gallery_photos);
       
-      // Normalize gallery photos - extract actual storage paths from nested objects
+      // Handle the new JSONB structure that stores {url, label} objects
       const photoObjects = profile.gallery_photos.map((item: any, index: number) => {
         console.log(`🖼️ Processing gallery item ${index}:`, item);
         
-        // Handle deeply nested objects (the bug case)  
-        if (typeof item === 'object' && item !== null) {
-          let storagePath = '';
-          
-          // Try to extract storage path from nested JSON structure
-          let current = item;
-          while (current && typeof current === 'object') {
-            if (typeof current.url === 'string') {
-              storagePath = current.url;
-              break;
-            } else if (current.url && typeof current.url === 'object') {
-              current = current.url;
-            } else {
-              break;
-            }
-          }
-          
-          // Fallback - search for storage path pattern in JSON string
-          if (!storagePath) {
-            const jsonStr = JSON.stringify(item);
-            const pathMatch = jsonStr.match(/[a-f0-9-]{36}\/gallery\/\d+\.(jpg|jpeg|png|JPG|JPEG|PNG|webp|WEBP)/);
-            if (pathMatch) {
-              storagePath = pathMatch[0];
-            }
-          }
-          
-          console.log(`🖼️ Extracted storage path:`, storagePath);
-          return storagePath ? { url: storagePath, label: item.label || '' } : null;
+        // Handle new JSONB structure: {url: string, label: string}
+        if (typeof item === 'object' && item !== null && item.url) {
+          console.log(`🖼️ Using JSONB object:`, item);
+          return { 
+            url: item.url, 
+            label: item.label || '' 
+          };
         }
         
-        // Handle string URLs (correct format)
+        // Handle legacy string format (backwards compatibility)
         if (typeof item === 'string' && item) {
-          console.log(`🖼️ Using string URL:`, item);
+          console.log(`🖼️ Using legacy string URL:`, item);
           return { url: item, label: "" };
         }
         
@@ -300,8 +279,11 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
         // Save reordered photos immediately to database
         setTimeout(async () => {
           try {
-            // Convert to simple string array of storage paths
-            const galleryArray = newOrder.map(photo => photo.url).filter(url => url);
+            // Convert to JSONB objects with url and label
+            const galleryArray = newOrder.map(photo => ({
+              url: photo.url,
+              label: photo.label || ''
+            }));
             
             console.log("💾 Gallery: Saving reordered array to database:", galleryArray);
             
@@ -434,29 +416,45 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
   };
 
   const handleUpdateCaption = async (index: number, caption: string) => {
+    console.log("💬 Gallery: Updating caption for photo", index, "to:", caption);
+    
     // Update local state immediately
     const updatedPhotos = photos.map((photo, i) => 
       i === index ? { ...photo, label: caption } : photo
     );
     setPhotos(updatedPhotos);
     
-    // Save to database
+    // Save to database with JSONB objects
     try {
+      const galleryArray = updatedPhotos.map(photo => ({
+        url: photo.url,
+        label: photo.label || ''
+      }));
+      
+      console.log("💾 Gallery: Saving caption update to database:", galleryArray);
+      
       const { error } = await supabase
         .from('artist_profiles')
         .update({ 
-          gallery_photos: updatedPhotos.map(photo => photo.url),
+          gallery_photos: galleryArray,
           updated_at: new Date().toISOString()
         })
         .eq('user_id', user?.id);
         
       if (error) throw error;
       
+      console.log("✅ Gallery: Caption saved successfully");
+      
       // Update parent component
-      onSave({ ...profile, gallery_photos: updatedPhotos.map(photo => photo.url) });
+      onSave({ ...profile, gallery_photos: galleryArray });
+      
+      toast({
+        title: "Caption saved",
+        description: "Photo caption updated successfully.",
+      });
       
     } catch (error) {
-      console.error("Error saving caption:", error);
+      console.error("❌ Gallery: Error saving caption:", error);
       toast({
         title: "Error saving caption",
         description: "Please try again.",
@@ -482,10 +480,13 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
       
       console.log("💾 GalleryEditor: Saving photos:", photos);
 
-      // Save as simple string array of storage paths to avoid nesting issues
-      const galleryArray = photos.map(photo => photo.url).filter(url => url);
+      // Save as JSONB objects with url and label
+      const galleryArray = photos.map(photo => ({
+        url: photo.url,
+        label: photo.label || ''
+      }));
 
-      console.log("💾 GalleryEditor: Saving gallery array (strings only):", galleryArray);
+      console.log("💾 GalleryEditor: Saving gallery array (JSONB objects):", galleryArray);
 
       const { error } = await supabase
         .from('artist_profiles')

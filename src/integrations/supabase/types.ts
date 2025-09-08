@@ -20,7 +20,7 @@ export type Database = {
           bio: string | null
           contact_info: Json | null
           created_at: string
-          gallery_photos: string[] | null
+          gallery_photos: Json[] | null
           genre: string | null
           hero_photo_url: string | null
           id: string
@@ -45,7 +45,7 @@ export type Database = {
           bio?: string | null
           contact_info?: Json | null
           created_at?: string
-          gallery_photos?: string[] | null
+          gallery_photos?: Json[] | null
           genre?: string | null
           hero_photo_url?: string | null
           id?: string
@@ -70,7 +70,7 @@ export type Database = {
           bio?: string | null
           contact_info?: Json | null
           created_at?: string
-          gallery_photos?: string[] | null
+          gallery_photos?: Json[] | null
           genre?: string | null
           hero_photo_url?: string | null
           id?: string

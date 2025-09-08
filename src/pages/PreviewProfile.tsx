@@ -19,7 +19,7 @@ interface PreviewProfile {
   press_photos?: string[];
   hero_photo_url?: string;
   show_videos?: string[];
-  gallery_photos?: string[];
+  gallery_photos?: { url: string; label?: string }[];
   press_quotes?: any;
   press_mentions?: any;
   streaming_links?: any;
@@ -120,7 +120,7 @@ const PreviewProfile = () => {
         }
 
         console.log("Preview profile found:", data.artist_name);
-        setProfile(data);
+        setProfile(data as PreviewProfile);
         setLoading(false);
       } catch (err) {
         console.error("Error fetching preview profile:", err);
@@ -356,15 +356,25 @@ const PreviewProfile = () => {
                 <section>
                   <h2 className="text-3xl font-bold text-white mb-8">Gallery</h2>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {profile.gallery_photos.map((photo, index) => (
-                      <div key={index} className="aspect-square rounded-lg overflow-hidden bg-muted">
-                        <img
-                          src={photo}
-                          alt={`${profile.artist_name} - Gallery ${index + 1}`}
-                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                        />
-                      </div>
-                    ))}
+                    {profile.gallery_photos.map((photo, index) => {
+                      const photoUrl = typeof photo === 'string' ? photo : photo.url;
+                      const photoLabel = typeof photo === 'object' ? photo.label : '';
+                      
+                      return (
+                        <div key={index} className="aspect-square rounded-lg overflow-hidden bg-muted">
+                          <img
+                            src={photoUrl}
+                            alt={photoLabel || `${profile.artist_name} - Gallery ${index + 1}`}
+                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          />
+                          {photoLabel && (
+                            <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-sm p-2">
+                              {photoLabel}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </section>
               )}
