@@ -27,12 +27,11 @@ export default function PrivateImage({ storagePath, alt, className, fallback }: 
       // Extract actual storage path from nested objects
       let actualPath = storagePath;
       
-      // If storagePath is an object, extract the URL
       if (typeof storagePath === 'object' && storagePath !== null) {
-        if (typeof (storagePath as any).url === 'string') {
-          actualPath = (storagePath as any).url;
-        } else if (typeof (storagePath as any).url === 'object' && (storagePath as any).url.url) {
-          actualPath = (storagePath as any).url.url; // Handle double nesting
+        if (typeof storagePath.url === 'string') {
+          actualPath = storagePath.url;
+        } else if (typeof storagePath.url === 'object' && storagePath.url?.url) {
+          actualPath = storagePath.url.url; // Handle double nesting
         } else {
           console.error("Invalid storagePath object:", storagePath);
           setError(true);
@@ -41,7 +40,7 @@ export default function PrivateImage({ storagePath, alt, className, fallback }: 
         }
       }
 
-      // If it's already a URL (for backwards compatibility), use it directly
+      // Continue with normal image loading logic...
       if (!ImageStorageService.isStoragePath(actualPath)) {
         console.log("Using direct URL:", actualPath);
         setImageUrl(actualPath);

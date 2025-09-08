@@ -279,16 +279,15 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
     
     console.log("🎯 Gallery: Drag ended, active:", active.id, "over:", over?.id);
     
-    // Reset preview order and dragged index immediately
+    // Reset preview states immediately
     setDraggedIndex(null);
     setPreviewOrder(null);
     
-    // Delay resetting isDragActive to prevent click-outside from triggering
-    // during the mouseup event that ends the drag
+    // CRITICAL: Delay resetting isDragActive to prevent click-outside trigger
     setTimeout(() => {
       console.log("🎯 Gallery: Resetting drag active state");
       setIsDragActive(false);
-    }, 100);
+    }, 150); // Increased delay to 150ms
 
     if (active.id !== over?.id) {
       setPhotos((items) => {
@@ -434,10 +433,45 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
     setPhotos(photos.filter((_, i) => i !== index));
   };
 
-  const handleUpdateCaption = (index: number, caption: string) => {
-    const updatedPhotos = [...photos];
-    updatedPhotos[index] = { ...updatedPhotos[index], label: caption };
+  const handleUpdateCaption = async (index: number, caption: string) => {
+    // Update local state immediately
+    const updatedPhotos = photos.map((photo, i) => 
+      i === index ? { ...photo, label: caption } : photo
+    );
     setPhotos(updatedPhotos);
+    
+    // Save to database
+    try {
+      const { error } = await supabase
+        .from('artist_profiles')
+        .update({ 
+          gallery_photos: updatedPhotos.map(photo => photo.url),
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', user?.id);
+        
+      if (error) throw error;
+      
+      // Update parent component
+      onSave({ ...profile, gallery_photos: updatedPhotos.map(photo => photo.url) });
+      
+    } catch (error) {
+      console.error("Error saving caption:", error);
+      toast({
+        title: "Error saving caption",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCaptionKeyDown = (e: React.KeyboardEvent, index: number) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const target = e.target as HTMLInputElement;
+      handleUpdateCaption(index, target.value);
+      target.blur(); // Remove focus to show the change
+    }
   };
 
   const handleSave = async () => {
