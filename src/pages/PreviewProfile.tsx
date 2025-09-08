@@ -19,7 +19,7 @@ interface PreviewProfile {
   press_photos?: string[];
   hero_photo_url?: string;
   show_videos?: string[];
-  gallery_photos?: { url: string; label?: string }[];
+  gallery_photos?: { url: string; label?: string }[] | any[];
   press_quotes?: any;
   press_mentions?: any;
   streaming_links?: any;
@@ -33,6 +33,10 @@ interface PreviewProfile {
   updated_at: string;
   playlists?: string[];
   pdf_urls?: string[];
+  blurb?: string;
+  performance_type?: string;
+  location?: string;
+  spotify_track_url?: string;
 }
 
 const PreviewProfile = () => {
@@ -120,7 +124,7 @@ const PreviewProfile = () => {
         }
 
         console.log("Preview profile found:", data.artist_name);
-        setProfile(data as PreviewProfile);
+        setProfile(data as unknown as PreviewProfile);
         setLoading(false);
       } catch (err) {
         console.error("Error fetching preview profile:", err);

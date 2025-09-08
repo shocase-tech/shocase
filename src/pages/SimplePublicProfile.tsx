@@ -26,6 +26,10 @@ interface SimpleProfile {
   past_shows: any;
   upcoming_shows: any;
   contact_info: any;
+  blurb?: string;
+  performance_type?: string;
+  location?: string;
+  spotify_track_url?: string;
 }
 
 export default function SimplePublicProfile() {

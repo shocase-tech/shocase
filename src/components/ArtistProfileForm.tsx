@@ -9,7 +9,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ImageStorageService } from "@/lib/imageStorage";
-import { Loader2, Sparkles, Plus, Trash2 } from "lucide-react";
+import { Loader2, Sparkles, Plus, Trash2, User, Users, Music, MapPin } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import FileUpload from "./FileUpload";
 import GenreInput from "./GenreInput";
 import PrivateImage from "./PrivateImage";
@@ -21,11 +22,15 @@ interface ArtistProfile {
   user_id: string;
   artist_name: string;
   bio?: string;
+  blurb?: string;
   genre?: string[];
   gallery_photos?: { url: string; label?: string }[];
   press_photos?: { url: string; label?: string }[];
   social_links?: any;
   profile_photo_url?: string;
+  performance_type?: 'Solo' | 'Duo' | 'Full Band';
+  location?: string;
+  spotify_track_url?: string;
   
   pdf_urls?: string[];
   hero_photo_url?: string;
@@ -48,11 +53,15 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
   const [formData, setFormData] = useState({
     artist_name: profile?.artist_name || "",
     bio: profile?.bio || "",
+    blurb: profile?.blurb || "",
     genre: Array.isArray(profile?.genre) ? profile.genre : (profile?.genre ? (typeof profile.genre === 'string' ? JSON.parse(profile.genre) : [profile.genre]) : []),
     website: profile?.social_links?.website || "",
     instagram: profile?.social_links?.instagram || "",
     spotify: profile?.social_links?.spotify || "",
     tiktok: profile?.social_links?.tiktok || "",
+    performance_type: profile?.performance_type || "",
+    location: profile?.location || "",
+    spotify_track_url: profile?.spotify_track_url || "",
     show_videos: profile?.show_videos || [],
     press_quotes: profile?.press_quotes || [],
     press_mentions: profile?.press_mentions || [],
@@ -84,7 +93,11 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
         user_id: user.id,
         artist_name: formData.artist_name,
         bio: formData.bio,
+        blurb: formData.blurb,
         genre: JSON.stringify(formData.genre),
+        performance_type: formData.performance_type,
+        location: formData.location,
+        spotify_track_url: formData.spotify_track_url,
         social_links: {
           website: formData.website,
           instagram: formData.instagram,
@@ -128,6 +141,52 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
     } finally {
       setLoading(false);
     }
+  };
+
+  // AI Blurb Generation Function
+  const generateBlurbWithAI = async () => {
+    if (!formData.bio || formData.bio.trim().length < 50) {
+      toast({
+        title: "Bio too short",
+        description: "Please write a longer bio (at least 50 characters) before generating a blurb.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    try {
+      // Simple AI-like logic to create blurb from bio
+      const sentences = formData.bio.split('.').filter(s => s.trim().length > 0);
+      const firstSentence = sentences[0]?.trim();
+      
+      if (firstSentence) {
+        const words = firstSentence.split(' ').slice(0, 20).join(' ');
+        const blurb = words.endsWith('.') ? words : words + '.';
+        
+        setFormData({ ...formData, blurb });
+        toast({
+          title: "Blurb generated!",
+          description: "Your AI-generated blurb has been created from your bio.",
+        });
+      }
+    } catch (error) {
+      console.error("Error generating blurb:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate blurb. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Spotify URL Validation
+  const isValidSpotifyUrl = (url: string): boolean => {
+    const spotifyPattern = /^https:\/\/open\.spotify\.com\/track\/[a-zA-Z0-9]+(\?.*)?$/;
+    return spotifyPattern.test(url);
+  };
+
+  const updateField = (field: string, value: any) => {
+    setFormData({ ...formData, [field]: value });
   };
 
   const generateBio = async () => {
@@ -333,6 +392,47 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
                 />
               </div>
 
+              {/* Blurb Section - NEW */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="blurb" className="text-sm font-medium">
+                    Artist Blurb (Optional)
+                  </Label>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm"
+                    onClick={generateBlurbWithAI}
+                    disabled={!formData.bio || formData.bio.trim().length < 50}
+                  >
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    AI Generate
+                  </Button>
+                </div>
+                <Textarea
+                  id="blurb"
+                  placeholder="A short 20-word summary of your artist bio (optional)..."
+                  value={formData.blurb || ""}
+                  onChange={(e) => {
+                    const words = e.target.value.split(' ').filter(word => word.length > 0);
+                    if (words.length <= 20) {
+                      updateField('blurb', e.target.value);
+                    }
+                  }}
+                  maxLength={200}
+                  rows={2}
+                  className="resize-none"
+                />
+                <div className="flex justify-between items-center">
+                  <p className="text-xs text-muted-foreground">
+                    Perfect for hero sections and quick introductions
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {formData.blurb ? formData.blurb.split(' ').filter(w => w.length > 0).length : 0}/20 words
+                  </p>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="website">Website</Label>
@@ -396,6 +496,86 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
                 </div>
               </div>
 
+              {/* Performance Type - NEW */}
+              <div className="space-y-2">
+                <Label htmlFor="performance_type" className="text-sm font-medium">
+                  Performance Type
+                </Label>
+                <Select
+                  value={formData.performance_type || ""}
+                  onValueChange={(value) => updateField('performance_type', value)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select your performance setup" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Solo">
+                      <div className="flex items-center gap-2">
+                        <User className="w-4 h-4" />
+                        Solo
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="Duo">
+                      <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4" />
+                        Duo
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="Full Band">
+                      <div className="flex items-center gap-2">
+                        <Music className="w-4 h-4" />
+                        Full Band
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Location - NEW */}
+              <div className="space-y-2">
+                <Label htmlFor="location" className="text-sm font-medium">
+                  Location
+                </Label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    id="location"
+                    placeholder="e.g., Nashville, TN or London, UK"
+                    value={formData.location || ""}
+                    onChange={(e) => updateField('location', e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Your city and state/country for booking inquiries
+                </p>
+              </div>
+
+              {/* Spotify Track Embed - NEW */}
+              <div className="space-y-2">
+                <Label htmlFor="spotify_track_url" className="text-sm font-medium">
+                  Featured Spotify Track (Optional)
+                </Label>
+                <div className="relative">
+                  <Music className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    id="spotify_track_url"
+                    placeholder="Paste Spotify track URL here (e.g., https://open.spotify.com/track/...)"
+                    value={formData.spotify_track_url || ""}
+                    onChange={(e) => updateField('spotify_track_url', e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  This track will be embedded on your EPK page for visitors to play
+                </p>
+                {formData.spotify_track_url && !isValidSpotifyUrl(formData.spotify_track_url) && (
+                  <p className="text-xs text-red-500">
+                    Please enter a valid Spotify track URL
+                  </p>
+                )}
+              </div>
+
               <Button type="submit" disabled={loading} className="w-full">
                 {loading ? "Saving..." : (profile ? "Update Profile" : "Create Profile")}
               </Button>
@@ -408,7 +588,11 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
                 onSave={() => saveSection({
                   artist_name: formData.artist_name,
                   bio: formData.bio,
+                  blurb: formData.blurb,
                   genre: JSON.stringify(formData.genre),
+                  performance_type: formData.performance_type,
+                  location: formData.location,
+                  spotify_track_url: formData.spotify_track_url,
                   social_links: {
                     website: formData.website,
                     instagram: formData.instagram,
