@@ -459,10 +459,15 @@ export default function SimplePublicProfile() {
               </section>
             )}
 
-            {/* Press Sections - Side by Side */}
+            {/* Press Sections - Side by Side with Responsive Layout */}
             {((profile.press_quotes && Array.isArray(profile.press_quotes) && profile.press_quotes.length > 0) || 
               (profile.press_mentions && Array.isArray(profile.press_mentions) && profile.press_mentions.length > 0)) && (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className={`grid gap-8 ${
+                (profile.press_quotes && Array.isArray(profile.press_quotes) && profile.press_quotes.length > 0) && 
+                (profile.press_mentions && Array.isArray(profile.press_mentions) && profile.press_mentions.length > 0)
+                  ? 'grid-cols-1 lg:grid-cols-2' 
+                  : 'grid-cols-1'
+              }`}>
                 {/* Press Quotes */}
                 {profile.press_quotes && Array.isArray(profile.press_quotes) && profile.press_quotes.length > 0 && (
                   <section className="glass-card border-glass p-8 rounded-xl">
