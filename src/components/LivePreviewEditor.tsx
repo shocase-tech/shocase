@@ -359,50 +359,51 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
             'basic',
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <CardTitle className="text-2xl gradient-text">{profile.artist_name}</CardTitle>
+                <div className="flex items-center gap-4 flex-wrap">
+                  <CardTitle className="text-2xl gradient-text">{profile.artist_name}</CardTitle>
+                  <div className="flex items-center gap-3">
+                    {/* Performance Type */}
+                    {profile.performance_type && (
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                        {profile.performance_type === 'Solo' && <UserIcon className="w-3 h-3" />}
+                        {profile.performance_type === 'Duo' && <Users className="w-3 h-3" />}
+                        {profile.performance_type === 'Full Band' && <Music className="w-3 h-3" />}
+                        {profile.performance_type}
+                      </div>
+                    )}
+                    
+                    {/* Location */}
+                    {profile.location && (
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                        <MapPin className="w-3 h-3" />
+                        {profile.location}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 {profile.genre && profile.genre.length > 0 && (
-                  <div className="mt-2 flex flex-wrap gap-2">
+                  <div className="mt-4 flex flex-wrap gap-2">
                     {profile.genre.map((genre: string, index: number) => (
                       <Badge key={index} variant="secondary">{genre}</Badge>
                     ))}
                   </div>
                 )}
-                {profile.contact_info?.email && (
-                  <div className="mt-1">
-                    <span className="text-xs text-muted-foreground/70">Email: </span>
-                    <span className="text-sm text-muted-foreground">{profile.contact_info.email}</span>
-                  </div>
-                )}
-                {profile.contact_info?.phone && (
-                  <div>
-                    <span className="text-xs text-muted-foreground/70">Phone: </span>
-                    <span className="text-sm text-muted-foreground">{profile.contact_info.phone}</span>
-                  </div>
-                )}
-                
-                {/* Performance Type */}
-                {profile.performance_type && (
-                  <div className="mt-2">
-                    <span className="text-xs text-muted-foreground/70">Performance: </span>
-                    <span className="text-sm text-muted-foreground flex items-center gap-1">
-                      {profile.performance_type === 'Solo' && <UserIcon className="w-3 h-3" />}
-                      {profile.performance_type === 'Duo' && <Users className="w-3 h-3" />}
-                      {profile.performance_type === 'Full Band' && <Music className="w-3 h-3" />}
-                      {profile.performance_type}
-                    </span>
-                  </div>
-                )}
-                
-                {/* Location */}
-                {profile.location && (
-                  <div className="mt-1">
-                    <span className="text-xs text-muted-foreground/70">Location: </span>
-                    <span className="text-sm text-muted-foreground flex items-center gap-1">
-                      <MapPin className="w-3 h-3" />
-                      {profile.location}
-                    </span>
-                  </div>
-                )}
+
+                <div className="mt-4 space-y-1">
+                  {profile.contact_info?.email && (
+                    <div>
+                      <span className="text-xs text-muted-foreground/70">Email: </span>
+                      <span className="text-sm text-muted-foreground">{profile.contact_info.email}</span>
+                    </div>
+                  )}
+                  {profile.contact_info?.phone && (
+                    <div>
+                      <span className="text-xs text-muted-foreground/70">Phone: </span>
+                      <span className="text-sm text-muted-foreground">{profile.contact_info.phone}</span>
+                    </div>
+                  )}
+                </div>
                 
                 {/* Streaming Links */}
                 {profile.streaming_links && Object.keys(profile.streaming_links).length > 0 && (
