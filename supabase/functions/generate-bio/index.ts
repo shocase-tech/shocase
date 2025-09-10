@@ -16,8 +16,27 @@ function buildBioPrompt(inputs: any) {
     existing_bio, 
     is_remix, 
     notable_performances, 
-    musical_background 
+    musical_background,
+    is_blurb,
+    word_limit
   } = inputs;
+
+  // Handle blurb generation request
+  if (is_blurb && existing_bio) {
+    return `Create a catchy, exciting blurb (maximum ${word_limit || 20} words) from this artist bio for ${artist_name}:
+
+"${existing_bio}"
+
+Requirements:
+• Maximum ${word_limit || 20} words
+• Catchy and exciting tone
+• Summarize the most compelling aspect
+• Make it sound intriguing and memorable
+• Focus on what makes them unique
+• No quotation marks in the output
+
+Generate just the blurb text, nothing else.`;
+  }
 
   if (is_remix && existing_bio) {
     return `Enhance and rewrite this artist bio for ${artist_name}:

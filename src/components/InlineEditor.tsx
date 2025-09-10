@@ -495,26 +495,6 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
         </div>
       </div>
 
-      <div className="space-y-4">
-        <h4 className="text-md font-medium mb-4">Artist Blurb</h4>
-        <div>
-          <Label htmlFor="blurb">Short Description (20 words max)</Label>
-          <Input
-            id="blurb"
-            value={formData.blurb || ''}
-            onChange={(e) => {
-              const words = e.target.value.split(' ').filter(w => w.length > 0);
-              if (words.length <= 20) {
-                setFormData({ ...formData, blurb: e.target.value });
-              }
-            }}
-            placeholder="A catchy one-liner about your music..."
-          />
-          <p className="text-xs text-muted-foreground mt-1">
-            {(formData.blurb || '').split(' ').filter(w => w.length > 0).length}/20 words
-          </p>
-        </div>
-      </div>
     </div>
   );
 
@@ -553,6 +533,79 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
                 {bioWordCount} words
               </span>
             </div>
+          </div>
+
+          {/* Blurb Section */}
+          <div className="space-y-3 pt-4 border-t">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="blurb">Blurb</Label>
+              <span className="text-xs text-muted-foreground">
+                {(formData.blurb || '').split(' ').filter(w => w.length > 0).length}/20 words
+              </span>
+            </div>
+            <div className="flex gap-2">
+              <Input
+                id="blurb"
+                value={formData.blurb || ''}
+                onChange={(e) => {
+                  const words = e.target.value.split(' ').filter(w => w.length > 0);
+                  if (words.length <= 20) {
+                    setFormData({ ...formData, blurb: e.target.value });
+                  }
+                }}
+                placeholder="A catchy one-liner about your music..."
+                className="flex-1"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  if (!formData.bio?.trim()) {
+                    toast({
+                      title: "Bio required",
+                      description: "Please write a bio first before generating a blurb.",
+                      variant: "destructive",
+                    });
+                    return;
+                  }
+                  
+                  try {
+                    const { data, error } = await supabase.functions.invoke('generate-bio', {
+                      body: {
+                        artist_name: formData.artist_name,
+                        existing_bio: formData.bio,
+                        is_blurb: true,
+                        word_limit: 20
+                      }
+                    });
+
+                    if (error) throw error;
+                    if (data?.error) throw new Error(data.error);
+                    
+                    if (data?.bio) {
+                      setFormData({ ...formData, blurb: data.bio });
+                      toast({
+                        title: "Blurb generated!",
+                        description: "Your catchy blurb has been created from your bio.",
+                      });
+                    }
+                  } catch (error: any) {
+                    toast({
+                      title: "Error",
+                      description: error.message || "Failed to generate blurb",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+                disabled={!formData.bio?.trim()}
+              >
+                Generate with AI
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Maximum 20 words - a catchy summary of your bio
+            </p>
           </div>
           
           {formData.bio?.trim() && (

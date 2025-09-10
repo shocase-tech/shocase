@@ -558,6 +558,12 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
             profile.bio ? (
               <div>
                 <h3 className="font-semibold mb-2">Bio</h3>
+                {profile.blurb && (
+                  <div className="mb-4 p-3 bg-primary/10 rounded-lg border-l-4 border-primary">
+                    <h4 className="text-sm font-medium text-primary mb-1">Blurb</h4>
+                    <p className="text-sm text-muted-foreground italic">{profile.blurb}</p>
+                  </div>
+                )}
                 <p className="text-muted-foreground leading-relaxed">{profile.bio}</p>
               </div>
             ) : null,
