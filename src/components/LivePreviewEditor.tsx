@@ -564,78 +564,6 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
             !!profile.bio
           )}
 
-          {/* Performance Type Section */}
-          {renderEditableSection(
-            'performance_type',
-            profile.performance_type ? (
-              <div>
-                <h3 className="font-semibold mb-2">Performance Type</h3>
-                <div className="flex items-center gap-2">
-                  {profile.performance_type === 'Solo' && <UserIcon className="w-4 h-4 text-primary" />}
-                  {profile.performance_type === 'Duo' && <Users className="w-4 h-4 text-primary" />}
-                  {profile.performance_type === 'Full Band' && <Music className="w-4 h-4 text-primary" />}
-                  <span className="text-muted-foreground">{profile.performance_type}</span>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-4">
-                <Users className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
-                <p className="text-muted-foreground">Add Performance Type</p>
-              </div>
-            ),
-            true
-          )}
-
-          {/* Location Section */}
-          {renderEditableSection(
-            'location',
-            profile.location ? (
-              <div>
-                <h3 className="font-semibold mb-2">Location</h3>
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-primary" />
-                  <span className="text-muted-foreground">{profile.location}</span>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-4">
-                <MapPin className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
-                <p className="text-muted-foreground">Add Location</p>
-              </div>
-            ),
-            true
-          )}
-
-          {/* Spotify Track Section */}
-          {renderEditableSection(
-            'spotify_track',
-            profile.spotify_track_url ? (
-              <div>
-                <h3 className="font-semibold mb-3">Featured Spotify Track</h3>
-                <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Music className="w-4 h-4 text-green-500" />
-                    <span className="text-sm font-medium text-green-500">Spotify</span>
-                  </div>
-                  <iframe
-                    src={profile.spotify_track_url.replace('open.spotify.com/track/', 'open.spotify.com/embed/track/')}
-                    width="100%"
-                    height="152"
-                    frameBorder="0"
-                    allow="encrypted-media"
-                    className="rounded"
-                  />
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-4">
-                <Music className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
-                <p className="text-muted-foreground">Add Featured Spotify Track</p>
-              </div>
-            ),
-            true
-          )}
-
           {/* Blurb Section */}
           {renderEditableSection(
             'blurb',
@@ -647,13 +575,8 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
                   {profile.blurb.split(' ').filter(w => w.length > 0).length} words
                 </p>
               </div>
-            ) : (
-              <div className="text-center py-4">
-                <FileText className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
-                <p className="text-muted-foreground">Add Artist Blurb</p>
-              </div>
-            ),
-            true
+            ) : null,
+            !!profile.blurb
           )}
 
           {/* Gallery Section */}

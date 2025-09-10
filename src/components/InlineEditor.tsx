@@ -47,6 +47,10 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
         profile_photo_url: profile.profile_photo_url || '',
         hero_photo_url: profile.hero_photo_url || '',
         gallery_photos: profile.gallery_photos || [],
+        blurb: profile.blurb || '',
+        performance_type: profile.performance_type || '',
+        location: profile.location || '',
+        spotify_track_url: profile.spotify_track_url || '',
       });
     } else {
       setFormData({
@@ -60,6 +64,10 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
         profile_photo_url: '',
         hero_photo_url: '',
         gallery_photos: [],
+        blurb: '',
+        performance_type: '',
+        location: '',
+        spotify_track_url: '',
       });
     }
   }, [profile]);
@@ -374,6 +382,33 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
           />
         </div>
 
+        <div>
+          <Label htmlFor="performance_type">Performance Type</Label>
+          <Select 
+            value={formData.performance_type || ''} 
+            onValueChange={(value) => setFormData({ ...formData, performance_type: value })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Solo">Solo</SelectItem>
+              <SelectItem value="Duo">Duo</SelectItem>
+              <SelectItem value="Full Band">Full Band</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label htmlFor="location">Location</Label>
+          <Input
+            id="location"
+            value={formData.location || ''}
+            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+            placeholder="City, State/Country"
+          />
+        </div>
+
         <div className="md:col-span-2">
           <Label htmlFor="genre">Genres</Label>
           <GenreInput
@@ -434,12 +469,51 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
         )}
       </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-4">
+          <h4 className="text-md font-medium mb-4">Streaming Links</h4>
+          <StreamingLinksInput
+            streamingLinks={formData.streaming_links || {}}
+            onChange={(links) => setFormData({ ...formData, streaming_links: links })}
+          />
+        </div>
+
+        <div className="space-y-4">
+          <h4 className="text-md font-medium mb-4">Featured Spotify Track</h4>
+          <div>
+            <Label htmlFor="spotify_track_url">Spotify Track URL</Label>
+            <Input
+              id="spotify_track_url"
+              value={formData.spotify_track_url || ''}
+              onChange={(e) => setFormData({ ...formData, spotify_track_url: e.target.value })}
+              placeholder="https://open.spotify.com/track/..."
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Paste the URL of your favorite Spotify track to feature it on your profile
+            </p>
+          </div>
+        </div>
+      </div>
+
       <div className="space-y-4">
-        <h4 className="text-md font-medium mb-4">Streaming Links</h4>
-        <StreamingLinksInput
-          streamingLinks={formData.streaming_links || {}}
-          onChange={(links) => setFormData({ ...formData, streaming_links: links })}
-        />
+        <h4 className="text-md font-medium mb-4">Artist Blurb</h4>
+        <div>
+          <Label htmlFor="blurb">Short Description (20 words max)</Label>
+          <Input
+            id="blurb"
+            value={formData.blurb || ''}
+            onChange={(e) => {
+              const words = e.target.value.split(' ').filter(w => w.length > 0);
+              if (words.length <= 20) {
+                setFormData({ ...formData, blurb: e.target.value });
+              }
+            }}
+            placeholder="A catchy one-liner about your music..."
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            {(formData.blurb || '').split(' ').filter(w => w.length > 0).length}/20 words
+          </p>
+        </div>
       </div>
     </div>
   );
