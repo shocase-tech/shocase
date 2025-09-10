@@ -5,10 +5,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { AutoSaveInput } from "@/components/ui/auto-save-input";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { Save, X, GripVertical, Upload, AlertTriangle, Edit, Loader2 } from "lucide-react";
+import { Save, X, GripVertical, Upload, AlertTriangle, Edit, Loader2, Trash2 } from "lucide-react";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragStartEvent, DragEndEvent, DragOverEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
@@ -111,14 +112,34 @@ function SortablePhoto({ photo, index, onDelete, onUpdateCaption, isDragActive, 
           <Edit className="w-4 h-4" />
         </Button>
         
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onDelete(index)}
-          className="bg-red-500/20 border-red-400/30 text-red-200 hover:bg-red-500/30"
-        >
-          <X className="w-4 h-4" />
-        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="bg-red-500/20 border-red-400/30 text-red-200 hover:bg-red-500/30"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent className="glass-card border-white/10">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Photo</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this photo? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => onDelete(index)}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                Delete Photo
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
       
       {/* Photo Index Badge */}
@@ -136,15 +157,22 @@ function SortablePhoto({ photo, index, onDelete, onUpdateCaption, isDragActive, 
               value={captionValue}
               onChange={(e) => setCaptionValue(e.target.value)}
               onAutoSave={async (value) => {
+                console.log("💬 Caption: AutoSave triggered with value:", value);
                 onUpdateCaption(index, value);
                 setIsEditingCaption(false);
               }}
-              placeholder="Press Enter to save caption"
+              placeholder="Enter caption and press Enter to save"
               className="text-sm h-9 bg-background border-input focus:ring-2 focus:ring-ring focus:border-transparent"
               maxLength={100}
               autoFocus
               onKeyDown={(e) => {
-                if (e.key === 'Escape') {
+                console.log("💬 Caption: Key pressed:", e.key);
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  console.log("💬 Caption: Enter pressed, saving caption:", captionValue);
+                  onUpdateCaption(index, captionValue);
+                  setIsEditingCaption(false);
+                } else if (e.key === 'Escape') {
                   handleCancelCaption();
                 }
               }}
@@ -262,11 +290,14 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
     setDraggedIndex(null);
     setPreviewOrder(null);
     
-    // CRITICAL: Delay resetting isDragActive to prevent click-outside trigger
+    // CRITICAL: Use a longer delay and prevent mousedown events during this period
+    const dragEndTime = Date.now();
+    (window as any).lastDragEndTime = dragEndTime;
+    
     setTimeout(() => {
       console.log("🎯 Gallery: Resetting drag active state");
       setIsDragActive(false);
-    }, 150); // Increased delay to 150ms
+    }, 300); // Increased delay to 300ms
 
     if (active.id !== over?.id) {
       setPhotos((items) => {

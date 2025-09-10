@@ -10,8 +10,17 @@ export function useClickOutside<T extends HTMLElement>(
     console.log("🔍 useClickOutside: Hook initialized, enabled:", enabled);
     if (!enabled) return;
 
-    function handleClickOutside(event: MouseEvent) {
+function handleClickOutside(event: MouseEvent) {
       console.log("🔍 useClickOutside: Click detected, event type:", event.type, "target:", event.target);
+      
+      // Check for recent drag operations
+      const now = Date.now();
+      const timeSinceLastDrag = now - ((window as any).lastDragEndTime || 0);
+      
+      if (timeSinceLastDrag < 500) {
+        console.log("🔍 useClickOutside: Ignoring click - recent drag operation:", timeSinceLastDrag + "ms ago");
+        return;
+      }
       
       // Ignore drag events to prevent closing editor during drag operations
       const target = event.target as Element;
