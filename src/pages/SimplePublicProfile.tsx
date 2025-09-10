@@ -5,7 +5,7 @@ import { User } from "@supabase/supabase-js";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket, Download, Mail, Phone, Star, Quote, Play, Users, Award, TrendingUp, User as UserIcon, UserCheck } from "lucide-react";
+import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket, Download, Mail, Phone, Star, Quote, Play, Users, Award, TrendingUp, User as UserIcon, UserCheck, ChevronLeft, ChevronRight } from "lucide-react";
 import spotifyColorIcon from "@/assets/streaming/spotify-color.png";
 import spotifyLightIcon from "@/assets/streaming/spotify-light.png";
 import soundcloudColorIcon from "@/assets/streaming/soundcloud-color.png";
@@ -384,15 +384,15 @@ export default function SimplePublicProfile() {
           
           <Card className="glass-card border-glass text-center p-6">
             <CardContent className="p-0">
-              {profile.performance_type === 'solo' && <UserIcon className="w-8 h-8 text-accent mx-auto mb-2" />}
-              {profile.performance_type === 'duo' && <UserCheck className="w-8 h-8 text-accent mx-auto mb-2" />}
-              {profile.performance_type === 'band' && <Users className="w-8 h-8 text-accent mx-auto mb-2" />}
-              {!profile.performance_type && <Users className="w-8 h-8 text-accent mx-auto mb-2" />}
+              {profile.performance_type === 'Solo Act' && <UserIcon className="w-8 h-8 text-accent mx-auto mb-2" />}
+              {profile.performance_type === 'Duo' && <UserCheck className="w-8 h-8 text-accent mx-auto mb-2" />}
+              {profile.performance_type === 'Full Band' && <Users className="w-8 h-8 text-accent mx-auto mb-2" />}
+              {(!profile.performance_type || (profile.performance_type !== 'Solo Act' && profile.performance_type !== 'Duo' && profile.performance_type !== 'Full Band')) && <Users className="w-8 h-8 text-accent mx-auto mb-2" />}
               <h3 className="text-2xl font-bold text-foreground">
-                {profile.performance_type === 'solo' && 'Solo Act'}
-                {profile.performance_type === 'duo' && 'Duo'}
-                {profile.performance_type === 'band' && 'Full Band'}
-                {!profile.performance_type && 'Artist'}
+                {profile.performance_type === 'Solo Act' ? 'Solo Act' : 
+                 profile.performance_type === 'Duo' ? 'Duo' :
+                 profile.performance_type === 'Full Band' ? 'Full Band' : 
+                 profile.performance_type || 'Artist'}
               </h3>
               <p className="text-sm text-muted-foreground">Performance Type</p>
             </CardContent>
@@ -451,6 +451,14 @@ export default function SimplePublicProfile() {
               </section>
             )}
 
+            {/* Gallery Photos - Moved below Biography */}
+            {profile.gallery_photos && profile.gallery_photos.length > 0 && (
+              <section className="glass-card border-glass p-8 rounded-xl">
+                <h2 className="text-3xl font-bold mb-6">Photo Gallery</h2>
+                <GallerySlideshow photos={profile.gallery_photos} artistName={profile.artist_name} />
+              </section>
+            )}
+
             {/* Press Quotes */}
             {profile.press_quotes && Array.isArray(profile.press_quotes) && profile.press_quotes.length > 0 && (
               <section className="glass-card border-glass p-8 rounded-xl">
@@ -498,27 +506,45 @@ export default function SimplePublicProfile() {
               </section>
             )}
 
-            {/* Gallery Photos */}
-            {profile.gallery_photos && profile.gallery_photos.length > 0 && (
-              <section className="glass-card border-glass p-8 rounded-xl">
-                <h2 className="text-3xl font-bold mb-6">Photo Gallery</h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {profile.gallery_photos.map((photo, index) => (
-                    <div key={index} className="aspect-square rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300">
-                      <PublicImage
-                        storagePath={typeof photo === 'string' ? photo : photo.url}
-                        alt={`Gallery photo ${index + 1}`}
-                        className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
           </div>
 
           {/* Sidebar */}
           <div className="space-y-8">
+            {/* Featured Shows */}
+            {profile.upcoming_shows && Array.isArray(profile.upcoming_shows) && profile.upcoming_shows.filter((show: any) => show.featured).length > 0 && (
+              <Card className="glass-card border-glass">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                    <Star className="w-6 h-6 text-accent" />
+                    Featured Shows
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {profile.upcoming_shows.filter((show: any) => show.featured).map((show: any, index: number) => (
+                    <div key={index} className="bg-gradient-to-r from-primary/20 to-accent/20 p-4 rounded-lg border border-primary/30">
+                      <h3 className="font-bold text-lg mb-2 text-primary">{show.venue}</h3>
+                      <div className="flex items-center gap-2 text-muted-foreground mb-2">
+                        <MapPin className="w-4 h-4" />
+                        <span>{show.location}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-muted-foreground mb-3">
+                        <Calendar className="w-4 h-4" />
+                        <span>{show.date}</span>
+                      </div>
+                      {show.ticket_url && (
+                        <Button variant="default" size="sm" asChild className="w-full">
+                          <a href={show.ticket_url} target="_blank" rel="noopener noreferrer">
+                            <Ticket className="w-4 h-4 mr-2" />
+                            Get Tickets
+                          </a>
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
             {/* Upcoming Shows */}
             {profile.upcoming_shows && Array.isArray(profile.upcoming_shows) && profile.upcoming_shows.length > 0 && (
               <Card className="glass-card border-glass">
@@ -529,7 +555,11 @@ export default function SimplePublicProfile() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {profile.upcoming_shows.map((show: any, index: number) => (
+                  {profile.upcoming_shows
+                    .filter((show: any) => !show.featured)
+                    .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                    .slice(0, 2)
+                    .map((show: any, index: number) => (
                     <div key={index} className="bg-white/5 p-4 rounded-lg">
                       <h3 className="font-bold text-lg mb-2">{show.venue}</h3>
                       <div className="flex items-center gap-2 text-muted-foreground mb-2">
@@ -554,17 +584,20 @@ export default function SimplePublicProfile() {
               </Card>
             )}
 
-            {/* Past Shows */}
+            {/* Recent Shows */}
             {profile.past_shows && Array.isArray(profile.past_shows) && profile.past_shows.length > 0 && (
               <Card className="glass-card border-glass">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3">
                     <Users className="w-6 h-6 text-accent" />
-                    Recent Performances
+                    Recent Shows
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {profile.past_shows.slice(0, 5).map((show: any, index: number) => (
+                  {profile.past_shows
+                    .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                    .slice(0, 2)
+                    .map((show: any, index: number) => (
                     <div key={index} className="bg-white/5 p-3 rounded-lg">
                       <h4 className="font-medium text-foreground">{show.venue}</h4>
                       <p className="text-sm text-muted-foreground">{show.location}</p>
@@ -619,27 +652,6 @@ export default function SimplePublicProfile() {
               </CardContent>
             </Card>
 
-            {/* Streaming Links */}
-            {profile.streaming_links && Object.keys(profile.streaming_links).length > 0 && (
-              <Card className="glass-card border-glass">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-3">
-                    <Play className="w-6 h-6 text-accent" />
-                    Listen Now
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {Object.entries(profile.streaming_links).map(([platform, url]) => (
-                    <Button key={platform} variant="outline" size="sm" asChild className="w-full">
-                      <a href={url as string} target="_blank" rel="noopener noreferrer">
-                        <Music className="w-4 h-4 mr-2" />
-                        {platform.charAt(0).toUpperCase() + platform.slice(1)}
-                      </a>
-                    </Button>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
 
             {/* Contact Info */}
             {profile.contact_info && (
@@ -673,6 +685,126 @@ export default function SimplePublicProfile() {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+// Gallery Slideshow Component
+function GallerySlideshow({ photos, artistName }: { photos: any[], artistName: string }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+
+  useEffect(() => {
+    if (!isAutoPlaying || photos.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % photos.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [isAutoPlaying, photos.length]);
+
+  const goToPrevious = () => {
+    setCurrentIndex((prevIndex) => (prevIndex - 1 + photos.length) % photos.length);
+    setIsAutoPlaying(false);
+  };
+
+  const goToNext = () => {
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % photos.length);
+    setIsAutoPlaying(false);
+  };
+
+  const goToSlide = (index: number) => {
+    setCurrentIndex(index);
+    setIsAutoPlaying(false);
+  };
+
+  if (!photos || photos.length === 0) return null;
+
+  const currentPhoto = photos[currentIndex];
+
+  return (
+    <div className="relative">
+      {/* Main Slideshow */}
+      <div className="relative aspect-video rounded-xl overflow-hidden shadow-2xl">
+        <PublicImage
+          storagePath={typeof currentPhoto === 'string' ? currentPhoto : currentPhoto.url}
+          alt={`${artistName} gallery photo ${currentIndex + 1}`}
+          className="w-full h-full object-cover"
+        />
+        
+        {/* Navigation Buttons */}
+        {photos.length > 1 && (
+          <>
+            <button
+              onClick={goToPrevious}
+              className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all duration-300 hover:scale-110"
+              aria-label="Previous photo"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+            <button
+              onClick={goToNext}
+              className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all duration-300 hover:scale-110"
+              aria-label="Next photo"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+          </>
+        )}
+
+        {/* Auto-play indicator */}
+        {isAutoPlaying && photos.length > 1 && (
+          <div className="absolute top-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+            Auto-playing
+          </div>
+        )}
+
+        {/* Caption */}
+        {currentPhoto.label && (
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
+            <p className="text-white text-lg font-medium">{currentPhoto.label}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Thumbnail Navigation */}
+      {photos.length > 1 && (
+        <div className="flex justify-center gap-2 mt-6 overflow-x-auto pb-2">
+          {photos.map((photo, index) => (
+            <button
+              key={index}
+              onClick={() => goToSlide(index)}
+              className={`flex-shrink-0 relative aspect-square w-16 h-16 rounded-lg overflow-hidden transition-all duration-300 ${
+                index === currentIndex 
+                  ? 'ring-2 ring-primary shadow-lg scale-110' 
+                  : 'opacity-60 hover:opacity-100'
+              }`}
+            >
+              <PublicImage
+                storagePath={typeof photo === 'string' ? photo : photo.url}
+                alt={`Thumbnail ${index + 1}`}
+                className="w-full h-full object-cover"
+              />
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Controls */}
+      {photos.length > 1 && (
+        <div className="flex justify-center items-center gap-4 mt-4">
+          <button
+            onClick={() => setIsAutoPlaying(!isAutoPlaying)}
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {isAutoPlaying ? 'Pause' : 'Play'} Slideshow
+          </button>
+          <span className="text-muted-foreground text-sm">
+            {currentIndex + 1} of {photos.length}
+          </span>
+        </div>
+      )}
     </div>
   );
 }
