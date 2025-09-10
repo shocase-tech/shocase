@@ -319,13 +319,14 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
             Get Started
           </Button>
           {editingSection === 'basic' && (
-            <div className="mt-6">
+            <div className="mt-6 animate-slide-in-up">
               <InlineEditor
                 sectionId="basic"
                 profile={null}
                 user={user}
                 onSave={(updatedData) => handleSectionSave(updatedData, () => setEditingSection(null))}
                 onCancel={() => setEditingSection(null)}
+                isInitialSetup={true}
               />
             </div>
           )}

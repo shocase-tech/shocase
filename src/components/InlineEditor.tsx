@@ -26,9 +26,10 @@ interface InlineEditorProps {
   user: User | null;
   onSave: (updatedData?: any) => void;
   onCancel: () => void;
+  isInitialSetup?: boolean;
 }
 
-export default function InlineEditor({ sectionId, profile, user, onSave, onCancel }: InlineEditorProps) {
+export default function InlineEditor({ sectionId, profile, user, onSave, onCancel, isInitialSetup = false }: InlineEditorProps) {
   const [formData, setFormData] = useState<any>({});
   const [loading, setLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -101,7 +102,7 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
     setFormData({ ...formData, gallery_photos: photos });
   };
 
-  const handleSave = async () => {
+  const handleSave = async (isDoneAction = false) => {
     if (!user) return;
 
     try {
@@ -128,12 +129,17 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
       }
 
       toast({
-        title: "Section updated!",
-        description: "Your changes have been saved.",
+        title: isDoneAction ? "Profile created!" : "Section updated!",
+        description: isDoneAction ? "Welcome to your press kit dashboard!" : "Your changes have been saved.",
       });
 
       // Update parent with new data instead of triggering refetch
       onSave(formData);
+      
+      // For initial setup completion, close the editor immediately
+      if (isDoneAction) {
+        onCancel();
+      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -156,7 +162,7 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
     try {
       setIsSaving(true);
       console.log("🔍 InlineEditor: Calling handleSave()");
-      await handleSave();
+      await handleSave(false);
       console.log("🔍 InlineEditor: handleSave() completed, closing editor");
       onCancel(); // Close the editor
     } catch (error) {
@@ -1020,6 +1026,54 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
         </div>
       )}
       {renderSection()}
+      
+      {/* Action Buttons */}
+      <div className="flex items-center justify-between pt-6 border-t border-white/10">
+        <Button
+          variant="outline"
+          onClick={onCancel}
+          disabled={loading}
+        >
+          Cancel
+        </Button>
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={() => handleSave(false)}
+            disabled={loading}
+            variant="outline"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4 mr-2" />
+                Save
+              </>
+            )}
+          </Button>
+          {isInitialSetup && (
+            <Button
+              onClick={() => handleSave(true)}
+              disabled={loading || !formData.artist_name}
+              className="bg-gradient-primary hover:shadow-glow transition-all duration-300"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  Done & Enter Dashboard
+                </>
+              )}
+            </Button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
