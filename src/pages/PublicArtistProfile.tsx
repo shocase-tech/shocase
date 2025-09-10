@@ -14,6 +14,8 @@ type PublicArtistProfile = {
   id: string;
   artist_name: string;
   bio: string | null;
+  blurb: string | null;
+  spotify_track_url: string | null;
   genre: string | null;
   social_links: any;
   profile_photo_url: string | null;
@@ -301,14 +303,60 @@ export default function PublicArtistProfile() {
               </div>
             )}
 
-            {profile.bio && (
+            {/* Streaming Links Icons */}
+            {profile.streaming_links && typeof profile.streaming_links === 'object' && profile.streaming_links !== null && !Array.isArray(profile.streaming_links) && (
+              <div className="flex justify-center gap-4 mb-8">
+                {(profile.streaming_links as any).spotify && (
+                  <a
+                    href={(profile.streaming_links as any).spotify}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="transition-transform hover:scale-110"
+                  >
+                    <img src="/src/assets/streaming/spotify-light.png" alt="Spotify" className="w-8 h-8" />
+                  </a>
+                )}
+                {(profile.streaming_links as any).apple_music && (
+                  <a
+                    href={(profile.streaming_links as any).apple_music}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="transition-transform hover:scale-110"
+                  >
+                    <img src="/src/assets/streaming/apple-music-light.svg" alt="Apple Music" className="w-8 h-8" />
+                  </a>
+                )}
+                {(profile.streaming_links as any).soundcloud && (
+                  <a
+                    href={(profile.streaming_links as any).soundcloud}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="transition-transform hover:scale-110"
+                  >
+                    <img src="/src/assets/streaming/soundcloud-light.png" alt="SoundCloud" className="w-8 h-8" />
+                  </a>
+                )}
+                {(profile.streaming_links as any).bandcamp && (
+                  <a
+                    href={(profile.streaming_links as any).bandcamp}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="transition-transform hover:scale-110"
+                  >
+                    <img src="/src/assets/streaming/bandcamp-light.png" alt="Bandcamp" className="w-8 h-8" />
+                  </a>
+                )}
+              </div>
+            )}
+
+            {profile.blurb && (
               <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-4xl mx-auto leading-relaxed">
-                {profile.bio.length > 200 ? `${profile.bio.substring(0, 200)}...` : profile.bio}
+                {profile.blurb}
               </p>
             )}
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+            <div className={`flex flex-col sm:flex-row gap-6 justify-center items-center ${!profile.spotify_track_url ? 'justify-center' : ''}`}>
               {profile.contact_info && (profile.contact_info as any).email && (
                 <Button variant="hero" size="lg" asChild className="group">
                   <a href={`mailto:${(profile.contact_info as any).email}`}>
@@ -319,17 +367,59 @@ export default function PublicArtistProfile() {
                 </Button>
               )}
               
-              <Button variant="glass" size="lg" className="group" asChild>
-                <a href="#listen">
+              {profile.spotify_track_url && (
+                <Button 
+                  variant="glass" 
+                  size="lg" 
+                  className="group" 
+                  onClick={() => {
+                    const spotifySection = document.getElementById('spotify-track');
+                    if (spotifySection) {
+                      spotifySection.scrollIntoView({ behavior: 'smooth' });
+                      // Try to auto-play the Spotify track
+                      const iframe = spotifySection.querySelector('iframe') as HTMLIFrameElement;
+                      if (iframe) {
+                        // Reload iframe with autoplay parameter
+                        const currentSrc = iframe.src;
+                        iframe.src = currentSrc.includes('?') 
+                          ? `${currentSrc}&autoplay=1` 
+                          : `${currentSrc}?autoplay=1`;
+                      }
+                    }
+                  }}
+                >
                   <Play className="w-5 h-5 mr-2" />
                   Listen Now
-                </a>
-              </Button>
+                </Button>
+              )}
             </div>
           </div>
-        </section>
+          </section>
 
-        <div className="container mx-auto px-4 py-12 max-w-7xl">
+          <div className="container mx-auto px-4 py-12 max-w-7xl">
+            {/* Featured Spotify Track */}
+            {profile.spotify_track_url && (
+              <section id="spotify-track" className="mb-16">
+                <div className="glass-card border-glass p-8 rounded-xl">
+                  <h2 className="text-3xl font-bold mb-6 text-center flex items-center justify-center gap-3">
+                    <Music className="w-8 h-8 text-green-500" />
+                    Featured Track
+                  </h2>
+                  <div className="max-w-2xl mx-auto">
+                    <iframe
+                      src={profile.spotify_track_url.replace('track/', 'embed/track/')}
+                      width="100%"
+                      height="352"
+                      frameBorder="0"
+                      allowTransparency={true}
+                      allow="encrypted-media"
+                      className="rounded-xl shadow-lg"
+                      title={`${profile.artist_name} featured track`}
+                    />
+                  </div>
+                </div>
+              </section>
+            )}
           {/* Key Stats Section */}
           <section className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
             <Card className="glass-card border-glass text-center p-6">
