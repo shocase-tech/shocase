@@ -377,8 +377,20 @@ export default function SimplePublicProfile() {
           <Card className="glass-card border-glass text-center p-6">
             <CardContent className="p-0">
               <TrendingUp className="w-8 h-8 text-primary mx-auto mb-2" />
-              <h3 className="text-2xl font-bold text-foreground">{profile.past_shows && Array.isArray(profile.past_shows) ? profile.past_shows.length : '0'}</h3>
-              <p className="text-sm text-muted-foreground">Past Shows</p>
+              <h3 className="text-2xl font-bold text-foreground">
+                {(() => {
+                  if (!profile.upcoming_shows || !Array.isArray(profile.upcoming_shows)) return '0';
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  return profile.upcoming_shows.filter((show: any) => {
+                    if (!show.date) return false;
+                    const showDate = new Date(show.date);
+                    showDate.setHours(0, 0, 0, 0);
+                    return showDate >= today;
+                  }).length;
+                })()}
+              </h3>
+              <p className="text-sm text-muted-foreground">Upcoming shows</p>
             </CardContent>
           </Card>
           
