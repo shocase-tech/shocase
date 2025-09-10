@@ -570,21 +570,6 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
             !!profile.bio
           )}
 
-          {/* Blurb Section */}
-          {renderEditableSection(
-            'blurb',
-            profile.blurb ? (
-              <div>
-                <h3 className="font-semibold mb-2">Artist Blurb</h3>
-                <p className="text-muted-foreground leading-relaxed italic">{profile.blurb}</p>
-                <p className="text-xs text-muted-foreground/70 mt-1">
-                  {profile.blurb.split(' ').filter(w => w.length > 0).length} words
-                </p>
-              </div>
-            ) : null,
-            !!profile.blurb
-          )}
-
           {/* Gallery Section */}
           {editingSection === 'gallery' ? (
             <div className="space-y-4">
