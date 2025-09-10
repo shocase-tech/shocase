@@ -13,11 +13,17 @@ export function useClickOutside<T extends HTMLElement>(
 function handleClickOutside(event: MouseEvent) {
       console.log("🔍 useClickOutside: Click detected, event type:", event.type, "target:", event.target);
       
+      // Check for active drag operations
+      if ((window as any).isDragOperationActive) {
+        console.log("🔍 useClickOutside: Ignoring click - drag operation active");
+        return;
+      }
+      
       // Check for recent drag operations
       const now = Date.now();
       const timeSinceLastDrag = now - ((window as any).lastDragEndTime || 0);
       
-      if (timeSinceLastDrag < 500) {
+      if (timeSinceLastDrag < 1000) {
         console.log("🔍 useClickOutside: Ignoring click - recent drag operation:", timeSinceLastDrag + "ms ago");
         return;
       }

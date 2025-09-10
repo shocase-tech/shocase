@@ -71,88 +71,95 @@ function SortablePhoto({ photo, index, onDelete, onUpdateCaption, isDragActive, 
   };
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={`relative group bg-white/5 rounded-lg overflow-hidden border sortable-item ${
-        isDragging 
-          ? 'border-primary/50 shadow-lg shadow-primary/20' 
-          : isMoving 
-            ? 'border-primary/30' 
-            : 'border-white/10'
-      }`}
-      data-dragging={isDragging}
-    >
-      {/* Image */}
-      <PrivateImage
-        storagePath={photo.url}
-        alt={photo.label || `Gallery ${index + 1}`}
-        className="w-full h-32 object-cover"
-      />
-      
-      {/* Hover Controls */}
-      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          className="bg-white/20 border-white/30 text-white hover:bg-white/30"
-          data-sortable-handle="true"
-          {...attributes}
-          {...listeners}
-        >
-          <GripVertical className="w-4 h-4" />
-        </Button>
+    <div className="space-y-2">
+      {/* Photo Container */}
+      <div
+        ref={setNodeRef}
+        style={style}
+        className={`relative group bg-white/5 rounded-lg overflow-hidden border sortable-item ${
+          isDragging 
+            ? 'border-primary/50 shadow-lg shadow-primary/20' 
+            : isMoving 
+              ? 'border-primary/30' 
+              : 'border-white/10'
+        }`}
+        data-dragging={isDragging}
+      >
+        {/* Image */}
+        <PrivateImage
+          storagePath={photo.url}
+          alt={photo.label || `Gallery ${index + 1}`}
+          className="w-full h-32 object-cover"
+        />
         
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setIsEditingCaption(true)}
-          className="bg-blue-500/20 border-blue-400/30 text-blue-200 hover:bg-blue-500/30"
-        >
-          <Edit className="w-4 h-4" />
-        </Button>
-        
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="bg-red-500/20 border-red-400/30 text-red-200 hover:bg-red-500/30"
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent className="glass-card border-white/10">
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete Photo</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to delete this photo? This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => onDelete(index)}
-                className="bg-red-600 hover:bg-red-700"
+        {/* Hover Controls */}
+        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="bg-white/20 border-white/30 text-white hover:bg-white/30"
+            data-sortable-handle="true"
+            {...attributes}
+            {...listeners}
+          >
+            <GripVertical className="w-4 h-4" />
+          </Button>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsEditingCaption(true);
+            }}
+            className="bg-blue-500/20 border-blue-400/30 text-blue-200 hover:bg-blue-500/30"
+          >
+            <Edit className="w-4 h-4" />
+          </Button>
+          
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="bg-red-500/20 border-red-400/30 text-red-200 hover:bg-red-500/30"
               >
-                Delete Photo
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
-      
-      {/* Photo Index Badge */}
-      <div className="absolute top-2 left-2">
-        <Badge variant="secondary" className="text-xs">
-          {index + 1}
-        </Badge>
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className="glass-card border-white/10">
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Photo</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete this photo? This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => onDelete(index)}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  Delete Photo
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+        
+        {/* Photo Index Badge */}
+        <div className="absolute top-2 left-2">
+          <Badge variant="secondary" className="text-xs">
+            {index + 1}
+          </Badge>
+        </div>
       </div>
 
-      {/* Caption Section */}
-      <div className="p-3 bg-white/5 border-t border-white/10">
+      {/* Caption Bubble - Now beneath the photo */}
+      <div className="bg-white/10 rounded-lg p-3 border border-white/20">
         {isEditingCaption ? (
-          <div className="space-y-3">
+          <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
             <AutoSaveInput
               value={captionValue}
               onChange={(e) => setCaptionValue(e.target.value)}
@@ -169,10 +176,13 @@ function SortablePhoto({ photo, index, onDelete, onUpdateCaption, isDragActive, 
                 console.log("💬 Caption: Key pressed:", e.key);
                 if (e.key === 'Enter') {
                   e.preventDefault();
+                  e.stopPropagation();
                   console.log("💬 Caption: Enter pressed, saving caption:", captionValue);
                   onUpdateCaption(index, captionValue);
                   setIsEditingCaption(false);
                 } else if (e.key === 'Escape') {
+                  e.preventDefault();
+                  e.stopPropagation();
                   handleCancelCaption();
                 }
               }}
@@ -183,8 +193,12 @@ function SortablePhoto({ photo, index, onDelete, onUpdateCaption, isDragActive, 
           </div>
         ) : (
           <div 
-            className="min-h-[2rem] flex items-center cursor-pointer hover:bg-white/5 rounded p-1 transition-colors"
-            onClick={() => setIsEditingCaption(true)}
+            className="min-h-[2rem] flex items-center cursor-pointer hover:bg-white/5 rounded p-2 transition-colors"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsEditingCaption(true);
+            }}
           >
             <p 
               className="text-sm text-muted-foreground truncate"
@@ -293,11 +307,14 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
     // CRITICAL: Use a longer delay and prevent mousedown events during this period
     const dragEndTime = Date.now();
     (window as any).lastDragEndTime = dragEndTime;
+    (window as any).isDragOperationActive = true;
     
+    // Set a much longer delay to prevent editor closure
     setTimeout(() => {
       console.log("🎯 Gallery: Resetting drag active state");
       setIsDragActive(false);
-    }, 300); // Increased delay to 300ms
+      (window as any).isDragOperationActive = false;
+    }, 800); // Increased delay to 800ms
 
     if (active.id !== over?.id) {
       setPhotos((items) => {
