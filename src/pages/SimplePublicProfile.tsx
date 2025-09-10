@@ -6,6 +6,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket, Download, Mail, Phone, Star, Quote, Play, Users, Award, TrendingUp } from "lucide-react";
+import spotifyColorIcon from "@/assets/streaming/spotify-color.png";
+import spotifyLightIcon from "@/assets/streaming/spotify-light.png";
+import soundcloudColorIcon from "@/assets/streaming/soundcloud-color.png";
+import soundcloudLightIcon from "@/assets/streaming/soundcloud-light.png";
+import bandcampColorIcon from "@/assets/streaming/bandcamp-color.png";
+import bandcampLightIcon from "@/assets/streaming/bandcamp-light.png";
+import appleMusicColorIcon from "@/assets/streaming/apple-music-color.svg";
+import appleMusicLightIcon from "@/assets/streaming/apple-music-light.svg";
 import PublicImage from "@/components/PublicImage";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -255,14 +263,60 @@ export default function SimplePublicProfile() {
             </div>
           )}
 
-          {profile.bio && (
+          {/* Streaming Icons */}
+          {profile.streaming_links && Object.keys(profile.streaming_links).length > 0 && (
+            <div className="flex justify-center gap-6 mb-8">
+              {profile.streaming_links.spotify && (
+                <a 
+                  href={profile.streaming_links.spotify} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="hover:scale-110 transition-transform duration-300"
+                >
+                  <img src={spotifyColorIcon} alt="Spotify" className="w-8 h-8" />
+                </a>
+              )}
+              {profile.streaming_links.soundcloud && (
+                <a 
+                  href={profile.streaming_links.soundcloud} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="hover:scale-110 transition-transform duration-300"
+                >
+                  <img src={soundcloudColorIcon} alt="SoundCloud" className="w-8 h-8" />
+                </a>
+              )}
+              {profile.streaming_links.bandcamp && (
+                <a 
+                  href={profile.streaming_links.bandcamp} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="hover:scale-110 transition-transform duration-300"
+                >
+                  <img src={bandcampColorIcon} alt="Bandcamp" className="w-8 h-8" />
+                </a>
+              )}
+              {profile.streaming_links.appleMusic && (
+                <a 
+                  href={profile.streaming_links.appleMusic} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="hover:scale-110 transition-transform duration-300"
+                >
+                  <img src={appleMusicColorIcon} alt="Apple Music" className="w-8 h-8" />
+                </a>
+              )}
+            </div>
+          )}
+
+          {profile.blurb && (
             <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-4xl mx-auto leading-relaxed">
-              {profile.bio.length > 200 ? `${profile.bio.substring(0, 200)}...` : profile.bio}
+              {profile.blurb}
             </p>
           )}
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+          <div className={`flex flex-col sm:flex-row gap-6 ${!profile.spotify_track_url ? 'justify-center' : 'justify-center'} items-center`}>
             {profile.contact_info && (profile.contact_info as any).email && (
               <Button variant="hero" size="lg" asChild className="group">
                 <a href={`mailto:${(profile.contact_info as any).email}`}>
@@ -273,12 +327,30 @@ export default function SimplePublicProfile() {
               </Button>
             )}
             
-            <Button variant="glass" size="lg" className="group" asChild>
-              <a href="#listen">
+            {profile.spotify_track_url && (
+              <Button 
+                variant="glass" 
+                size="lg" 
+                className="group" 
+                onClick={() => {
+                  const spotifySection = document.getElementById('spotify-player');
+                  if (spotifySection) {
+                    spotifySection.scrollIntoView({ behavior: 'smooth' });
+                    // Attempt to trigger play (limited by browser autoplay policies)
+                    const iframe = spotifySection.querySelector('iframe') as HTMLIFrameElement;
+                    if (iframe) {
+                      // Spotify embed doesn't support programmatic play, but we can at least scroll to it
+                      setTimeout(() => {
+                        iframe.focus();
+                      }, 1000);
+                    }
+                  }
+                }}
+              >
                 <Play className="w-5 h-5 mr-2" />
                 Listen Now
-              </a>
-            </Button>
+              </Button>
+            )}
           </div>
         </div>
       </section>
@@ -318,6 +390,30 @@ export default function SimplePublicProfile() {
             </CardContent>
           </Card>
         </section>
+
+        {/* Spotify Track Section */}
+        {profile.spotify_track_url && (
+          <section id="spotify-player" className="mb-16">
+            <div className="glass-card border-glass p-8 rounded-xl">
+              <h2 className="text-3xl font-bold mb-6 text-center flex items-center justify-center gap-3">
+                <Music className="w-8 h-8 text-primary" />
+                Featured Track
+              </h2>
+              <div className="max-w-2xl mx-auto">
+                <iframe
+                  src={profile.spotify_track_url.replace('open.spotify.com/track/', 'open.spotify.com/embed/track/')}
+                  width="100%"
+                  height="352"
+                  frameBorder="0"
+                  allowTransparency={true}
+                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                  loading="lazy"
+                  className="rounded-xl shadow-lg"
+                />
+              </div>
+            </div>
+          </section>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
