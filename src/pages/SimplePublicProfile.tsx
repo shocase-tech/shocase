@@ -5,7 +5,7 @@ import { User } from "@supabase/supabase-js";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket, Download, Mail, Phone, Star, Quote, Play, Users, Award, TrendingUp } from "lucide-react";
+import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket, Download, Mail, Phone, Star, Quote, Play, Users, Award, TrendingUp, User as UserIcon, UserCheck } from "lucide-react";
 import spotifyColorIcon from "@/assets/streaming/spotify-color.png";
 import spotifyLightIcon from "@/assets/streaming/spotify-light.png";
 import soundcloudColorIcon from "@/assets/streaming/soundcloud-color.png";
@@ -368,9 +368,9 @@ export default function SimplePublicProfile() {
           
           <Card className="glass-card border-glass text-center p-6">
             <CardContent className="p-0">
-              <Award className="w-8 h-8 text-accent mx-auto mb-2" />
-              <h3 className="text-2xl font-bold text-foreground">Pro</h3>
-              <p className="text-sm text-muted-foreground">Quality Shows</p>
+              <MapPin className="w-8 h-8 text-accent mx-auto mb-2" />
+              <h3 className="text-2xl font-bold text-foreground">{profile.location || 'Location'}</h3>
+              <p className="text-sm text-muted-foreground">Based</p>
             </CardContent>
           </Card>
           
@@ -384,9 +384,17 @@ export default function SimplePublicProfile() {
           
           <Card className="glass-card border-glass text-center p-6">
             <CardContent className="p-0">
-              <Music className="w-8 h-8 text-accent mx-auto mb-2" />
-              <h3 className="text-2xl font-bold text-foreground">Pro</h3>
-              <p className="text-sm text-muted-foreground">Audio/Video</p>
+              {profile.performance_type === 'solo' && <UserIcon className="w-8 h-8 text-accent mx-auto mb-2" />}
+              {profile.performance_type === 'duo' && <UserCheck className="w-8 h-8 text-accent mx-auto mb-2" />}
+              {profile.performance_type === 'band' && <Users className="w-8 h-8 text-accent mx-auto mb-2" />}
+              {!profile.performance_type && <Users className="w-8 h-8 text-accent mx-auto mb-2" />}
+              <h3 className="text-2xl font-bold text-foreground">
+                {profile.performance_type === 'solo' && 'Solo Act'}
+                {profile.performance_type === 'duo' && 'Duo'}
+                {profile.performance_type === 'band' && 'Full Band'}
+                {!profile.performance_type && 'Artist'}
+              </h3>
+              <p className="text-sm text-muted-foreground">Performance Type</p>
             </CardContent>
           </Card>
         </section>
@@ -394,23 +402,17 @@ export default function SimplePublicProfile() {
         {/* Spotify Track Section */}
         {profile.spotify_track_url && (
           <section id="spotify-player" className="mb-16">
-            <div className="glass-card border-glass p-8 rounded-xl">
-              <h2 className="text-3xl font-bold mb-6 text-center flex items-center justify-center gap-3">
-                <Music className="w-8 h-8 text-primary" />
-                Featured Track
-              </h2>
-              <div className="max-w-2xl mx-auto">
-                <iframe
-                  src={profile.spotify_track_url.replace('open.spotify.com/track/', 'open.spotify.com/embed/track/')}
-                  width="100%"
-                  height="352"
-                  frameBorder="0"
-                  allowTransparency={true}
-                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                  loading="lazy"
-                  className="rounded-xl shadow-lg"
-                />
-              </div>
+            <div className="w-full">
+              <iframe
+                src={profile.spotify_track_url.replace('open.spotify.com/track/', 'open.spotify.com/embed/track/')}
+                width="100%"
+                height="152"
+                frameBorder="0"
+                allowTransparency={true}
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                loading="lazy"
+                className="rounded-xl shadow-lg"
+              />
             </div>
           </section>
         )}
