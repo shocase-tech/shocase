@@ -411,7 +411,7 @@ export default function Dashboard() {
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Progress Section with Publish Controls */}
           {profile && (
-            <Card ref={progressCardRef} className="glass-card border-white/10">
+            <Card ref={progressCardRef} className="glass-card border-white/10 animate-slide-in-up">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between mb-4">
                   <div>
@@ -494,11 +494,13 @@ export default function Dashboard() {
           )}
 
           {/* Live Preview Editor */}
-          <LivePreviewEditor 
-            profile={profile} 
-            onProfileUpdated={handleProfileUpdated}
-            user={user}
-          />
+          <div className="animate-slide-in-up">
+            <LivePreviewEditor 
+              profile={profile} 
+              onProfileUpdated={handleProfileUpdated}
+              user={user}
+            />
+          </div>
         </div>
         
         {/* Floating Progress Indicator with Publish Toggle */}

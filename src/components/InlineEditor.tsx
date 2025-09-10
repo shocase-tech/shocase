@@ -136,9 +136,9 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
       // Update parent with new data instead of triggering refetch
       onSave(formData);
       
-      // For initial setup completion, close the editor immediately
+      // For initial setup completion, reload the page to show full dashboard
       if (isDoneAction) {
-        onCancel();
+        window.location.reload();
       }
     } catch (error: any) {
       toast({
