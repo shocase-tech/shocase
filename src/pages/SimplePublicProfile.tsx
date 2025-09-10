@@ -5,7 +5,7 @@ import { User } from "@supabase/supabase-js";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket, Download, Mail, Phone, Star, Quote, Play, Users, Award, TrendingUp, User as UserIcon, UserCheck, ChevronLeft, ChevronRight } from "lucide-react";
+import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket, Download, Mail, Phone, Star, Quote, Play, Users, Award, TrendingUp, User as UserIcon, Users2, Guitar, ChevronLeft, ChevronRight } from "lucide-react";
 import spotifyColorIcon from "@/assets/streaming/spotify-color.png";
 import spotifyLightIcon from "@/assets/streaming/spotify-light.png";
 import soundcloudColorIcon from "@/assets/streaming/soundcloud-color.png";
@@ -385,8 +385,8 @@ export default function SimplePublicProfile() {
           <Card className="glass-card border-glass text-center p-6">
             <CardContent className="p-0">
               {profile.performance_type === 'Solo Act' && <UserIcon className="w-8 h-8 text-accent mx-auto mb-2" />}
-              {profile.performance_type === 'Duo' && <UserCheck className="w-8 h-8 text-accent mx-auto mb-2" />}
-              {profile.performance_type === 'Full Band' && <Users className="w-8 h-8 text-accent mx-auto mb-2" />}
+              {profile.performance_type === 'Duo' && <Users2 className="w-8 h-8 text-accent mx-auto mb-2" />}
+              {profile.performance_type === 'Full Band' && <Guitar className="w-8 h-8 text-accent mx-auto mb-2" />}
               {(!profile.performance_type || (profile.performance_type !== 'Solo Act' && profile.performance_type !== 'Duo' && profile.performance_type !== 'Full Band')) && <Users className="w-8 h-8 text-accent mx-auto mb-2" />}
               <h3 className="text-2xl font-bold text-foreground">
                 {profile.performance_type === 'Solo Act' ? 'Solo Act' : 
@@ -451,65 +451,115 @@ export default function SimplePublicProfile() {
               </section>
             )}
 
-            {/* Gallery Photos - Moved below Biography */}
+            {/* Gallery Photos - Full Width */}
             {profile.gallery_photos && profile.gallery_photos.length > 0 && (
-              <section className="glass-card border-glass p-8 rounded-xl">
-                <h2 className="text-3xl font-bold mb-6">Photo Gallery</h2>
+              <section className="w-full">
+                <h2 className="text-3xl font-bold mb-6 text-center">Photo Gallery</h2>
                 <GallerySlideshow photos={profile.gallery_photos} artistName={profile.artist_name} />
               </section>
             )}
 
-            {/* Press Quotes */}
-            {profile.press_quotes && Array.isArray(profile.press_quotes) && profile.press_quotes.length > 0 && (
-              <section className="glass-card border-glass p-8 rounded-xl">
-                <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
-                  <Quote className="w-8 h-8 text-accent" />
-                  Press & Reviews
-                </h2>
-                <div className="space-y-6">
-                  {profile.press_quotes.map((quote: any, index: number) => (
-                    <blockquote key={index} className="border-l-4 border-primary pl-6 bg-white/5 p-6 rounded-r-lg hover:shadow-glow transition-all duration-300">
-                      <p className="italic text-xl mb-4 leading-relaxed">"{quote.text}"</p>
-                      <cite className="text-lg font-bold text-primary">— {quote.source}</cite>
-                    </blockquote>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Press Mentions */}
-            {profile.press_mentions && Array.isArray(profile.press_mentions) && profile.press_mentions.length > 0 && (
-              <section className="glass-card border-glass p-8 rounded-xl">
-                <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
-                  <ExternalLink className="w-8 h-8 text-accent" />
-                  Press Coverage
-                </h2>
-                <div className="space-y-4">
-                  {profile.press_mentions.map((mention: any, index: number) => (
-                    <div key={index} className="bg-white/5 p-6 rounded-lg hover:bg-white/10 transition-all duration-300">
-                      <h3 className="text-xl font-bold text-foreground mb-2">{mention.title}</h3>
-                      <p className="text-muted-foreground mb-3">{mention.description}</p>
-                      <div className="flex items-center gap-3">
-                        <span className="text-primary font-medium">{mention.source}</span>
-                        {mention.url && (
-                          <Button variant="outline" size="sm" asChild>
-                            <a href={mention.url} target="_blank" rel="noopener noreferrer">
-                              <ExternalLink className="w-4 h-4 mr-2" />
-                              Read More
-                            </a>
-                          </Button>
-                        )}
-                      </div>
+            {/* Press Sections - Side by Side */}
+            {((profile.press_quotes && Array.isArray(profile.press_quotes) && profile.press_quotes.length > 0) || 
+              (profile.press_mentions && Array.isArray(profile.press_mentions) && profile.press_mentions.length > 0)) && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Press Quotes */}
+                {profile.press_quotes && Array.isArray(profile.press_quotes) && profile.press_quotes.length > 0 && (
+                  <section className="glass-card border-glass p-8 rounded-xl">
+                    <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
+                      <Quote className="w-8 h-8 text-accent" />
+                      Press & Reviews
+                    </h2>
+                    <div className="space-y-6">
+                      {profile.press_quotes.map((quote: any, index: number) => (
+                        <blockquote key={index} className="border-l-4 border-primary pl-6 bg-white/5 p-6 rounded-r-lg hover:shadow-glow transition-all duration-300">
+                          <p className="italic text-xl mb-4 leading-relaxed">"{quote.text}"</p>
+                          <cite className="text-lg font-bold text-primary">— {quote.source}</cite>
+                        </blockquote>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </section>
+                  </section>
+                )}
+
+                {/* Press Mentions */}
+                {profile.press_mentions && Array.isArray(profile.press_mentions) && profile.press_mentions.length > 0 && (
+                  <section className="glass-card border-glass p-8 rounded-xl">
+                    <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
+                      <ExternalLink className="w-8 h-8 text-accent" />
+                      Press Coverage
+                    </h2>
+                    <div className="space-y-4">
+                      {profile.press_mentions.map((mention: any, index: number) => (
+                        <div key={index} className="bg-white/5 p-6 rounded-lg hover:bg-white/10 transition-all duration-300">
+                          <h3 className="text-xl font-bold text-foreground mb-2">{mention.title}</h3>
+                          <p className="text-muted-foreground mb-3">{mention.description}</p>
+                          <div className="flex items-center gap-3">
+                            <span className="text-primary font-medium">{mention.source}</span>
+                            {mention.url && (
+                              <Button variant="outline" size="sm" asChild>
+                                <a href={mention.url} target="_blank" rel="noopener noreferrer">
+                                  <ExternalLink className="w-4 h-4 mr-2" />
+                                  Read More
+                                </a>
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
+              </div>
             )}
 
           </div>
 
           {/* Sidebar */}
           <div className="space-y-8">
+            {/* Connect Section */}
+            <Card className="glass-card border-glass">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3">
+                  <Globe className="w-6 h-6 text-primary" />
+                  Connect
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex justify-center gap-6">
+                  {socialLinks.website && (
+                    <a 
+                      href={socialLinks.website} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="hover:scale-110 transition-transform duration-300"
+                    >
+                      <Globe className="w-10 h-10 text-primary hover:text-accent" />
+                    </a>
+                  )}
+                  {socialLinks.instagram && (
+                    <a 
+                      href={socialLinks.instagram} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="hover:scale-110 transition-transform duration-300"
+                    >
+                      <Instagram className="w-10 h-10 text-primary hover:text-accent" />
+                    </a>
+                  )}
+                  {socialLinks.tiktok && (
+                    <a 
+                      href={socialLinks.tiktok} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="hover:scale-110 transition-transform duration-300"
+                    >
+                      <Play className="w-10 h-10 text-primary hover:text-accent" />
+                    </a>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Featured Shows */}
             {profile.upcoming_shows && Array.isArray(profile.upcoming_shows) && profile.upcoming_shows.filter((show: any) => show.featured).length > 0 && (
               <Card className="glass-card border-glass">
@@ -608,49 +658,6 @@ export default function SimplePublicProfile() {
               </Card>
             )}
 
-            {/* Social Links */}
-            <Card className="glass-card border-glass">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3">
-                  <Globe className="w-6 h-6 text-primary" />
-                  Connect
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {socialLinks.website && (
-                  <Button variant="outline" size="sm" asChild className="w-full">
-                    <a href={socialLinks.website} target="_blank" rel="noopener noreferrer">
-                      <Globe className="w-4 h-4 mr-2" />
-                      Website
-                    </a>
-                  </Button>
-                )}
-                {socialLinks.instagram && (
-                  <Button variant="outline" size="sm" asChild className="w-full">
-                    <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer">
-                      <Instagram className="w-4 h-4 mr-2" />
-                      Instagram
-                    </a>
-                  </Button>
-                )}
-                {socialLinks.spotify && (
-                  <Button variant="outline" size="sm" asChild className="w-full">
-                    <a href={socialLinks.spotify} target="_blank" rel="noopener noreferrer">
-                      <Music className="w-4 h-4 mr-2" />
-                      Spotify
-                    </a>
-                  </Button>
-                )}
-                {socialLinks.tiktok && (
-                  <Button variant="outline" size="sm" asChild className="w-full">
-                    <a href={socialLinks.tiktok} target="_blank" rel="noopener noreferrer">
-                      <Play className="w-4 h-4 mr-2" />
-                      TikTok
-                    </a>
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
 
 
             {/* Contact Info */}
@@ -726,11 +733,11 @@ function GallerySlideshow({ photos, artistName }: { photos: any[], artistName: s
   return (
     <div className="relative">
       {/* Main Slideshow */}
-      <div className="relative aspect-video rounded-xl overflow-hidden shadow-2xl">
+      <div className="relative aspect-video rounded-xl overflow-hidden shadow-2xl max-w-none w-full">
         <PublicImage
           storagePath={typeof currentPhoto === 'string' ? currentPhoto : currentPhoto.url}
           alt={`${artistName} gallery photo ${currentIndex + 1}`}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain bg-black/10"
         />
         
         {/* Navigation Buttons */}
