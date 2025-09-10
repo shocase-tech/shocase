@@ -21,7 +21,7 @@ function buildBioPrompt(inputs: any) {
     word_limit
   } = inputs;
 
-  // Handle blurb generation request
+// Handle blurb generation request
   if (is_blurb && existing_bio) {
     return `Create a catchy, exciting blurb (maximum ${word_limit || 20} words) from this artist bio for ${artist_name}:
 

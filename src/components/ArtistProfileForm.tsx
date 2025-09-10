@@ -144,38 +144,53 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
   };
 
   // AI Blurb Generation Function
+  const [blurbGenerating, setBlurbGenerating] = useState(false);
+  
   const generateBlurbWithAI = async () => {
     if (!formData.bio || formData.bio.trim().length < 50) {
       toast({
-        title: "Bio too short",
-        description: "Please write a longer bio (at least 50 characters) before generating a blurb.",
+        title: "Bio required",
+        description: "Please write a bio first before generating a blurb.",
         variant: "destructive",
       });
       return;
     }
     
+    setBlurbGenerating(true);
+    
     try {
-      // Simple AI-like logic to create blurb from bio
-      const sentences = formData.bio.split('.').filter(s => s.trim().length > 0);
-      const firstSentence = sentences[0]?.trim();
-      
-      if (firstSentence) {
-        const words = firstSentence.split(' ').slice(0, 20).join(' ');
-        const blurb = words.endsWith('.') ? words : words + '.';
-        
-        setFormData({ ...formData, blurb });
+      const { data, error } = await supabase.functions.invoke('generate-bio', {
+        body: {
+          artist_name: formData.artist_name,
+          existing_bio: formData.bio,
+          is_blurb: true,
+          word_limit: 20
+        }
+      });
+
+      if (error) {
+        console.error('Edge function error:', error);
+        throw new Error(error.message || 'Failed to generate blurb');
+      }
+
+      if (data?.bio) {
+        setFormData({ ...formData, blurb: data.bio });
         toast({
           title: "Blurb generated!",
-          description: "Your AI-generated blurb has been created from your bio.",
+          description: "Your AI-generated blurb has been created.",
         });
+      } else {
+        throw new Error('No blurb content received');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating blurb:", error);
       toast({
-        title: "Error",
-        description: "Failed to generate blurb. Please try again.",
+        title: "Generation failed",
+        description: error.message || "Failed to generate blurb. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setBlurbGenerating(false);
     }
   };
 
@@ -403,10 +418,19 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
                     variant="outline" 
                     size="sm"
                     onClick={generateBlurbWithAI}
-                    disabled={!formData.bio || formData.bio.trim().length < 50}
+                    disabled={!formData.bio || formData.bio.trim().length < 50 || blurbGenerating}
                   >
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    AI Generate
+                    {blurbGenerating ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        AI Generate
+                      </>
+                    )}
                   </Button>
                 </div>
                 <Textarea
