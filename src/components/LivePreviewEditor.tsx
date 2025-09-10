@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket, Edit3, Plus, Quote, Star, User as UserIcon, Users, Sparkles } from "lucide-react";
+import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket, Edit3, Plus, Quote, Star, User as UserIcon, Users, Sparkles, FileText } from "lucide-react";
 import PrivateImage from "@/components/PrivateImage";
 import InlineEditor from "@/components/InlineEditor";
 import PressQuotesEditor from "@/components/PressQuotesEditor";
@@ -577,8 +577,13 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
                   <span className="text-muted-foreground">{profile.performance_type}</span>
                 </div>
               </div>
-            ) : null,
-            !!profile.performance_type
+            ) : (
+              <div className="text-center py-4">
+                <Users className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
+                <p className="text-muted-foreground">Add Performance Type</p>
+              </div>
+            ),
+            true
           )}
 
           {/* Location Section */}
@@ -592,8 +597,13 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
                   <span className="text-muted-foreground">{profile.location}</span>
                 </div>
               </div>
-            ) : null,
-            !!profile.location
+            ) : (
+              <div className="text-center py-4">
+                <MapPin className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
+                <p className="text-muted-foreground">Add Location</p>
+              </div>
+            ),
+            true
           )}
 
           {/* Spotify Track Section */}
@@ -617,8 +627,13 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
                   />
                 </div>
               </div>
-            ) : null,
-            !!profile.spotify_track_url
+            ) : (
+              <div className="text-center py-4">
+                <Music className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
+                <p className="text-muted-foreground">Add Featured Spotify Track</p>
+              </div>
+            ),
+            true
           )}
 
           {/* Blurb Section */}
@@ -632,8 +647,13 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
                   {profile.blurb.split(' ').filter(w => w.length > 0).length} words
                 </p>
               </div>
-            ) : null,
-            !!profile.blurb
+            ) : (
+              <div className="text-center py-4">
+                <FileText className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
+                <p className="text-muted-foreground">Add Artist Blurb</p>
+              </div>
+            ),
+            true
           )}
 
           {/* Gallery Section */}
