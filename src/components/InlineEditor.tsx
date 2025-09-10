@@ -1028,51 +1028,54 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
       {renderSection()}
       
       {/* Action Buttons */}
-      <div className="flex items-center justify-between pt-6 border-t border-white/10">
-        <Button
-          variant="outline"
-          onClick={onCancel}
-          disabled={loading}
-        >
-          Cancel
-        </Button>
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-center pt-6 border-t border-white/10">
+        {isInitialSetup ? (
           <Button
-            onClick={() => handleSave(false)}
-            disabled={loading}
-            variant="outline"
+            onClick={() => handleSave(true)}
+            disabled={loading || !formData.artist_name}
+            className="bg-gradient-primary hover:shadow-glow transition-all duration-300 px-8 py-3 text-lg"
           >
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                Saving...
+                Creating...
               </>
             ) : (
               <>
-                <Save className="w-4 h-4 mr-2" />
-                Save
+                Done & Enter Dashboard
               </>
             )}
           </Button>
-          {isInitialSetup && (
+        ) : (
+          <>
             <Button
-              onClick={() => handleSave(true)}
-              disabled={loading || !formData.artist_name}
-              className="bg-gradient-primary hover:shadow-glow transition-all duration-300"
+              variant="outline"
+              onClick={onCancel}
+              disabled={loading}
             >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  Creating...
-                </>
-              ) : (
-                <>
-                  Done & Enter Dashboard
-                </>
-              )}
+              Cancel
             </Button>
-          )}
-        </div>
+            <div className="flex items-center gap-3">
+              <Button
+                onClick={() => handleSave(false)}
+                disabled={loading}
+                variant="outline"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Save
+                  </>
+                )}
+              </Button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

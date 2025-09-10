@@ -309,7 +309,7 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
 
   if (!profile) {
     return (
-      <Card className="glass-card border-white/10">
+      <Card className="glass-card border-white/10 animate-slide-in-up">
         <CardContent className="py-12 text-center">
           <h2 className="text-xl font-semibold mb-4">Welcome to your Press Kit Builder</h2>
           <p className="text-muted-foreground mb-6">
@@ -354,7 +354,7 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
       )}
 
       {/* Main Profile Card */}
-      <Card className="glass-card border-white/10">
+      <Card className="glass-card border-white/10 animate-slide-in-up">
         <CardHeader>
           {renderEditableSection(
             'basic',
@@ -657,7 +657,7 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
             <div>
               {editingSection === 'quotes' ? (
                 <div className="space-y-4">
-                  <Card className="border-primary/20 bg-primary/5">
+                  <Card className="border-primary/20 bg-primary/5 animate-slide-in-up">
                     <CardContent className="pt-6">
                       <PressQuotesEditor
                         quotes={profile?.press_quotes || []}
@@ -685,7 +685,7 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
                       <h3 className="font-semibold mb-3">Press Quotes</h3>
                       <div className="space-y-4">
                         {profile.press_quotes.map((quote: any, index: number) => (
-                          <Card key={index} className="border-l-4 border-l-primary bg-muted/30">
+                          <Card key={index} className="border-l-4 border-l-primary bg-muted/30 animate-slide-in-up">
                             <CardContent className="pt-4">
                               <div className="flex items-start gap-3">
                                 <Quote className="w-5 h-5 text-primary flex-shrink-0 mt-1" />
