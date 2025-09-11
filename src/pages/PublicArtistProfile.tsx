@@ -220,6 +220,15 @@ export default function PublicArtistProfile() {
     genreArray = [];
   }
 
+  // Helper functions to handle field variations
+  const getShowLocation = (show: any) => {
+    return show.city || show.location || '';
+  };
+
+  const getShowTicketLink = (show: any) => {
+    return show.ticket_link || show.ticket_url || show.ticketUrl || '';
+  };
+
   return (
     <>
       <Helmet>
@@ -603,12 +612,16 @@ export default function PublicArtistProfile() {
                         </div>
                         <p className="text-sm text-muted-foreground flex items-center gap-1 mb-3">
                           <MapPin className="w-3 h-3" />
-                          {show.city} • {show.date}
+                          {getShowLocation(show)} • {new Date(show.date).toLocaleDateString('en-US', { 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric' 
+                          })}
                         </p>
-                        {show.ticket_link && (
+                        {getShowTicketLink(show) && (
                           <Button asChild size="sm" className="w-full">
                             <a
-                              href={show.ticket_link}
+                              href={getShowTicketLink(show)}
                               target="_blank"
                               rel="noopener noreferrer"
                             >
@@ -683,7 +696,11 @@ export default function PublicArtistProfile() {
                     <p className="font-semibold text-lg">{show.venue}</p>
                     <p className="text-sm text-muted-foreground flex items-center gap-1">
                       <MapPin className="w-3 h-3" />
-                      {show.city} • {show.date}
+                      {getShowLocation(show)} • {new Date(show.date).toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })}
                     </p>
                   </div>
                 ))}

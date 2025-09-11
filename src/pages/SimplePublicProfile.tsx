@@ -207,6 +207,15 @@ export default function SimplePublicProfile() {
     genreArray = [];
   }
 
+  // Helper functions to handle field variations
+  const getShowLocation = (show: any) => {
+    return show.city || show.location || '';
+  };
+
+  const getShowTicketLink = (show: any) => {
+    return show.ticket_link || show.ticket_url || show.ticketUrl || '';
+  };
+
   return (
     <div className="min-h-screen bg-gradient-dark">
       {/* Owner Preview Banner */}
@@ -592,15 +601,19 @@ export default function SimplePublicProfile() {
                       <h3 className="font-bold text-lg mb-2 text-primary">{show.venue}</h3>
                       <div className="flex items-center gap-2 text-muted-foreground mb-2">
                         <MapPin className="w-4 h-4" />
-                        <span>{show.location}</span>
+                        <span>{getShowLocation(show)}</span>
                       </div>
                       <div className="flex items-center gap-2 text-muted-foreground mb-3">
                         <Calendar className="w-4 h-4" />
-                        <span>{show.date}</span>
+                        <span>{new Date(show.date).toLocaleDateString('en-US', { 
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric' 
+                        })}</span>
                       </div>
-                      {show.ticket_url && (
+                      {getShowTicketLink(show) && (
                         <Button variant="default" size="sm" asChild className="w-full">
-                          <a href={show.ticket_url} target="_blank" rel="noopener noreferrer">
+                          <a href={getShowTicketLink(show)} target="_blank" rel="noopener noreferrer">
                             <Ticket className="w-4 h-4 mr-2" />
                             Get Tickets
                           </a>
@@ -631,15 +644,19 @@ export default function SimplePublicProfile() {
                       <h3 className="font-bold text-lg mb-2">{show.venue}</h3>
                       <div className="flex items-center gap-2 text-muted-foreground mb-2">
                         <MapPin className="w-4 h-4" />
-                        <span>{show.location}</span>
+                        <span>{getShowLocation(show)}</span>
                       </div>
                       <div className="flex items-center gap-2 text-muted-foreground mb-3">
                         <Calendar className="w-4 h-4" />
-                        <span>{show.date}</span>
+                        <span>{new Date(show.date).toLocaleDateString('en-US', { 
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric' 
+                        })}</span>
                       </div>
-                      {show.ticket_url && (
+                      {getShowTicketLink(show) && (
                         <Button variant="outline" size="sm" asChild className="w-full">
-                          <a href={show.ticket_url} target="_blank" rel="noopener noreferrer">
+                          <a href={getShowTicketLink(show)} target="_blank" rel="noopener noreferrer">
                             <Ticket className="w-4 h-4 mr-2" />
                             Get Tickets
                           </a>
@@ -667,8 +684,15 @@ export default function SimplePublicProfile() {
                     .map((show: any, index: number) => (
                     <div key={index} className="bg-white/5 p-3 rounded-lg">
                       <h4 className="font-medium text-foreground">{show.venue}</h4>
-                      <p className="text-sm text-muted-foreground">{show.location}</p>
-                      <p className="text-xs text-muted-foreground">{show.date}</p>
+                      <p className="text-sm text-muted-foreground flex items-center gap-1">
+                        <MapPin className="w-3 h-3" />
+                        {getShowLocation(show)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">{new Date(show.date).toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })}</p>
                     </div>
                   ))}
                 </CardContent>
