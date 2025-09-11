@@ -254,9 +254,11 @@ export default function ShowsEditor({ profile, user, onSave, onCancel }: ShowsEd
   );
 
   useEffect(() => {
-    if (profile?.upcoming_shows) {
-      setShows(profile.upcoming_shows);
-    }
+    const allShows = [
+      ...(profile?.upcoming_shows || []),
+      ...(profile?.past_shows || [])
+    ];
+    setShows(allShows);
   }, [profile]);
 
   const handleDragEnd = (event: any) => {
