@@ -18,6 +18,7 @@ import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSo
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useClickOutside } from "@/hooks/useClickOutside";
+import { ValidationAlertModal } from "@/components/ValidationAlertModal";
 
 interface ShowsEditorProps {
   profile: any;
@@ -241,6 +242,8 @@ export default function ShowsEditor({ profile, user, onSave, onCancel }: ShowsEd
   const [shows, setShows] = useState<Show[]>([]);
   const [loading, setLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [showValidationModal, setShowValidationModal] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Array<{ showIndex: number; missingFields: string[] }>>([]);
   const { toast } = useToast();
 
   const sensors = useSensors(
@@ -317,35 +320,46 @@ export default function ShowsEditor({ profile, user, onSave, onCancel }: ShowsEd
     });
   };
 
+  const validateShows = () => {
+    const errors: Array<{ showIndex: number; missingFields: string[] }> = [];
+    
+    shows.forEach((show, index) => {
+      const missingFields: string[] = [];
+      
+      if (!show.venue.trim()) missingFields.push("venue");
+      if (!show.city.trim()) missingFields.push("city");
+      if (!show.date) missingFields.push("date");
+      
+      if (missingFields.length > 0) {
+        errors.push({ showIndex: index, missingFields });
+      }
+    });
+    
+    return errors;
+  };
+
   const handleSave = async () => {
     if (!user) return;
 
     // Validate shows data before saving
-    const validShows = shows.filter(show => 
-      show.venue.trim() && 
-      show.city.trim() && 
-      show.date
-    );
-
-    if (validShows.length !== shows.length) {
-      toast({
-        title: "Validation Error",
-        description: "Please fill out all required fields (venue, city, date) for each show.",
-        variant: "destructive",
-      });
+    const errors = validateShows();
+    
+    if (errors.length > 0) {
+      setValidationErrors(errors);
+      setShowValidationModal(true);
       return;
     }
 
     try {
       setLoading(true);
       
-      console.log("💾 ShowsEditor: Saving shows:", validShows);
+      console.log("💾 ShowsEditor: Saving shows:", shows);
 
       const { error } = await supabase
         .from('artist_profiles')
         .update({
-          upcoming_shows: validShows.filter(show => new Date(show.date) >= new Date()) as any,
-          past_shows: validShows.filter(show => new Date(show.date) < new Date()) as any,
+          upcoming_shows: shows.filter(show => new Date(show.date) >= new Date()) as any,
+          past_shows: shows.filter(show => new Date(show.date) < new Date()) as any,
           updated_at: new Date().toISOString()
         })
         .eq('user_id', user.id);
@@ -360,8 +374,8 @@ export default function ShowsEditor({ profile, user, onSave, onCancel }: ShowsEd
       // Update parent component with new data
       const updatedProfile = {
         ...profile,
-        upcoming_shows: validShows.filter(show => new Date(show.date) >= new Date()),
-        past_shows: validShows.filter(show => new Date(show.date) < new Date())
+        upcoming_shows: shows.filter(show => new Date(show.date) >= new Date()),
+        past_shows: shows.filter(show => new Date(show.date) < new Date())
       };
       
       console.log("📤 ShowsEditor: Calling onSave with updated profile:", updatedProfile);
@@ -385,6 +399,15 @@ export default function ShowsEditor({ profile, user, onSave, onCancel }: ShowsEd
     if (isSaving || loading) return;
     
     console.log("🔍 ShowsEditor: Current shows data before save:", shows);
+    
+    // Check validation before attempting save
+    const errors = validateShows();
+    if (errors.length > 0) {
+      console.log("🔍 ShowsEditor: Validation failed, showing modal instead of saving");
+      setValidationErrors(errors);
+      setShowValidationModal(true);
+      return; // Don't save or close editor
+    }
     
     try {
       setIsSaving(true);
@@ -462,6 +485,12 @@ export default function ShowsEditor({ profile, user, onSave, onCancel }: ShowsEd
           </div>
         )}
       </CardContent>
+      
+      <ValidationAlertModal
+        open={showValidationModal}
+        onOpenChange={setShowValidationModal}
+        validationErrors={validationErrors}
+      />
     </Card>
   );
 }
