@@ -17,6 +17,8 @@ import appleMusicLightIcon from "@/assets/streaming/apple-music-light.svg";
 import PublicImage from "@/components/PublicImage";
 import { Skeleton } from "@/components/ui/skeleton";
 
+import { AllShowsModal } from "@/components/AllShowsModal";
+
 interface SimpleProfile {
   id: string;
   artist_name: string;
@@ -215,6 +217,15 @@ export default function SimplePublicProfile() {
   const getShowTicketLink = (show: any) => {
     return show.ticket_link || show.ticket_url || show.ticketUrl || '';
   };
+
+  // Combine all shows for the modal
+  const allShows = [
+    ...(profile.upcoming_shows || []),
+    ...(profile.past_shows || [])
+  ];
+
+  // Check if we should show "View All Shows" button
+  const shouldShowViewAllButton = allShows.length > 4;
 
   return (
     <div className="min-h-screen bg-gradient-dark">
@@ -629,9 +640,18 @@ export default function SimplePublicProfile() {
             {profile.upcoming_shows && Array.isArray(profile.upcoming_shows) && profile.upcoming_shows.length > 0 && (
               <Card className="glass-card border-glass">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-3">
-                    <Calendar className="w-6 h-6 text-primary" />
-                    Upcoming Shows
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Calendar className="w-6 h-6 text-primary" />
+                      Upcoming Shows
+                    </div>
+                    {shouldShowViewAllButton && (
+                      <AllShowsModal 
+                        allShows={allShows}
+                        artistName={profile.artist_name}
+                        className="ml-auto"
+                      />
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -672,9 +692,18 @@ export default function SimplePublicProfile() {
             {profile.past_shows && Array.isArray(profile.past_shows) && profile.past_shows.length > 0 && (
               <Card className="glass-card border-glass">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-3">
-                    <Users className="w-6 h-6 text-accent" />
-                    Recent Shows
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Users className="w-6 h-6 text-accent" />
+                      Recent Shows
+                    </div>
+                    {!shouldShowViewAllButton && allShows.length > 4 && (
+                      <AllShowsModal 
+                        allShows={allShows}
+                        artistName={profile.artist_name}
+                        className="ml-auto"
+                      />
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">

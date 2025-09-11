@@ -10,6 +10,8 @@ import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket, Downlo
 import PublicImage from "@/components/PublicImage";
 import { Skeleton } from "@/components/ui/skeleton";
 
+import { AllShowsModal } from "@/components/AllShowsModal";
+
 type PublicArtistProfile = {
   id: string;
   artist_name: string;
@@ -228,6 +230,15 @@ export default function PublicArtistProfile() {
   const getShowTicketLink = (show: any) => {
     return show.ticket_link || show.ticket_url || show.ticketUrl || '';
   };
+
+  // Combine all shows for the modal
+  const allShows = [
+    ...(profile.upcoming_shows || []),
+    ...(profile.past_shows || [])
+  ];
+
+  // Check if we should show "View All Shows" button
+  const shouldShowViewAllButton = allShows.length > 4;
 
   return (
     <>
@@ -599,12 +610,20 @@ export default function PublicArtistProfile() {
               {/* Upcoming Shows */}
               {profile.upcoming_shows && Array.isArray(profile.upcoming_shows) && profile.upcoming_shows.length > 0 && (
                 <section className="glass-card border-glass p-6 rounded-xl">
-                  <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                    <Calendar className="w-6 h-6 text-accent" />
-                    Upcoming Shows
-                  </h2>
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold flex items-center gap-2">
+                      <Calendar className="w-6 h-6 text-accent" />
+                      Upcoming Shows
+                    </h2>
+                    {shouldShowViewAllButton && (
+                      <AllShowsModal 
+                        allShows={allShows}
+                        artistName={profile.artist_name}
+                      />
+                    )}
+                  </div>
                   <div className="space-y-4">
-                    {profile.upcoming_shows.map((show: any, index: number) => (
+                    {profile.upcoming_shows.slice(0, 3).map((show: any, index: number) => (
                       <div key={index} className="p-4 bg-white/5 rounded-lg border border-white/10 hover:border-primary/50 transition-colors">
                         <div className="flex items-center gap-3 mb-2">
                           <Calendar className="w-4 h-4 text-primary" />
@@ -686,12 +705,20 @@ export default function PublicArtistProfile() {
           {/* Past Shows Section */}
           {profile.past_shows && Array.isArray(profile.past_shows) && profile.past_shows.length > 0 && (
             <section className="glass-card border-glass p-8 rounded-xl mt-12">
-              <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
-                <Award className="w-8 h-8 text-accent" />
-                Performance History
-              </h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-3xl font-bold flex items-center gap-3">
+                  <Award className="w-8 h-8 text-accent" />
+                  Performance History
+                </h2>
+                {!shouldShowViewAllButton && allShows.length > 4 && (
+                  <AllShowsModal 
+                    allShows={allShows}
+                    artistName={profile.artist_name}
+                  />
+                )}
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {profile.past_shows.map((show: any, index: number) => (
+                {profile.past_shows.slice(0, 6).map((show: any, index: number) => (
                   <div key={index} className="p-4 bg-white/5 rounded-lg border border-white/10 hover:border-accent/50 transition-colors">
                     <p className="font-semibold text-lg">{show.venue}</p>
                     <p className="text-sm text-muted-foreground flex items-center gap-1">
