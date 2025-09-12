@@ -281,23 +281,23 @@ export default function SimplePublicProfile() {
             <Star className="w-12 h-12 text-accent animate-pulse" />
           </div>
           
-          <h1 className="text-4xl md:text-7xl font-bold gradient-text mb-6">
+          <h1 className="text-5xl md:text-7xl font-bold gradient-text mb-6">
             {profile.artist_name}
           </h1>
           
           {genreArray && genreArray.length > 0 && (
             <div className="flex flex-wrap justify-center gap-3 mb-8">
               {genreArray.filter(Boolean).slice(0, window.innerWidth < 768 ? 2 : genreArray.length).map((genre: string, index: number) => (
-                <Badge key={index} variant="secondary" className="text-lg px-4 py-2">
+                <Badge key={index} variant="secondary" className="text-sm md:text-lg px-2 py-1 md:px-4 md:py-2">
                   {genre}
                 </Badge>
               ))}
             </div>
           )}
 
-          {/* Streaming Icons - max 3 on mobile */}
+          {/* Streaming Icons - hidden on mobile, shown on desktop */}
           {profile.streaming_links && Object.keys(profile.streaming_links).length > 0 && (
-            <div className="flex justify-center gap-6 mb-8">
+            <div className="hidden md:flex justify-center gap-6 mb-8">
               {profile.streaming_links.spotify && (
                 <a 
                   href={profile.streaming_links.spotify} 
@@ -323,7 +323,7 @@ export default function SimplePublicProfile() {
                   href={profile.streaming_links.bandcamp} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="hover:scale-110 transition-transform duration-300 hidden md:block"
+                  className="hover:scale-110 transition-transform duration-300"
                 >
                   <img src={bandcampColorIcon} alt="Bandcamp" className="w-8 h-8" />
                 </a>
@@ -438,7 +438,7 @@ export default function SimplePublicProfile() {
                 </div>
               </div>
 
-              {/* Social Links and Booking */}
+              {/* Social Links, Streaming Links, and Booking */}
               <div className="flex justify-center gap-4 flex-wrap">
                 {profile.contact_info && (profile.contact_info as any).email && (
                   <Button variant="default" size="sm" asChild>
@@ -464,15 +464,43 @@ export default function SimplePublicProfile() {
                     </a>
                   </Button>
                 )}
-                {socialLinks.website && (
-                  <Button variant="outline" size="sm" asChild>
-                    <a href={socialLinks.website} target="_blank" rel="noopener noreferrer">
-                      <Globe className="w-4 h-4 mr-2" />
-                      Website
-                    </a>
-                  </Button>
-                )}
               </div>
+
+              {/* Streaming Links Row */}
+              {profile.streaming_links && Object.keys(profile.streaming_links).length > 0 && (
+                <div className="flex justify-center gap-4 mt-4">
+                  {profile.streaming_links.spotify && (
+                    <a 
+                      href={profile.streaming_links.spotify} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="hover:scale-110 transition-transform duration-300"
+                    >
+                      <img src={spotifyColorIcon} alt="Spotify" className="w-8 h-8" />
+                    </a>
+                  )}
+                  {profile.streaming_links.soundcloud && (
+                    <a 
+                      href={profile.streaming_links.soundcloud} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="hover:scale-110 transition-transform duration-300"
+                    >
+                      <img src={soundcloudColorIcon} alt="SoundCloud" className="w-8 h-8" />
+                    </a>
+                  )}
+                  {profile.streaming_links.appleMusic && (
+                    <a 
+                      href={profile.streaming_links.appleMusic} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="hover:scale-110 transition-transform duration-300"
+                    >
+                      <img src={appleMusicColorIcon} alt="Apple Music" className="w-8 h-8" />
+                    </a>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         </section>
@@ -613,10 +641,147 @@ export default function SimplePublicProfile() {
               </section>
             )}
 
-            {/* Press Sections - Side by Side with Responsive Layout */}
+            {/* Shows Section - Mobile Only */}
+            <div className="md:hidden">
+              {(profile.upcoming_shows && Array.isArray(profile.upcoming_shows) && profile.upcoming_shows.length > 0) || 
+               (profile.past_shows && Array.isArray(profile.past_shows) && profile.past_shows.length > 0) ? (
+                <section className="glass-card border-glass p-4 rounded-xl">
+                  <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+                    <Calendar className="w-6 h-6 text-primary" />
+                    Shows
+                  </h2>
+                  <div className="space-y-4">
+                    {/* Featured Show */}
+                    {profile.upcoming_shows && profile.upcoming_shows.filter((show: any) => show.featured).length > 0 && (
+                      <div className="bg-gradient-to-r from-primary/20 to-accent/20 p-4 rounded-lg border border-primary/30">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Star className="w-4 h-4 text-accent" />
+                          <span className="text-sm font-medium text-accent">Featured Show</span>
+                        </div>
+                        {profile.upcoming_shows.filter((show: any) => show.featured).slice(0, 1).map((show: any, index: number) => (
+                          <div key={index}>
+                            <h3 className="font-bold text-lg mb-2 text-primary">{show.venue}</h3>
+                            <div className="flex items-center gap-2 text-muted-foreground mb-2 text-sm">
+                              <MapPin className="w-3 h-3" />
+                              <span>{getShowLocation(show)}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-muted-foreground mb-3 text-sm">
+                              <Calendar className="w-3 h-3" />
+                              <span>{new Date(show.date).toLocaleDateString('en-US', { 
+                                year: 'numeric', 
+                                month: 'long', 
+                                day: 'numeric' 
+                              })}</span>
+                            </div>
+                            {getShowTicketLink(show) && (
+                              <Button variant="default" size="sm" asChild className="w-full">
+                                <a href={getShowTicketLink(show)} target="_blank" rel="noopener noreferrer">
+                                  <Ticket className="w-4 h-4 mr-2" />
+                                  Get Tickets
+                                </a>
+                              </Button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Next Upcoming Show */}
+                    {profile.upcoming_shows && profile.upcoming_shows.filter((show: any) => !show.featured).length > 0 && (
+                      <div className="bg-white/5 p-4 rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-primary">Next Show</span>
+                          {profile.upcoming_shows.filter((show: any) => !show.featured).length > 1 && (
+                            <span className="text-xs text-muted-foreground">
+                              +{profile.upcoming_shows.filter((show: any) => !show.featured).length - 1} more upcoming
+                            </span>
+                          )}
+                        </div>
+                        {profile.upcoming_shows
+                          .filter((show: any) => !show.featured)
+                          .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                          .slice(0, 1)
+                          .map((show: any, index: number) => (
+                          <div key={index}>
+                            <h3 className="font-bold text-base mb-2">{show.venue}</h3>
+                            <div className="flex items-center gap-2 text-muted-foreground mb-2 text-sm">
+                              <MapPin className="w-3 h-3" />
+                              <span>{getShowLocation(show)}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-muted-foreground mb-3 text-sm">
+                              <Calendar className="w-3 h-3" />
+                              <span>{new Date(show.date).toLocaleDateString('en-US', { 
+                                year: 'numeric', 
+                                month: 'short', 
+                                day: 'numeric' 
+                              })}</span>
+                            </div>
+                            {getShowTicketLink(show) && (
+                              <Button variant="outline" size="sm" asChild className="w-full">
+                                <a href={getShowTicketLink(show)} target="_blank" rel="noopener noreferrer">
+                                  <Ticket className="w-4 h-4 mr-2" />
+                                  Get Tickets
+                                </a>
+                              </Button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Recent Past Show */}
+                    {profile.past_shows && Array.isArray(profile.past_shows) && profile.past_shows.length > 0 && (
+                      <div className="bg-white/5 p-4 rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-muted-foreground">Recent Show</span>
+                          {profile.past_shows.length > 1 && (
+                            <span className="text-xs text-muted-foreground">
+                              +{profile.past_shows.length - 1} past shows
+                            </span>
+                          )}
+                        </div>
+                        {profile.past_shows
+                          .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                          .slice(0, 1)
+                          .map((show: any, index: number) => (
+                          <div key={index}>
+                            <h3 className="font-bold text-base mb-2">{show.venue}</h3>
+                            <div className="flex items-center gap-2 text-muted-foreground mb-2 text-sm">
+                              <MapPin className="w-3 h-3" />
+                              <span>{getShowLocation(show)}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                              <Calendar className="w-3 h-3" />
+                              <span>{new Date(show.date).toLocaleDateString('en-US', { 
+                                year: 'numeric', 
+                                month: 'short', 
+                                day: 'numeric' 
+                              })}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* View All Shows Button */}
+                    {shouldShowViewAllButton && (
+                      <div className="flex justify-center pt-2">
+                        <AllShowsModal 
+                          allShows={allShows}
+                          artistName={profile.artist_name}
+                          triggerText="View All Shows"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </section>
+              ) : null}
+            </div>
+
+            {/* Press Sections - Desktop Only */}
             {((profile.press_quotes && Array.isArray(profile.press_quotes) && profile.press_quotes.length > 0) || 
               (profile.press_mentions && Array.isArray(profile.press_mentions) && profile.press_mentions.length > 0)) && (
-              <div className={`grid gap-8 ${
+              <div className={`hidden md:grid gap-8 ${
                 (profile.press_quotes && Array.isArray(profile.press_quotes) && profile.press_quotes.length > 0) && 
                 (profile.press_mentions && Array.isArray(profile.press_mentions) && profile.press_mentions.length > 0)
                   ? 'grid-cols-1 lg:grid-cols-2' 
