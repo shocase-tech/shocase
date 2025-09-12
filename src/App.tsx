@@ -7,7 +7,6 @@ import { HelmetProvider } from 'react-helmet-async';
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
-import PreviewProfile from "./pages/PreviewProfile";
 import SimplePublicProfile from "./pages/SimplePublicProfile";
 import NotFound from "./pages/NotFound";
 
@@ -24,7 +23,6 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/preview/:identifier" element={<PreviewProfile />} />
             <Route path="/:identifier" element={<SimplePublicProfile />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

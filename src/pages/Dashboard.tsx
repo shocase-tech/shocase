@@ -11,6 +11,7 @@ import { Copy, ExternalLink, Edit3, Eye, EyeOff, CheckCircle, Circle } from "luc
 import { cn } from "@/lib/utils";
 import LivePreviewEditor from "@/components/LivePreviewEditor";
 import FloatingProgressIndicator from "@/components/FloatingProgressIndicator";
+import { PreviewModal } from "@/components/PreviewModal";
 import { useScrollVisibility } from "@/hooks/useScrollVisibility";
 import { useScrollPosition } from "@/hooks/useScrollPosition";
 import { useTabStateManager } from "@/hooks/useTabStateManager";
@@ -43,6 +44,7 @@ export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<DashboardArtistProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -345,10 +347,8 @@ export default function Dashboard() {
       console.log("Opening public EPK URL:", publicUrl);
       window.open(publicUrl, '_blank');
     } else {
-      // For unpublished EPKs, navigate in same tab to preview
-      const previewUrl = `/preview/${identifier}`;
-      console.log("Navigating to preview URL:", previewUrl);
-      navigate(previewUrl);
+      // For unpublished EPKs, show preview modal
+      setShowPreviewModal(true);
     }
   };
 
@@ -513,6 +513,14 @@ export default function Dashboard() {
             onTogglePublish={togglePublishStatus}
           />
         )}
+
+        {/* Preview Modal */}
+        <PreviewModal
+          open={showPreviewModal}
+          onOpenChange={setShowPreviewModal}
+          profile={profile}
+          onPublish={togglePublishStatus}
+        />
       </main>
     </div>
   );
