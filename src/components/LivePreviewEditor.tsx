@@ -105,16 +105,16 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
     if (callback) callback();
   };
 
-  // Function to render shows with smart display logic
+  // Function to render shows with smart display logic and mobile optimization
   const renderShowsSection = () => {
     // Get all shows from both upcoming and past arrays
     const allShows = [...(profile.upcoming_shows || []), ...(profile.past_shows || [])];
     
     if (allShows.length === 0) {
       return (
-        <div className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-8 text-center">
+        <div className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-6 md:p-8 text-center">
           <Plus className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
-          <p className="text-muted-foreground">Click to add shows</p>
+          <p className="text-muted-foreground text-sm">Click to add shows</p>
         </div>
       );
     }
@@ -143,26 +143,26 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
 
     return (
       <div>
-        <h3 className="font-semibold mb-4">Shows</h3>
-        <div className="space-y-6">
+        <h3 className="font-semibold mb-3 md:mb-4 text-base md:text-lg">Shows</h3>
+        <div className="space-y-4 md:space-y-6">
           {/* Highlighted Shows */}
           {highlightedShows.length > 0 && (
             <div>
-              <h4 className="text-sm font-medium text-primary mb-3">Featured Shows</h4>
+              <h4 className="text-sm font-medium text-primary mb-2 md:mb-3">Featured Shows</h4>
               <div className="space-y-2">
                 {highlightedShows.map((show: any, index: number) => (
-                  <div key={`highlighted-${index}`} className="flex items-center justify-between p-3 bg-primary/10 rounded-md border border-primary/30 shadow-sm">
-                    <div className="flex items-center gap-3">
-                      <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                      <Calendar className="w-5 h-5 text-primary" />
-                      <div>
-                        <p className="font-medium flex items-center gap-2">
-                          {show.venue}
-                          <Badge variant="secondary" className="text-xs">Featured</Badge>
+                  <div key={`highlighted-${index}`} className="flex flex-col md:flex-row md:items-center justify-between p-2 md:p-3 bg-primary/10 rounded-md border border-primary/30 shadow-sm gap-2 md:gap-0">
+                    <div className="flex items-center gap-2 md:gap-3">
+                      <Star className="w-4 h-4 text-yellow-500 fill-current flex-shrink-0" />
+                      <Calendar className="w-4 md:w-5 h-4 md:h-5 text-primary flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium flex items-center gap-2 text-sm md:text-base">
+                          <span className="truncate">{show.venue}</span>
+                          <Badge variant="secondary" className="text-xs flex-shrink-0">Featured</Badge>
                         </p>
-                        <p className="text-sm text-muted-foreground flex items-center gap-1">
-                          <MapPin className="w-3 h-3" />
-                          {show.city} • {new Date(show.date).toLocaleDateString()}
+                        <p className="text-xs md:text-sm text-muted-foreground flex items-center gap-1">
+                          <MapPin className="w-3 h-3 flex-shrink-0" />
+                          <span className="truncate">{show.city} • {new Date(show.date).toLocaleDateString()}</span>
                         </p>
                       </div>
                     </div>
@@ -171,10 +171,10 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
                         href={show.ticket_link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                        className="flex items-center justify-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors text-sm min-h-[44px] w-full md:w-auto"
                       >
                         <Ticket className="w-4 h-4" />
-                        Tickets
+                        <span>Tickets</span>
                       </a>
                     )}
                   </div>
@@ -186,17 +186,17 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
           {/* Upcoming Shows */}
           {regularUpcoming.length > 0 && (
             <div>
-              <h4 className="text-sm font-medium text-primary mb-3">Upcoming Shows</h4>
+              <h4 className="text-sm font-medium text-primary mb-2 md:mb-3">Upcoming Shows</h4>
               <div className="space-y-2">
                 {regularUpcoming.map((show: any, index: number) => (
-                  <div key={`upcoming-${index}`} className="flex items-center justify-between p-3 bg-white/5 rounded-md border border-primary/20">
-                    <div className="flex items-center gap-3">
-                      <Calendar className="w-5 h-5 text-primary" />
-                      <div>
-                        <p className="font-medium">{show.venue}</p>
-                        <p className="text-sm text-muted-foreground flex items-center gap-1">
-                          <MapPin className="w-3 h-3" />
-                          {show.city} • {new Date(show.date).toLocaleDateString()}
+                  <div key={`upcoming-${index}`} className="flex flex-col md:flex-row md:items-center justify-between p-2 md:p-3 bg-white/5 rounded-md border border-primary/20 gap-2 md:gap-0">
+                    <div className="flex items-center gap-2 md:gap-3">
+                      <Calendar className="w-4 md:w-5 h-4 md:h-5 text-primary flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-sm md:text-base truncate">{show.venue}</p>
+                        <p className="text-xs md:text-sm text-muted-foreground flex items-center gap-1">
+                          <MapPin className="w-3 h-3 flex-shrink-0" />
+                          <span className="truncate">{show.city} • {new Date(show.date).toLocaleDateString()}</span>
                         </p>
                       </div>
                     </div>
@@ -205,10 +205,10 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
                         href={show.ticket_link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                        className="flex items-center justify-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors text-sm min-h-[44px] w-full md:w-auto"
                       >
                         <Ticket className="w-4 h-4" />
-                        Tickets
+                        <span>Tickets</span>
                       </a>
                     )}
                   </div>
@@ -220,17 +220,17 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
           {/* Recent Past Shows */}
           {regularPast.length > 0 && (
             <div>
-              <h4 className="text-sm font-medium text-muted-foreground mb-3">Recent Shows</h4>
+              <h4 className="text-sm font-medium text-muted-foreground mb-2 md:mb-3">Recent Shows</h4>
               <div className="space-y-2">
                 {regularPast.map((show: any, index: number) => (
-                  <div key={`past-${index}`} className="flex items-center justify-between p-3 bg-white/5 rounded-md opacity-75">
-                    <div className="flex items-center gap-3">
-                      <Calendar className="w-5 h-5 text-muted-foreground" />
-                      <div>
-                        <p className="font-medium text-muted-foreground">{show.venue}</p>
-                        <p className="text-sm text-muted-foreground flex items-center gap-1">
-                          <MapPin className="w-3 h-3" />
-                          {show.city} • {new Date(show.date).toLocaleDateString()}
+                  <div key={`past-${index}`} className="flex items-center justify-between p-2 md:p-3 bg-white/5 rounded-md opacity-75">
+                    <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
+                      <Calendar className="w-4 md:w-5 h-4 md:h-5 text-muted-foreground flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-muted-foreground text-sm md:text-base truncate">{show.venue}</p>
+                        <p className="text-xs md:text-sm text-muted-foreground flex items-center gap-1">
+                          <MapPin className="w-3 h-3 flex-shrink-0" />
+                          <span className="truncate">{show.city} • {new Date(show.date).toLocaleDateString()}</span>
                         </p>
                       </div>
                     </div>
@@ -391,15 +391,16 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
                   </div>
                 )}
 
+                {/* Contact info - Mobile optimized layout */}
                 <div className="mt-4 space-y-1">
                   {profile.contact_info?.email && (
-                    <div>
+                    <div className="text-center md:text-left">
                       <span className="text-xs text-muted-foreground/70">Email: </span>
                       <span className="text-sm text-muted-foreground">{profile.contact_info.email}</span>
                     </div>
                   )}
                   {profile.contact_info?.phone && (
-                    <div>
+                    <div className="text-center md:text-left">
                       <span className="text-xs text-muted-foreground/70">Phone: </span>
                       <span className="text-sm text-muted-foreground">{profile.contact_info.phone}</span>
                     </div>
@@ -471,11 +472,11 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
                   </div>
                 )}
                 
-                {/* Featured Spotify Track */}
+                {/* Featured Spotify Track - Full width on mobile */}
                 {profile.spotify_track_url && (
                   <div className="mt-4">
                     <h4 className="text-sm font-medium mb-2">Featured Track</h4>
-                    <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                    <div className="bg-white/5 rounded-lg p-2 md:p-3 border border-white/10 w-full">
                       <div className="flex items-center gap-2 mb-2">
                         <Music className="w-4 h-4 text-green-500" />
                         <span className="text-sm font-medium">Spotify Track</span>
@@ -486,7 +487,7 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
                         height="80"
                         frameBorder="0"
                         allow="encrypted-media"
-                        className="rounded"
+                        className="rounded w-full"
                       />
                     </div>
                   </div>
@@ -504,24 +505,24 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
           )}
         </CardHeader>
 
-        <CardContent className="space-y-8">
-          {/* Social Links */}
+        <CardContent className="space-y-6 md:space-y-8 px-3 md:px-6">
+          {/* Social Links - Enhanced with proper icons */}
           {renderEditableSection(
             'social',
             profile.social_links && Object.keys(profile.social_links).length > 0 ? (
               <div>
                 <h3 className="font-semibold mb-3">Social Links</h3>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-2 md:gap-3">
                   {profile.social_links.website && (
                     <a
                       href={profile.social_links.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-3 py-2 rounded-md bg-white/5 hover:bg-white/10 transition-colors"
+                      className="flex items-center gap-2 px-3 py-2 rounded-md bg-white/5 hover:bg-white/10 transition-colors text-sm min-h-[44px]"
                     >
-                      <Globe className="w-4 h-4" />
-                      Website
-                      <ExternalLink className="w-3 h-3" />
+                      <Globe className="w-4 h-4 flex-shrink-0" />
+                      <span className="hidden sm:inline">Website</span>
+                      <ExternalLink className="w-3 h-3 flex-shrink-0" />
                     </a>
                   )}
                   {profile.social_links.instagram && (
@@ -529,11 +530,11 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
                       href={`https://instagram.com/${profile.social_links.instagram.replace('@', '')}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-3 py-2 rounded-md bg-white/5 hover:bg-white/10 transition-colors"
+                      className="flex items-center gap-2 px-3 py-2 rounded-md bg-white/5 hover:bg-white/10 transition-colors text-sm min-h-[44px]"
                     >
-                      <Instagram className="w-4 h-4" />
-                      Instagram
-                      <ExternalLink className="w-3 h-3" />
+                      <Instagram className="w-4 h-4 flex-shrink-0" />
+                      <span className="hidden sm:inline">Instagram</span>
+                      <ExternalLink className="w-3 h-3 flex-shrink-0" />
                     </a>
                   )}
                   {profile.social_links.tiktok && (
@@ -541,11 +542,11 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
                       href={`https://tiktok.com/@${profile.social_links.tiktok.replace('@', '')}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-3 py-2 rounded-md bg-white/5 hover:bg-white/10 transition-colors"
+                      className="flex items-center gap-2 px-3 py-2 rounded-md bg-white/5 hover:bg-white/10 transition-colors text-sm min-h-[44px]"
                     >
-                      <Music className="w-4 h-4" />
-                      TikTok
-                      <ExternalLink className="w-3 h-3" />
+                      <Music className="w-4 h-4 flex-shrink-0" />
+                      <span className="hidden sm:inline">TikTok</span>
+                      <ExternalLink className="w-3 h-3 flex-shrink-0" />
                     </a>
                   )}
                 </div>
@@ -651,8 +652,8 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
             !!(profile.show_videos && profile.show_videos.length > 0)
           )}
 
-          {/* Two Column Layout: Press Quotes & Press Mentions/Shows */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Two Column Layout: Press Quotes & Press Mentions/Shows - Stack on mobile */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
             {/* Left Column: Press Quotes */}
             <div>
               {editingSection === 'quotes' ? (

@@ -7,7 +7,9 @@ import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { Copy, ExternalLink, Edit3, Eye, EyeOff, CheckCircle, Circle } from "lucide-react";
+import { Copy, ExternalLink, Edit3, Eye, EyeOff, CheckCircle, Circle, Menu, Globe } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import showcaseIcon from "@/assets/shocase-icon.png";
 import { cn } from "@/lib/utils";
 import LivePreviewEditor from "@/components/LivePreviewEditor";
 import FloatingProgressIndicator from "@/components/FloatingProgressIndicator";
@@ -383,12 +385,22 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/80 pb-20">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-white/10 backdrop-blur-sm bg-background/80">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <h1 className="text-xl font-bold gradient-text">Press Kit Builder</h1>
+        <div className="container mx-auto px-3 md:px-4 py-3 md:py-4 flex justify-between items-center">
+          <div className="flex items-center gap-2 md:gap-4">
+            {/* Mobile: Show logo icon, Desktop: Show text */}
+            <div className="flex items-center">
+              <img 
+                src={showcaseIcon} 
+                alt="SHOCASE" 
+                className="w-6 h-6 md:hidden"
+              />
+              <h1 className="hidden md:block text-xl font-bold gradient-text">Press Kit Builder</h1>
+            </div>
             {getStatusBadge()}
           </div>
-          <div className="flex items-center gap-3">
+          
+          {/* Desktop: Show individual buttons */}
+          <div className="hidden md:flex items-center gap-3">
             {profile && (
               <Button
                 onClick={previewProfile}
@@ -404,6 +416,38 @@ export default function Dashboard() {
               Sign Out
             </Button>
           </div>
+
+          {/* Mobile: Show hamburger menu */}
+          <div className="md:hidden">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="p-2">
+                  <Menu className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 bg-popover/95 backdrop-blur-sm border border-white/10">
+                {profile && (
+                  <>
+                    <DropdownMenuItem onClick={previewProfile} className="flex items-center gap-2">
+                      <ExternalLink className="w-4 h-4" />
+                      {profile.is_published ? "View EPK" : "Preview"}
+                    </DropdownMenuItem>
+                    {profile.is_published && (
+                      <DropdownMenuItem onClick={copyPublicLink} className="flex items-center gap-2">
+                        <Copy className="w-4 h-4" />
+                        Copy Link
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuSeparator />
+                  </>
+                )}
+                <DropdownMenuItem onClick={handleSignOut} className="flex items-center gap-2">
+                  <Eye className="w-4 h-4" />
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </header>
 
@@ -412,18 +456,20 @@ export default function Dashboard() {
           {/* Progress Section with Publish Controls */}
           {profile && (
             <Card ref={progressCardRef} className="glass-card border-white/10 animate-slide-in-up">
-              <CardContent className="pt-6">
+              <CardContent className="pt-4 md:pt-6">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h2 className="text-lg font-semibold">Your kit is {completionPercentage}% complete</h2>
-                    <p className="text-sm text-muted-foreground">
+                    <h2 className="text-base md:text-lg font-semibold">Your kit is {completionPercentage}% complete</h2>
+                    <p className="text-xs md:text-sm text-muted-foreground">
                       {completedMilestones} of {milestones.length} milestones completed
                     </p>
                   </div>
-                  <div className="text-2xl font-bold text-primary">{completionPercentage}%</div>
+                  <div className="text-xl md:text-2xl font-bold text-primary">{completionPercentage}%</div>
                 </div>
                 <Progress value={completionPercentage} className="mb-4" />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-6">
+                
+                {/* Hide checklist on mobile, show on desktop */}
+                <div className="hidden md:grid md:grid-cols-2 gap-2 mb-6">
                   {milestones.map((milestone, index) => (
                     <div key={index} className="flex items-center gap-2 text-sm">
                       {milestone.completed ? (
@@ -439,9 +485,10 @@ export default function Dashboard() {
                 </div>
                 
                 {/* Publish Controls */}
-                <div className="border-t border-white/10 pt-6">
-                  <div className="flex items-center justify-between">
-                    <div>
+                <div className="border-t border-white/10 pt-4 md:pt-6">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    {/* Hide descriptive text on mobile */}
+                    <div className="hidden MD:block">
                       <h3 className="font-medium mb-1">EPK Publication</h3>
                       <p className="text-sm text-muted-foreground">
                         {profile.is_published 
@@ -450,9 +497,11 @@ export default function Dashboard() {
                         }
                       </p>
                     </div>
-                    <div className="flex items-center gap-3">
+                    
+                    <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 md:gap-3">
+                      {/* Desktop: Show copy/view buttons inline */}
                       {profile.is_published && (
-                        <>
+                        <div className="hidden md:flex items-center gap-3">
                           <Button
                             onClick={copyPublicLink}
                             variant="outline"
@@ -471,13 +520,15 @@ export default function Dashboard() {
                             <ExternalLink className="w-4 h-4" />
                             View EPK
                           </Button>
-                        </>
+                        </div>
                       )}
+                      
+                      {/* Publish button - full width on mobile */}
                       <Button
                         onClick={togglePublishStatus}
                         variant={profile.is_published ? "outline" : "default"}
                         className={cn(
-                          "flex items-center gap-2 font-medium px-6",
+                          "flex items-center justify-center gap-2 font-medium px-4 md:px-6 w-full md:w-auto min-h-[44px]",
                           profile.is_published 
                             ? "border-orange-500/50 text-orange-600 hover:bg-orange-500/10" 
                             : "bg-green-600 hover:bg-green-700 text-white"
