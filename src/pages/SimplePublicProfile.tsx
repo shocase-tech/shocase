@@ -14,6 +14,8 @@ import bandcampColorIcon from "@/assets/streaming/bandcamp-color.png";
 import bandcampLightIcon from "@/assets/streaming/bandcamp-light.png";
 import appleMusicColorIcon from "@/assets/streaming/apple-music-color.svg";
 import appleMusicLightIcon from "@/assets/streaming/apple-music-light.svg";
+import tiktokIcon from "@/assets/social/tiktok-white.png";
+import instagramIcon from "@/assets/social/instagram-gradient.png";
 import PublicImage from "@/components/PublicImage";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -580,7 +582,7 @@ export default function SimplePublicProfile() {
                       rel="noopener noreferrer"
                       className="hover:scale-110 transition-transform duration-300"
                     >
-                      <Instagram className="w-10 h-10 text-primary hover:text-accent" />
+                      <img src={instagramIcon} alt="Instagram" className="w-10 h-10" />
                     </a>
                   )}
                   {socialLinks.tiktok && (
@@ -590,7 +592,7 @@ export default function SimplePublicProfile() {
                       rel="noopener noreferrer"
                       className="hover:scale-110 transition-transform duration-300"
                     >
-                      <Play className="w-10 h-10 text-primary hover:text-accent" />
+                      <img src={tiktokIcon} alt="TikTok" className="w-10 h-10" />
                     </a>
                   )}
                 </div>

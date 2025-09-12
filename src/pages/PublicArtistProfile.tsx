@@ -9,6 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket, Download, Mail, Phone, Star, Quote, Play, Users, Award, TrendingUp } from "lucide-react";
 import PublicImage from "@/components/PublicImage";
 import { Skeleton } from "@/components/ui/skeleton";
+import tiktokIcon from "@/assets/social/tiktok-white.png";
+import instagramIcon from "@/assets/social/instagram-gradient.png";
 
 import { AllShowsModal } from "@/components/AllShowsModal";
 
@@ -691,8 +693,20 @@ export default function PublicArtistProfile() {
                         rel="noopener noreferrer"
                         className="flex items-center gap-3 w-full px-4 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 transition-colors"
                       >
-                        <Instagram className="w-5 h-5" />
+                        <img src={instagramIcon} alt="Instagram" className="w-5 h-5" />
                         Instagram
+                        <ExternalLink className="w-4 h-4 ml-auto" />
+                      </a>
+                    )}
+                    {(profile.social_links as any).tiktok && (
+                      <a
+                        href={(profile.social_links as any).tiktok}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 w-full px-4 py-3 rounded-lg bg-black text-white hover:bg-gray-800 transition-colors"
+                      >
+                        <img src={tiktokIcon} alt="TikTok" className="w-5 h-5" />
+                        TikTok
                         <ExternalLink className="w-4 h-4 ml-auto" />
                       </a>
                     )}
