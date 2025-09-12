@@ -139,6 +139,10 @@ export type Database = {
           url_slug: string
         }[]
       }
+      is_profile_published_by_user_id: {
+        Args: { profile_user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
