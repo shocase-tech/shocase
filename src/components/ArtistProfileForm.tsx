@@ -146,7 +146,25 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
   // AI Blurb Generation Function
   const [blurbGenerating, setBlurbGenerating] = useState(false);
   
+  // Rate limiting for API calls
+  const [lastGenerationTime, setLastGenerationTime] = useState(0);
+  const GENERATION_COOLDOWN = 2000; // 2 seconds between requests
+  
   const generateBlurbWithAI = async () => {
+    // Check cooldown to prevent rapid requests
+    const now = Date.now();
+    const timeSinceLastGeneration = now - lastGenerationTime;
+    
+    if (timeSinceLastGeneration < GENERATION_COOLDOWN) {
+      const remainingTime = Math.ceil((GENERATION_COOLDOWN - timeSinceLastGeneration) / 1000);
+      toast({
+        title: "Please wait",
+        description: `Please wait ${remainingTime} second${remainingTime !== 1 ? 's' : ''} before generating again.`,
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (!formData.bio || formData.bio.trim().length < 50) {
       toast({
         title: "Bio required",
@@ -156,6 +174,7 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
       return;
     }
     
+    setLastGenerationTime(now);
     setBlurbGenerating(true);
     
     try {
@@ -205,6 +224,21 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
   };
 
   const generateBio = async () => {
+    // Check cooldown to prevent rapid requests
+    const now = Date.now();
+    const timeSinceLastGeneration = now - lastGenerationTime;
+    
+    if (timeSinceLastGeneration < GENERATION_COOLDOWN) {
+      const remainingTime = Math.ceil((GENERATION_COOLDOWN - timeSinceLastGeneration) / 1000);
+      toast({
+        title: "Please wait",
+        description: `Please wait ${remainingTime} second${remainingTime !== 1 ? 's' : ''} before generating again.`,
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setLastGenerationTime(now);
     setBioGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke('generate-bio', {

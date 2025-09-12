@@ -116,16 +116,17 @@ serve(async (req) => {
     const prompt = buildBioPrompt(inputs);
     console.log('Generated prompt:', prompt);
 
-    // Retry logic with exponential backoff
-    const maxRetries = 3;
+    // Retry logic with exponential backoff and jitter
+    const maxRetries = 5;
     let lastError;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         if (attempt > 1) {
-          const delay = 1000 * Math.pow(2, attempt - 1);
-          console.log(`Retry attempt ${attempt}/${maxRetries}, waiting ${delay}ms...`);
-          await new Promise(resolve => setTimeout(resolve, delay));
+          const delay = 2000 * Math.pow(2, attempt - 1);
+          const jitter = Math.random() * 1000;
+          console.log(`Retry attempt ${attempt}/${maxRetries}, waiting ${delay + jitter}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delay + jitter));
         }
 
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -153,8 +154,14 @@ serve(async (req) => {
         if (response.status === 429) {
           const errorText = await response.text();
           console.log(`Rate limited (attempt ${attempt}):`, errorText);
+          
+          // Check for quota vs rate limit errors
+          if (errorText.includes('insufficient_quota') || errorText.includes('quota_exceeded')) {
+            throw new Error('Daily AI quota reached. Try again tomorrow.');
+          }
+          
           if (attempt === maxRetries) {
-            throw new Error('AI service is temporarily busy due to high demand. Please wait a moment and try again.');
+            throw new Error('AI service is busy. Please wait 30 seconds and try again.');
           }
           continue;
         }
@@ -163,10 +170,18 @@ serve(async (req) => {
           const errorText = await response.text();
           console.error('OpenAI API error:', response.status, errorText);
           
+          // Additional rate limit detection in error messages
+          if (errorText.includes('rate_limit_exceeded') || errorText.includes('insufficient_quota')) {
+            if (errorText.includes('insufficient_quota')) {
+              throw new Error('Daily AI quota reached. Try again tomorrow.');
+            }
+            throw new Error('AI service is busy. Please wait 30 seconds and try again.');
+          }
+          
           if (response.status === 401) {
             throw new Error('OpenAI API authentication failed');
           } else if (response.status === 402) {
-            throw new Error('OpenAI API quota exceeded');
+            throw new Error('Daily AI quota reached. Try again tomorrow.');
           } else {
             throw new Error(`OpenAI API error (${response.status})`);
           }
@@ -202,15 +217,15 @@ serve(async (req) => {
     let errorMessage = 'Failed to generate bio';
     let statusCode = 500;
     
-    if (error.message?.includes('temporarily busy') || error.message?.includes('Rate limit')) {
-      errorMessage = 'AI service is temporarily busy. Please wait a moment and try again.';
+    if (error.message?.includes('Daily AI quota reached')) {
+      errorMessage = 'Daily AI quota reached. Try again tomorrow.';
+      statusCode = 402;
+    } else if (error.message?.includes('AI service is busy') || error.message?.includes('rate_limit')) {
+      errorMessage = 'AI service is busy. Please wait 30 seconds and try again.';
       statusCode = 429;
     } else if (error.message?.includes('authentication')) {
       errorMessage = 'Authentication error with AI service';
       statusCode = 401;
-    } else if (error.message?.includes('quota')) {
-      errorMessage = 'AI service quota exceeded';
-      statusCode = 402;
     } else if (error.message?.includes('Artist name is required')) {
       errorMessage = error.message;
       statusCode = 400;
