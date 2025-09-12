@@ -5,7 +5,7 @@ import { User } from "@supabase/supabase-js";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket, Download, Mail, Phone, Star, Quote, Play, Users, Award, TrendingUp, User as UserIcon, Users2, Guitar, ChevronLeft, ChevronRight } from "lucide-react";
+import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket, Download, Mail, Phone, Star, Quote, Play, Users, Award, TrendingUp, User as UserIcon, Users2, Guitar, ChevronLeft, ChevronRight, X } from "lucide-react";
 import spotifyColorIcon from "@/assets/streaming/spotify-color.png";
 import spotifyLightIcon from "@/assets/streaming/spotify-light.png";
 import soundcloudColorIcon from "@/assets/streaming/soundcloud-color.png";
@@ -51,6 +51,8 @@ export default function SimplePublicProfile() {
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isOwnerPreview, setIsOwnerPreview] = useState(false);
+  const [bioExpanded, setBioExpanded] = useState(false);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
 
   useEffect(() => {
     // Check if user is authenticated
@@ -229,8 +231,15 @@ export default function SimplePublicProfile() {
   // Check if we should show "View All Shows" button
   const shouldShowViewAllButton = allShows.length > 4;
 
+  // Helper function to truncate bio for mobile
+  const getTruncatedBio = (bio: string, wordLimit: number = 100) => {
+    const words = bio.split(' ');
+    if (words.length <= wordLimit) return bio;
+    return words.slice(0, wordLimit).join(' ') + '...';
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-dark">
+    <div className="min-h-screen bg-gradient-dark pb-20 md:pb-0">
       {/* Owner Preview Banner */}
       {isOwnerPreview && !profile.is_published && (
         <div className="bg-yellow-600/90 backdrop-blur-sm border-b border-yellow-500/50 sticky top-0 z-50">
@@ -266,18 +275,19 @@ export default function SimplePublicProfile() {
 
         {/* Hero Content */}
         <div className="relative z-10 max-w-6xl mx-auto px-6 text-center">
-          <div className="flex items-center justify-center mb-8">
+          {/* Decorative icons - hidden on mobile */}
+          <div className="hidden md:flex items-center justify-center mb-8">
             <Music className="w-16 h-16 text-primary mr-4" />
             <Star className="w-12 h-12 text-accent animate-pulse" />
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-bold gradient-text mb-6">
+          <h1 className="text-4xl md:text-7xl font-bold gradient-text mb-6">
             {profile.artist_name}
           </h1>
           
           {genreArray && genreArray.length > 0 && (
             <div className="flex flex-wrap justify-center gap-3 mb-8">
-              {genreArray.filter(Boolean).map((genre: string, index: number) => (
+              {genreArray.filter(Boolean).slice(0, window.innerWidth < 768 ? 2 : genreArray.length).map((genre: string, index: number) => (
                 <Badge key={index} variant="secondary" className="text-lg px-4 py-2">
                   {genre}
                 </Badge>
@@ -285,7 +295,7 @@ export default function SimplePublicProfile() {
             </div>
           )}
 
-          {/* Streaming Icons */}
+          {/* Streaming Icons - max 3 on mobile */}
           {profile.streaming_links && Object.keys(profile.streaming_links).length > 0 && (
             <div className="flex justify-center gap-6 mb-8">
               {profile.streaming_links.spotify && (
@@ -313,7 +323,7 @@ export default function SimplePublicProfile() {
                   href={profile.streaming_links.bandcamp} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="hover:scale-110 transition-transform duration-300"
+                  className="hover:scale-110 transition-transform duration-300 hidden md:block"
                 >
                   <img src={bandcampColorIcon} alt="Bandcamp" className="w-8 h-8" />
                 </a>
@@ -337,49 +347,138 @@ export default function SimplePublicProfile() {
             </p>
           )}
 
-          {/* CTA Buttons */}
-          <div className={`flex flex-col sm:flex-row gap-6 ${!profile.spotify_track_url ? 'justify-center' : 'justify-center'} items-center`}>
-            {profile.contact_info && (profile.contact_info as any).email && (
-              <Button variant="hero" size="lg" asChild className="group">
-                <a href={`mailto:${(profile.contact_info as any).email}`}>
-                  <Mail className="w-5 h-5 mr-2" />
-                  Book Now
-                  <Star className="w-5 h-5 ml-2 group-hover:animate-spin" />
-                </a>
-              </Button>
-            )}
-            
-            {profile.spotify_track_url && (
-              <Button 
-                variant="glass" 
-                size="lg" 
-                className="group" 
-                onClick={() => {
-                  const spotifySection = document.getElementById('spotify-player');
-                  if (spotifySection) {
-                    spotifySection.scrollIntoView({ behavior: 'smooth' });
-                    // Attempt to trigger play (limited by browser autoplay policies)
-                    const iframe = spotifySection.querySelector('iframe') as HTMLIFrameElement;
-                    if (iframe) {
-                      // Spotify embed doesn't support programmatic play, but we can at least scroll to it
-                      setTimeout(() => {
-                        iframe.focus();
-                      }, 1000);
+          {/* Single CTA Button on mobile, multiple on desktop */}
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+            <div className="md:hidden">
+              {/* Mobile: Single primary CTA */}
+              {profile.contact_info && (profile.contact_info as any).email ? (
+                <Button variant="hero" size="lg" asChild className="group">
+                  <a href={`mailto:${(profile.contact_info as any).email}`}>
+                    <Mail className="w-5 h-5 mr-2" />
+                    Book Now
+                    <Star className="w-5 h-5 ml-2 group-hover:animate-spin" />
+                  </a>
+                </Button>
+              ) : profile.spotify_track_url ? (
+                <Button 
+                  variant="hero" 
+                  size="lg" 
+                  className="group" 
+                  onClick={() => {
+                    const spotifySection = document.getElementById('spotify-player');
+                    if (spotifySection) {
+                      spotifySection.scrollIntoView({ behavior: 'smooth' });
                     }
-                  }
-                }}
-              >
-                <Play className="w-5 h-5 mr-2" />
-                Listen Now
-              </Button>
-            )}
+                  }}
+                >
+                  <Play className="w-5 h-5 mr-2" />
+                  Listen Now
+                </Button>
+              ) : null}
+            </div>
+            
+            <div className="hidden md:flex gap-6">
+              {/* Desktop: Multiple CTAs */}
+              {profile.contact_info && (profile.contact_info as any).email && (
+                <Button variant="hero" size="lg" asChild className="group">
+                  <a href={`mailto:${(profile.contact_info as any).email}`}>
+                    <Mail className="w-5 h-5 mr-2" />
+                    Book Now
+                    <Star className="w-5 h-5 ml-2 group-hover:animate-spin" />
+                  </a>
+                </Button>
+              )}
+              
+              {profile.spotify_track_url && (
+                <Button 
+                  variant="glass" 
+                  size="lg" 
+                  className="group" 
+                  onClick={() => {
+                    const spotifySection = document.getElementById('spotify-player');
+                    if (spotifySection) {
+                      spotifySection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }}
+                >
+                  <Play className="w-5 h-5 mr-2" />
+                  Listen Now
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </section>
 
-      <div className="container mx-auto px-4 py-12 max-w-7xl">
-        {/* Key Stats Section */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
+      <div className="container mx-auto px-4 py-8 md:py-12 max-w-7xl">
+        {/* Mobile Connect Section - Replaces Key Stats on mobile */}
+        <section className="md:hidden mb-8">
+          <Card className="glass-card border-glass">
+            <CardHeader>
+              <CardTitle className="text-center text-2xl">Connect with {profile.artist_name}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {/* Location and Performance Type */}
+              <div className="flex justify-center gap-6 mb-6 text-center">
+                <div className="flex flex-col items-center">
+                  <MapPin className="w-6 h-6 text-accent mb-1" />
+                  <span className="text-sm font-medium text-foreground">{profile.location || 'Location'}</span>
+                </div>
+                <div className="flex flex-col items-center">
+                  {profile.performance_type === 'Solo Act' && <UserIcon className="w-6 h-6 text-primary mb-1" />}
+                  {profile.performance_type === 'Duo' && <Users2 className="w-6 h-6 text-primary mb-1" />}
+                  {profile.performance_type === 'Full Band' && <Guitar className="w-6 h-6 text-primary mb-1" />}
+                  {(!profile.performance_type || (profile.performance_type !== 'Solo Act' && profile.performance_type !== 'Duo' && profile.performance_type !== 'Full Band')) && <Users className="w-6 h-6 text-primary mb-1" />}
+                  <span className="text-sm font-medium text-foreground">
+                    {profile.performance_type === 'Solo Act' ? 'Solo Act' : 
+                     profile.performance_type === 'Duo' ? 'Duo' :
+                     profile.performance_type === 'Full Band' ? 'Full Band' : 
+                     profile.performance_type || 'Artist'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Social Links and Booking */}
+              <div className="flex justify-center gap-4 flex-wrap">
+                {profile.contact_info && (profile.contact_info as any).email && (
+                  <Button variant="default" size="sm" asChild>
+                    <a href={`mailto:${(profile.contact_info as any).email}`}>
+                      <Mail className="w-4 h-4 mr-2" />
+                      Book Now
+                    </a>
+                  </Button>
+                )}
+                {socialLinks.instagram && (
+                  <Button variant="outline" size="sm" asChild>
+                    <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer">
+                      <img src={instagramIcon} alt="Instagram" className="w-4 h-4 mr-2" />
+                      Instagram
+                    </a>
+                  </Button>
+                )}
+                {socialLinks.tiktok && (
+                  <Button variant="outline" size="sm" asChild>
+                    <a href={socialLinks.tiktok} target="_blank" rel="noopener noreferrer">
+                      <img src={tiktokIcon} alt="TikTok" className="w-4 h-4 mr-2" />
+                      TikTok
+                    </a>
+                  </Button>
+                )}
+                {socialLinks.website && (
+                  <Button variant="outline" size="sm" asChild>
+                    <a href={socialLinks.website} target="_blank" rel="noopener noreferrer">
+                      <Globe className="w-4 h-4 mr-2" />
+                      Website
+                    </a>
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Desktop Key Stats Section */}
+        <section className="hidden md:grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
           <Card className="glass-card border-glass text-center p-6">
             <CardContent className="p-0">
               <Users className="w-8 h-8 text-primary mx-auto mb-2" />
@@ -435,7 +534,7 @@ export default function SimplePublicProfile() {
 
         {/* Spotify Track Section */}
         {profile.spotify_track_url && (
-          <section id="spotify-player" className="mb-16">
+          <section id="spotify-player" className="mb-8 md:mb-16">
             <div className="w-full">
               <iframe
                 src={profile.spotify_track_url.replace('open.spotify.com/track/', 'open.spotify.com/embed/track/')}
@@ -451,17 +550,17 @@ export default function SimplePublicProfile() {
           </section>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-6 md:space-y-8">
             {/* Videos Section */}
             {profile.show_videos && profile.show_videos.length > 0 && (
-              <section id="videos" className="glass-card border-glass p-8 rounded-xl">
-                <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
-                  <Play className="w-8 h-8 text-primary" />
+              <section id="videos" className="glass-card border-glass p-4 md:p-8 rounded-xl">
+                <h2 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 flex items-center gap-3">
+                  <Play className="w-6 md:w-8 h-6 md:h-8 text-primary" />
                   Live Performance Videos
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-4 md:gap-6">
                   {profile.show_videos.map((video, index) => (
                     <div key={index} className="aspect-video rounded-lg overflow-hidden bg-black/20 shadow-lg hover:shadow-xl transition-all duration-300">
                       <iframe
@@ -477,18 +576,39 @@ export default function SimplePublicProfile() {
               </section>
             )}
 
-            {/* Bio Section */}
+            {/* Bio Section with Mobile Truncation */}
             {profile.bio && (
-              <section className="glass-card border-glass p-8 rounded-xl">
-                <h2 className="text-3xl font-bold mb-6">Artist Biography</h2>
-                <p className="text-muted-foreground leading-relaxed text-lg">{profile.bio}</p>
+              <section className="glass-card border-glass p-4 md:p-8 rounded-xl">
+                <h2 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6">Artist Biography</h2>
+                <div className="text-muted-foreground leading-relaxed text-base md:text-lg">
+                  {/* Mobile: Truncated bio with expand/collapse */}
+                  <div className="md:hidden">
+                    <p className="mb-4">
+                      {bioExpanded ? profile.bio : getTruncatedBio(profile.bio)}
+                    </p>
+                    {profile.bio.split(' ').length > 100 && (
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => setBioExpanded(!bioExpanded)}
+                        className="text-primary hover:text-primary/80"
+                      >
+                        {bioExpanded ? 'Show Less' : 'Show More'}
+                      </Button>
+                    )}
+                  </div>
+                  {/* Desktop: Full bio */}
+                  <div className="hidden md:block">
+                    <p>{profile.bio}</p>
+                  </div>
+                </div>
               </section>
             )}
 
             {/* Gallery Photos - Full Width */}
             {profile.gallery_photos && profile.gallery_photos.length > 0 && (
               <section className="w-full">
-                <h2 className="text-3xl font-bold mb-6 text-center">Photo Gallery</h2>
+                <h2 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-center">Photo Gallery</h2>
                 <GallerySlideshow photos={profile.gallery_photos} artistName={profile.artist_name} />
               </section>
             )}
@@ -504,16 +624,16 @@ export default function SimplePublicProfile() {
               }`}>
                 {/* Press Quotes */}
                 {profile.press_quotes && Array.isArray(profile.press_quotes) && profile.press_quotes.length > 0 && (
-                  <section className="glass-card border-glass p-8 rounded-xl">
-                    <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
-                      <Quote className="w-8 h-8 text-accent" />
+                  <section className="glass-card border-glass p-4 md:p-8 rounded-xl">
+                    <h2 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 flex items-center gap-3">
+                      <Quote className="w-6 md:w-8 h-6 md:h-8 text-accent" />
                       Press & Reviews
                     </h2>
-                    <div className="space-y-6">
+                    <div className="space-y-4 md:space-y-6">
                       {profile.press_quotes.map((quote: any, index: number) => (
-                        <blockquote key={index} className="border-l-4 border-primary pl-6 bg-white/5 p-6 rounded-r-lg hover:shadow-glow transition-all duration-300">
-                          <p className="italic text-xl mb-4 leading-relaxed">"{quote.text}"</p>
-                          <cite className="text-lg font-bold text-primary">— {quote.source}</cite>
+                        <blockquote key={index} className="border-l-4 border-primary pl-4 md:pl-6 bg-white/5 p-4 md:p-6 rounded-r-lg hover:shadow-glow transition-all duration-300">
+                          <p className="italic text-lg md:text-xl mb-3 md:mb-4 leading-relaxed">"{quote.text}"</p>
+                          <cite className="text-base md:text-lg font-bold text-primary">— {quote.source}</cite>
                         </blockquote>
                       ))}
                     </div>
@@ -522,18 +642,18 @@ export default function SimplePublicProfile() {
 
                 {/* Press Mentions */}
                 {profile.press_mentions && Array.isArray(profile.press_mentions) && profile.press_mentions.length > 0 && (
-                  <section className="glass-card border-glass p-8 rounded-xl">
-                    <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
-                      <ExternalLink className="w-8 h-8 text-accent" />
+                  <section className="glass-card border-glass p-4 md:p-8 rounded-xl">
+                    <h2 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 flex items-center gap-3">
+                      <ExternalLink className="w-6 md:w-8 h-6 md:h-8 text-accent" />
                       Press Coverage
                     </h2>
-                    <div className="space-y-4">
+                    <div className="space-y-3 md:space-y-4">
                       {profile.press_mentions.map((mention: any, index: number) => (
-                        <div key={index} className="bg-white/5 p-6 rounded-lg hover:bg-white/10 transition-all duration-300">
-                          <h3 className="text-xl font-bold text-foreground mb-2">{mention.title}</h3>
-                          <p className="text-muted-foreground mb-3">{mention.description}</p>
+                        <div key={index} className="bg-white/5 p-4 md:p-6 rounded-lg hover:bg-white/10 transition-all duration-300">
+                          <h3 className="text-lg md:text-xl font-bold text-foreground mb-2">{mention.title}</h3>
+                          <p className="text-muted-foreground mb-3 text-sm md:text-base">{mention.description}</p>
                           <div className="flex items-center gap-3">
-                            <span className="text-primary font-medium">{mention.source}</span>
+                            <span className="text-primary font-medium text-sm md:text-base">{mention.source}</span>
                             {mention.url && (
                               <Button variant="outline" size="sm" asChild>
                                 <a href={mention.url} target="_blank" rel="noopener noreferrer">
@@ -553,8 +673,8 @@ export default function SimplePublicProfile() {
 
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-8">
+          {/* Sidebar - Hidden on mobile since Connect moved above */}
+          <div className="hidden md:block space-y-8">
             {/* Connect Section */}
             <Card className="glass-card border-glass">
               <CardHeader>
@@ -608,16 +728,16 @@ export default function SimplePublicProfile() {
                     Featured Shows
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3 md:space-y-4">
                   {profile.upcoming_shows.filter((show: any) => show.featured).map((show: any, index: number) => (
-                    <div key={index} className="bg-gradient-to-r from-primary/20 to-accent/20 p-4 rounded-lg border border-primary/30">
-                      <h3 className="font-bold text-lg mb-2 text-primary">{show.venue}</h3>
-                      <div className="flex items-center gap-2 text-muted-foreground mb-2">
-                        <MapPin className="w-4 h-4" />
+                    <div key={index} className="bg-gradient-to-r from-primary/20 to-accent/20 p-3 md:p-4 rounded-lg border border-primary/30">
+                      <h3 className="font-bold text-base md:text-lg mb-2 text-primary">{show.venue}</h3>
+                      <div className="flex items-center gap-2 text-muted-foreground mb-2 text-sm">
+                        <MapPin className="w-3 md:w-4 h-3 md:h-4" />
                         <span>{getShowLocation(show)}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-muted-foreground mb-3">
-                        <Calendar className="w-4 h-4" />
+                      <div className="flex items-center gap-2 text-muted-foreground mb-3 text-sm">
+                        <Calendar className="w-3 md:w-4 h-3 md:h-4" />
                         <span>{new Date(show.date).toLocaleDateString('en-US', { 
                           year: 'numeric', 
                           month: 'long', 
@@ -656,20 +776,20 @@ export default function SimplePublicProfile() {
                     )}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3 md:space-y-4">
                   {profile.upcoming_shows
                     .filter((show: any) => !show.featured)
                     .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
                     .slice(0, 2)
                     .map((show: any, index: number) => (
-                    <div key={index} className="bg-white/5 p-4 rounded-lg">
-                      <h3 className="font-bold text-lg mb-2">{show.venue}</h3>
-                      <div className="flex items-center gap-2 text-muted-foreground mb-2">
-                        <MapPin className="w-4 h-4" />
+                    <div key={index} className="bg-white/5 p-3 md:p-4 rounded-lg">
+                      <h3 className="font-bold text-base md:text-lg mb-2">{show.venue}</h3>
+                      <div className="flex items-center gap-2 text-muted-foreground mb-2 text-sm">
+                        <MapPin className="w-3 md:w-4 h-3 md:h-4" />
                         <span>{getShowLocation(show)}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-muted-foreground mb-3">
-                        <Calendar className="w-4 h-4" />
+                      <div className="flex items-center gap-2 text-muted-foreground mb-3 text-sm">
+                        <Calendar className="w-3 md:w-4 h-3 md:h-4" />
                         <span>{new Date(show.date).toLocaleDateString('en-US', { 
                           year: 'numeric', 
                           month: 'long', 
@@ -764,6 +884,46 @@ export default function SimplePublicProfile() {
           </div>
         </div>
       </div>
+
+      {/* Sticky Bottom Booking Banner - Mobile Only */}
+      {!bannerDismissed && profile.contact_info && (profile.contact_info as any).email && (
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-primary to-primary/90 border-t border-primary/20 backdrop-blur-sm">
+          <div className="flex items-center justify-between p-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-3">
+                <div>
+                  <p className="text-white font-semibold text-sm">Book {profile.artist_name}</p>
+                  <p className="text-white/80 text-xs">
+                    {profile.location && `${profile.location} • `}
+                    {profile.performance_type || 'Artist'}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="secondary" 
+                size="sm" 
+                asChild
+                className="bg-white text-primary hover:bg-white/90 font-semibold min-h-[44px]"
+              >
+                <a href={`mailto:${(profile.contact_info as any).email}`}>
+                  <Mail className="w-4 h-4 mr-2" />
+                  Contact
+                </a>
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setBannerDismissed(true)}
+                className="text-white hover:bg-white/10 min-h-[44px] min-w-[44px] p-2"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -812,22 +972,22 @@ function GallerySlideshow({ photos, artistName }: { photos: any[], artistName: s
           className="w-full h-full object-contain bg-black/10"
         />
         
-        {/* Navigation Buttons */}
+        {/* Navigation Buttons - Optimized for touch */}
         {photos.length > 1 && (
           <>
             <button
               onClick={goToPrevious}
-              className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all duration-300 hover:scale-110"
+              className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 md:p-3 rounded-full transition-all duration-300 hover:scale-110 min-h-[44px] min-w-[44px]"
               aria-label="Previous photo"
             >
-              <ChevronLeft className="w-6 h-6" />
+              <ChevronLeft className="w-5 md:w-6 h-5 md:h-6" />
             </button>
             <button
               onClick={goToNext}
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all duration-300 hover:scale-110"
+              className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 md:p-3 rounded-full transition-all duration-300 hover:scale-110 min-h-[44px] min-w-[44px]"
               aria-label="Next photo"
             >
-              <ChevronRight className="w-6 h-6" />
+              <ChevronRight className="w-5 md:w-6 h-5 md:h-6" />
             </button>
           </>
         )}
