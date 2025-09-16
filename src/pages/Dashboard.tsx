@@ -17,6 +17,7 @@ import { PreviewModal } from "@/components/PreviewModal";
 import { useScrollVisibility } from "@/hooks/useScrollVisibility";
 import { useScrollPosition } from "@/hooks/useScrollPosition";
 import { useTabStateManager } from "@/hooks/useTabStateManager";
+import { useDashboardStatePersistence } from "@/hooks/useDashboardStatePersistence";
 
 interface DashboardArtistProfile {
   id: string;
@@ -47,11 +48,31 @@ export default function Dashboard() {
   const [profile, setProfile] = useState<DashboardArtistProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [editingSection, setEditingSection] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   
   // Tab state management for preventing tab reload issues
   useTabStateManager();
+  
+  // Comprehensive state persistence system
+  useDashboardStatePersistence({
+    profile,
+    editingSection,
+    showPreviewModal,
+    user,
+    onStateRestore: (restoredState) => {
+      if (restoredState.profile && !profile) {
+        setProfile(restoredState.profile);
+      }
+      if (restoredState.editingSection !== undefined) {
+        setEditingSection(restoredState.editingSection);
+      }
+      if (restoredState.showPreviewModal !== undefined) {
+        setShowPreviewModal(restoredState.showPreviewModal);
+      }
+    }
+  });
   
   // Refs for scroll visibility detection
   const progressCardRef = useRef<HTMLDivElement>(null);
@@ -474,11 +495,13 @@ export default function Dashboard() {
 
           {/* Live Preview Editor */}
           <div className="animate-slide-in-up">
-            <LivePreviewEditor 
-              profile={profile} 
-              onProfileUpdated={handleProfileUpdated}
-              user={user}
-            />
+          <LivePreviewEditor 
+            profile={profile} 
+            onProfileUpdated={handleProfileUpdated}
+            user={user}
+            editingSection={editingSection}
+            onEditingSectionChange={setEditingSection}
+          />
           </div>
         </div>
         

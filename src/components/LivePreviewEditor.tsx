@@ -30,10 +30,22 @@ interface LivePreviewEditorProps {
   };
   onProfileUpdated: (updatedData?: any) => void;
   user: User | null;
+  editingSection?: string | null;
+  onEditingSectionChange?: (section: string | null) => void;
 }
 
-export default function LivePreviewEditor({ profile, onProfileUpdated, user }: LivePreviewEditorProps) {
-  const [editingSection, setEditingSection] = useState<string | null>(null);
+export default function LivePreviewEditor({ 
+  profile, 
+  onProfileUpdated, 
+  user, 
+  editingSection: externalEditingSection,
+  onEditingSectionChange 
+}: LivePreviewEditorProps) {
+  // Use external state if provided, otherwise fall back to internal state
+  const [internalEditingSection, setInternalEditingSection] = useState<string | null>(null);
+  const editingSection = externalEditingSection !== undefined ? externalEditingSection : internalEditingSection;
+  const setEditingSection = onEditingSectionChange || setInternalEditingSection;
+  
   const scrollPositionRef = useRef<number>(0);
 
   // Auto-save functionality for live editing
@@ -59,24 +71,6 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
     delay: 300,
     enabled: !!user && !!profile
   });
-
-  // Persist state when user switches tabs
-//  useEffect(() => {
-//    const handleVisibilityChange = () => {
-//      if (document.visibilityState === 'hidden') {
-//        // Store scroll position when tab becomes hidden
-//        scrollPositionRef.current = window.scrollY;
-//      } else {
-//        // Restore scroll position when tab becomes visible
-//        setTimeout(() => {
-//          window.scrollTo(0, scrollPositionRef.current);
-//        }, 100);
-//      }
- //   };
-
- //   document.addEventListener('visibilitychange', handleVisibilityChange);
- //   return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
- // }, []);
 
   const handleSectionClick = (sectionId: string) => {
     setEditingSection(editingSection === sectionId ? null : sectionId);
