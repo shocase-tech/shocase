@@ -249,9 +249,9 @@ export function useDashboardStateManager() {
       console.log(`🔍 [${timestamp}] Document visibility:`, document.visibilityState);
       console.log(`🔍 [${timestamp}] Page URL:`, window.location.href);
       
-      // If page was reloaded or this is the first visit, don't restore scroll
-      if (navEntry && (navEntry.type === 'reload' || navEntry.type === 'navigate')) {
-        console.log(`🚨 [${timestamp}] StateManager: CLEARING STATE due to navigation type: ${navEntry.type}`);
+      // Only clear state on actual page reloads, not tab returns
+      if (navEntry && navEntry.type === 'reload') {
+        console.log(`🚨 [${timestamp}] StateManager: CLEARING STATE due to page reload`);
         console.log(`🚨 [${timestamp}] Full navEntry details:`, {
           type: navEntry.type,
           loadEventEnd: navEntry.loadEventEnd,
@@ -262,7 +262,7 @@ export function useDashboardStateManager() {
         stateManager.setInitialLoad(true);
         stateManager.clearState(); // Clear on fresh load
       } else {
-        console.log(`✅ [${timestamp}] StateManager: NOT clearing state, navigation type: ${navEntry?.type || 'undefined'}`);
+        console.log(`✅ [${timestamp}] StateManager: NOT clearing state, navigation type: ${navEntry?.type || 'undefined'} (preserving state for tab return)`);
         stateManager.setInitialLoad(false);
       }
     };
