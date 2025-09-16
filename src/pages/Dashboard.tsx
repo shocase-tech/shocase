@@ -16,7 +16,7 @@ import FloatingProgressIndicator from "@/components/FloatingProgressIndicator";
 import { PreviewModal } from "@/components/PreviewModal";
 import { useScrollVisibility } from "@/hooks/useScrollVisibility";
 import { useScrollPosition } from "@/hooks/useScrollPosition";
-import { useDashboardStateManager } from "@/hooks/useDashboardStateManager";
+import { useTabStateManager } from "@/hooks/useTabStateManager";
 
 interface DashboardArtistProfile {
   id: string;
@@ -43,9 +43,6 @@ interface DashboardArtistProfile {
 }
 
 export default function Dashboard() {
-  const timestamp = new Date().toISOString();
-  console.log(`🔧 [${timestamp}] Dashboard: Component mounting/rendering`);
-  
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<DashboardArtistProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -53,14 +50,8 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  // Enhanced dashboard state management
-  const {
-    storeState,
-    restoreState,
-    updateProfileData,
-    updateEditingSection,
-    getEditingSection
-  } = useDashboardStateManager();
+  // Tab state management for preventing tab reload issues
+  useTabStateManager();
   
   // Refs for scroll visibility detection
   const progressCardRef = useRef<HTMLDivElement>(null);
@@ -72,52 +63,34 @@ export default function Dashboard() {
   const { scrollY, isAboveThreshold } = useScrollPosition({ threshold: 500 });
 
   useEffect(() => {
-    const timestamp = new Date().toISOString();
-    console.log(`🔧 [${timestamp}] Dashboard: useEffect[navigate] - Setting up auth session`);
-    
     const getSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) {
-        console.log(`🔧 [${timestamp}] Dashboard: No session found, navigating to auth`);
         navigate("/auth");
         return;
       }
-      console.log(`🔧 [${timestamp}] Dashboard: Session found for user: ${session.user.id}`);
       setUser(session.user);
     };
 
     getSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log(`🔧 [${timestamp}] Dashboard: Auth state changed - Event: ${event}`);
       if (!session?.user) {
-        console.log(`🔧 [${timestamp}] Dashboard: No session in auth change, navigating to auth`);
         navigate("/auth");
         return;
       }
-      console.log(`🔧 [${timestamp}] Dashboard: Auth change - User: ${session.user.id}`);
       setUser(session.user);
     });
 
-    // Cleanup function to track unmounting
     return () => {
-      console.log(`🔧 [${timestamp}] Dashboard: useEffect[navigate] cleanup called`);
       subscription.unsubscribe();
     };
   }, [navigate]);
 
   useEffect(() => {
-    const timestamp = new Date().toISOString();
-    console.log(`🔧 [${timestamp}] Dashboard: useEffect[user] - User changed:`, user?.id);
-    
     if (user) {
       fetchProfile();
     }
-    
-    // Cleanup function to track unmounting
-    return () => {
-      console.log(`🔧 [${timestamp}] Dashboard: useEffect[user] cleanup called`);
-    };
   }, [user]);
 
   const fetchProfile = async () => {
@@ -220,12 +193,9 @@ export default function Dashboard() {
   const handleProfileUpdated = useCallback((updatedData?: Partial<DashboardArtistProfile>) => {
     // Update local state instead of refetching from database to prevent reloads
     if (updatedData && profile) {
-      const newProfile = { ...profile, ...updatedData };
-      setProfile(newProfile);
-      // Update state manager with new profile data
-      updateProfileData(newProfile);
+      setProfile({ ...profile, ...updatedData });
     }
-  }, [profile, updateProfileData]);
+  }, [profile]);
 
   const togglePublishStatus = async () => {
     if (!profile || !user) return;

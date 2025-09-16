@@ -17,7 +17,6 @@ import { CSS } from '@dnd-kit/utilities';
 import { ImageStorageService } from "@/lib/imageStorage";
 import PrivateImage from "@/components/PrivateImage";
 import { useClickOutside } from "@/hooks/useClickOutside";
-import { useDashboardStateManager } from "@/hooks/useDashboardStateManager";
 
 interface GalleryEditorProps {
   profile: any;
@@ -225,32 +224,6 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [previewOrder, setPreviewOrder] = useState<{ url: string; label?: string }[] | null>(null);
   const { toast } = useToast();
-  
-  // Enhanced state management
-  const { registerEditor, unregisterEditor, updateEditorActiveState } = useDashboardStateManager();
-  const editorId = 'gallery-editor';
-
-  // Register this editor with the state manager
-  useEffect(() => {
-    const registration = {
-      editorId,
-      getState: () => ({ photos }),
-      setState: (state: any) => {
-        console.log('🔄 GalleryEditor: Restoring state:', state);
-        if (state.photos) setPhotos(state.photos);
-      },
-      isActive: true
-    };
-    
-    registerEditor(registration);
-    updateEditorActiveState(editorId, true);
-    
-    return () => {
-      console.log('🗑️ GalleryEditor: Unregistering');
-      updateEditorActiveState(editorId, false);
-      unregisterEditor(editorId);
-    };
-  }, [registerEditor, unregisterEditor, updateEditorActiveState, photos]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),

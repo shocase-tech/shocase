@@ -19,7 +19,6 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { ValidationAlertModal } from "@/components/ValidationAlertModal";
-import { useDashboardStateManager } from "@/hooks/useDashboardStateManager";
 
 interface ShowsEditorProps {
   profile: any;
@@ -246,32 +245,6 @@ export default function ShowsEditor({ profile, user, onSave, onCancel }: ShowsEd
   const [showValidationModal, setShowValidationModal] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Array<{ showIndex: number; missingFields: string[] }>>([]);
   const { toast } = useToast();
-  
-  // Enhanced state management
-  const { registerEditor, unregisterEditor, updateEditorActiveState } = useDashboardStateManager();
-  const editorId = 'shows-editor';
-
-  // Register this editor with the state manager
-  useEffect(() => {
-    const registration = {
-      editorId,
-      getState: () => ({ shows }),
-      setState: (state: any) => {
-        console.log('🔄 ShowsEditor: Restoring state:', state);
-        if (state.shows) setShows(state.shows);
-      },
-      isActive: true
-    };
-    
-    registerEditor(registration);
-    updateEditorActiveState(editorId, true);
-    
-    return () => {
-      console.log('🗑️ ShowsEditor: Unregistering');
-      updateEditorActiveState(editorId, false);
-      unregisterEditor(editorId);
-    };
-  }, [registerEditor, unregisterEditor, updateEditorActiveState, shows]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -452,7 +425,7 @@ export default function ShowsEditor({ profile, user, onSave, onCancel }: ShowsEd
     }
   }, [isSaving, loading, onCancel, shows]);
   
-  // Click outside detection with enhanced drag operation handling
+  // Click outside detection
   const editorRef = useClickOutside<HTMLDivElement>(handleAutoSaveAndClose);
 
   return (

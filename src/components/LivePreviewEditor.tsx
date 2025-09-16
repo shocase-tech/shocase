@@ -11,7 +11,6 @@ import MentionsEditor from "@/components/MentionsEditor";
 import ShowsEditor from "@/components/ShowsEditor";
 import SaveIndicator from "@/components/SaveIndicator";
 import { useAutoSave } from "@/hooks/useAutoSave";
-import { useDashboardStateManager } from "@/hooks/useDashboardStateManager";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 
@@ -36,9 +35,6 @@ interface LivePreviewEditorProps {
 export default function LivePreviewEditor({ profile, onProfileUpdated, user }: LivePreviewEditorProps) {
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const scrollPositionRef = useRef<number>(0);
-  
-  // Enhanced state management
-  const { updateEditingSection, getEditingSection, storeState } = useDashboardStateManager();
 
   // Auto-save functionality for live editing
   const saveProfile = async (profileData: any) => {
@@ -64,25 +60,12 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
     enabled: !!user && !!profile
   });
 
-  // Restore editing section from state manager on component mount
-  useEffect(() => {
-    const savedEditingSection = getEditingSection();
-    if (savedEditingSection && !editingSection) {
-      console.log('🔄 LivePreviewEditor: Restoring editing section:', savedEditingSection);
-      setEditingSection(savedEditingSection);
-    }
-  }, [getEditingSection, editingSection]);
-
   // Persist state when user switches tabs
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
-        // Store scroll position and current editing section
+        // Store scroll position when tab becomes hidden
         scrollPositionRef.current = window.scrollY;
-        storeState({ 
-          scrollPosition: window.scrollY,
-          editingSection: editingSection
-        });
       } else {
         // Restore scroll position when tab becomes visible
         setTimeout(() => {
@@ -93,15 +76,10 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [editingSection, storeState]);
+  }, []);
 
   const handleSectionClick = (sectionId: string) => {
-    const newEditingSection = editingSection === sectionId ? null : sectionId;
-    setEditingSection(newEditingSection);
-    updateEditingSection(newEditingSection);
-    
-    // Store current state including the new editing section
-    storeState({ editingSection: newEditingSection });
+    setEditingSection(editingSection === sectionId ? null : sectionId);
   };
 
   const handleSectionSave = (updatedData?: any, callback?: () => void) => {

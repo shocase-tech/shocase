@@ -10,7 +10,6 @@ import { User } from "@supabase/supabase-js";
 import { Save, X, Plus, ExternalLink, Loader2, Quote } from "lucide-react";
 import PressQuotesEditor from "@/components/PressQuotesEditor";
 import { useClickOutside } from "@/hooks/useClickOutside";
-import { useDashboardStateManager } from "@/hooks/useDashboardStateManager";
 
 interface MentionsEditorProps {
   profile: any;
@@ -36,34 +35,6 @@ export default function MentionsEditor({ profile, user, onSave, onCancel }: Ment
   const [fetchingMetadata, setFetchingMetadata] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
-  
-  // Enhanced state management
-  const { registerEditor, unregisterEditor, updateEditorActiveState } = useDashboardStateManager();
-  const editorId = 'mentions-editor';
-
-  // Register this editor with the state manager
-  useEffect(() => {
-    const registration = {
-      editorId,
-      getState: () => ({ mentions, quotes, newUrl }),
-      setState: (state: any) => {
-        console.log('🔄 MentionsEditor: Restoring state:', state);
-        if (state.mentions) setMentions(state.mentions);
-        if (state.quotes) setQuotes(state.quotes);
-        if (state.newUrl) setNewUrl(state.newUrl);
-      },
-      isActive: true
-    };
-    
-    registerEditor(registration);
-    updateEditorActiveState(editorId, true);
-    
-    return () => {
-      console.log('🗑️ MentionsEditor: Unregistering');
-      updateEditorActiveState(editorId, false);
-      unregisterEditor(editorId);
-    };
-  }, [registerEditor, unregisterEditor, updateEditorActiveState, mentions, quotes, newUrl]);
 
   useEffect(() => {
     if (profile?.press_mentions) {
@@ -222,7 +193,7 @@ export default function MentionsEditor({ profile, user, onSave, onCancel }: Ment
     }
   }, [isSaving, loading, fetchingMetadata, onCancel, mentions, quotes]);
   
-  // Click outside detection with enhanced drag operation handling
+  // Click outside detection
   const editorRef = useClickOutside<HTMLDivElement>(handleAutoSaveAndClose);
 
   return (
