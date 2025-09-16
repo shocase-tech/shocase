@@ -55,12 +55,16 @@ export default function Dashboard() {
   // Tab state management for preventing tab reload issues
   useTabStateManager();
   
+  // Store form data ref for persistence
+  const formDataRef = useRef<Record<string, any>>({});
+  
   // Comprehensive state persistence system
-  useDashboardStatePersistence({
+  const { isRestoredFromSavedState } = useDashboardStatePersistence({
     profile,
     editingSection,
     showPreviewModal,
     user,
+    getFormData: () => formDataRef.current,
     onStateRestore: (restoredState) => {
       if (restoredState.profile && !profile) {
         setProfile(restoredState.profile);
@@ -70,6 +74,10 @@ export default function Dashboard() {
       }
       if (restoredState.showPreviewModal !== undefined) {
         setShowPreviewModal(restoredState.showPreviewModal);
+      }
+      // Store restored form data for editor to use
+      if (restoredState.formData) {
+        formDataRef.current = restoredState.formData;
       }
     }
   });
@@ -110,9 +118,14 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (user) {
-      fetchProfile();
+      // Skip loading animation if we're restoring from saved state (tab switch)
+      if (isRestoredFromSavedState && profile) {
+        setLoading(false);
+      } else {
+        fetchProfile();
+      }
     }
-  }, [user]);
+  }, [user, isRestoredFromSavedState, profile]);
 
   const fetchProfile = async () => {
     if (!user) return;
@@ -501,6 +514,12 @@ export default function Dashboard() {
             user={user}
             editingSection={editingSection}
             onEditingSectionChange={setEditingSection}
+            onFormDataChange={(data) => {
+              if (editingSection) {
+                formDataRef.current = { ...formDataRef.current, [editingSection]: data };
+              }
+            }}
+            initialFormData={editingSection ? formDataRef.current[editingSection] : undefined}
           />
           </div>
         </div>

@@ -27,51 +27,68 @@ interface InlineEditorProps {
   onSave: (updatedData?: any) => void;
   onCancel: () => void;
   isInitialSetup?: boolean;
+  initialFormData?: Record<string, any>;
+  onFormDataChange?: (data: Record<string, any>) => void;
 }
 
-export default function InlineEditor({ sectionId, profile, user, onSave, onCancel, isInitialSetup = false }: InlineEditorProps) {
+export default function InlineEditor({ 
+  sectionId, 
+  profile, 
+  user, 
+  onSave, 
+  onCancel, 
+  isInitialSetup = false, 
+  initialFormData,
+  onFormDataChange 
+}: InlineEditorProps) {
   const [formData, setFormData] = useState<any>({});
   const [loading, setLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    if (profile) {
-      setFormData({
-        artist_name: profile.artist_name || '',
-        bio: profile.bio || '',
-        genre: profile.genre || [],
-        social_links: profile.social_links || {},
-        contact_info: profile.contact_info || {},
-        streaming_links: profile.streaming_links || {},
-        show_videos: profile.show_videos || [],
-        profile_photo_url: profile.profile_photo_url || '',
-        hero_photo_url: profile.hero_photo_url || '',
-        gallery_photos: profile.gallery_photos || [],
-        blurb: profile.blurb || '',
-        performance_type: profile.performance_type || '',
-        location: profile.location || '',
-        spotify_track_url: profile.spotify_track_url || '',
-      });
-    } else {
-      setFormData({
-        artist_name: '',
-        bio: '',
-        genre: [],
-        social_links: {},
-        contact_info: {},
-        streaming_links: {},
-        show_videos: [],
-        profile_photo_url: '',
-        hero_photo_url: '',
-        gallery_photos: [],
-        blurb: '',
-        performance_type: '',
-        location: '',
-        spotify_track_url: '',
-      });
+    // Start with initial data from persistence or profile
+    const initialData = initialFormData || (profile ? {
+      artist_name: profile.artist_name || '',
+      bio: profile.bio || '',
+      genre: profile.genre || [],
+      social_links: profile.social_links || {},
+      contact_info: profile.contact_info || {},
+      streaming_links: profile.streaming_links || {},
+      show_videos: profile.show_videos || [],
+      profile_photo_url: profile.profile_photo_url || '',
+      hero_photo_url: profile.hero_photo_url || '',
+      gallery_photos: profile.gallery_photos || [],
+      blurb: profile.blurb || '',
+      performance_type: profile.performance_type || '',
+      location: profile.location || '',
+      spotify_track_url: profile.spotify_track_url || '',
+    } : {
+      artist_name: '',
+      bio: '',
+      genre: [],
+      social_links: {},
+      contact_info: {},
+      streaming_links: {},
+      show_videos: [],
+      profile_photo_url: '',
+      hero_photo_url: '',
+      gallery_photos: [],
+      blurb: '',
+      performance_type: '',
+      location: '',
+      spotify_track_url: '',
+    });
+    
+    setFormData(initialData);
+  }, [profile, initialFormData]);
+
+  // Notify parent of form data changes
+  useEffect(() => {
+    if (onFormDataChange) {
+      onFormDataChange(formData);
     }
-  }, [profile]);
+  }, [formData, onFormDataChange]);
 
   // File upload handlers
   const handleProfilePhotoUpload = async (file: File) => {

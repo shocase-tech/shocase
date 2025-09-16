@@ -7,7 +7,8 @@ interface PersistedDashboardState {
   showPreviewModal: boolean;
   scrollPosition: number;
   lastSaved: number;
-  version: string; // For future compatibility
+  version: string;
+  formData?: Record<string, any>; // Store active editor form data
 }
 
 interface UseDashboardStatePersistenceProps {
@@ -16,6 +17,7 @@ interface UseDashboardStatePersistenceProps {
   showPreviewModal: boolean;
   user: User | null;
   onStateRestore?: (state: Partial<PersistedDashboardState>) => void;
+  getFormData?: () => Record<string, any>; // Function to capture current form data
 }
 
 const STORAGE_KEY = 'dashboard_persistent_state';
@@ -27,32 +29,35 @@ export function useDashboardStatePersistence({
   editingSection,
   showPreviewModal,
   user,
-  onStateRestore
+  onStateRestore,
+  getFormData
 }: UseDashboardStatePersistenceProps) {
   const hasRestoredRef = useRef(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
   const intervalRef = useRef<NodeJS.Timeout>();
+  const restoredFromSavedStateRef = useRef(false);
   
   // Save current state to sessionStorage
   const saveState = useCallback(() => {
     if (!user) return;
     
     try {
+      const formData = getFormData ? getFormData() : {};
       const state: PersistedDashboardState = {
         profile,
         editingSection,
         showPreviewModal,
         scrollPosition: window.scrollY,
         lastSaved: Date.now(),
-        version: STATE_VERSION
+        version: STATE_VERSION,
+        formData
       };
       
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      console.debug('Dashboard state saved', { editingSection, scrollPosition: window.scrollY });
     } catch (error) {
       console.warn('Failed to save dashboard state:', error);
     }
-  }, [profile, editingSection, showPreviewModal, user]);
+  }, [profile, editingSection, showPreviewModal, user, getFormData]);
 
   // Restore state from sessionStorage
   const restoreState = useCallback(() => {
@@ -66,7 +71,6 @@ export function useDashboardStatePersistence({
       
       // Check version compatibility
       if (state.version !== STATE_VERSION) {
-        console.warn('Incompatible state version, clearing saved state');
         sessionStorage.removeItem(STORAGE_KEY);
         return;
       }
@@ -74,32 +78,35 @@ export function useDashboardStatePersistence({
       // Check if state is recent (within last 10 minutes)
       const timeDiff = Date.now() - state.lastSaved;
       if (timeDiff > 10 * 60 * 1000) {
-        console.debug('Saved state is too old, ignoring');
         return;
       }
       
-      console.debug('Restoring dashboard state', { 
-        editingSection: state.editingSection, 
-        scrollPosition: state.scrollPosition 
-      });
+      // Mark that we're restoring from saved state (tab switch, not fresh load)
+      restoredFromSavedStateRef.current = true;
       
-      // Restore state through callback
+      // Restore state through callback (including form data)
       if (onStateRestore) {
         onStateRestore({
           profile: state.profile,
           editingSection: state.editingSection,
-          showPreviewModal: state.showPreviewModal
+          showPreviewModal: state.showPreviewModal,
+          formData: state.formData
         });
       }
       
-      // Restore scroll position after a delay to allow DOM to settle
+      // Restore scroll position with multiple attempts for reliability
       if (state.scrollPosition > 0) {
-        setTimeout(() => {
+        const restoreScroll = () => {
           window.scrollTo({
             top: state.scrollPosition,
-            behavior: 'auto' // Use auto for instant restore
+            behavior: 'auto'
           });
-        }, 100);
+        };
+        
+        // Try multiple times to ensure DOM is ready
+        setTimeout(restoreScroll, 50);
+        setTimeout(restoreScroll, 150);
+        setTimeout(restoreScroll, 300);
       }
       
       hasRestoredRef.current = true;
@@ -112,7 +119,7 @@ export function useDashboardStatePersistence({
   const clearState = useCallback(() => {
     try {
       sessionStorage.removeItem(STORAGE_KEY);
-      console.debug('Dashboard state cleared');
+      restoredFromSavedStateRef.current = false;
     } catch (error) {
       console.warn('Failed to clear dashboard state:', error);
     }
@@ -188,6 +195,7 @@ export function useDashboardStatePersistence({
   return {
     clearState,
     saveState,
-    hasRestoredState: hasRestoredRef.current
+    hasRestoredState: hasRestoredRef.current,
+    isRestoredFromSavedState: restoredFromSavedStateRef.current
   };
 }

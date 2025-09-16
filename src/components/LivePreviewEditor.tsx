@@ -32,6 +32,8 @@ interface LivePreviewEditorProps {
   user: User | null;
   editingSection?: string | null;
   onEditingSectionChange?: (section: string | null) => void;
+  onFormDataChange?: (data: Record<string, any>) => void;
+  initialFormData?: Record<string, any>;
 }
 
 export default function LivePreviewEditor({ 
@@ -39,7 +41,9 @@ export default function LivePreviewEditor({
   onProfileUpdated, 
   user, 
   editingSection: externalEditingSection,
-  onEditingSectionChange 
+  onEditingSectionChange,
+  onFormDataChange,
+  initialFormData
 }: LivePreviewEditorProps) {
   // Use external state if provided, otherwise fall back to internal state
   const [internalEditingSection, setInternalEditingSection] = useState<string | null>(null);
@@ -47,6 +51,20 @@ export default function LivePreviewEditor({
   const setEditingSection = onEditingSectionChange || setInternalEditingSection;
   
   const scrollPositionRef = useRef<number>(0);
+  const formDataRef = useRef<Record<string, any>>(initialFormData || {});
+  
+  // Update form data ref when initialFormData changes (state restoration)
+  useEffect(() => {
+    if (initialFormData) {
+      formDataRef.current = { ...formDataRef.current, ...initialFormData };
+    }
+  }, [initialFormData]);
+  
+  // Notify parent of form data changes
+  const handleFormDataChange = (newData: Record<string, any>) => {
+    formDataRef.current = { ...formDataRef.current, ...newData };
+    onFormDataChange?.(formDataRef.current);
+  };
 
   // Auto-save functionality for live editing
   const saveProfile = async (profileData: any) => {
@@ -260,6 +278,8 @@ export default function LivePreviewEditor({
             user={user}
             onSave={(updatedData) => handleSectionSave(updatedData)}
             onCancel={() => setEditingSection(null)}
+            initialFormData={formDataRef.current[sectionId]}
+            onFormDataChange={(data) => handleFormDataChange({ [sectionId]: data })}
           />
         </div>
       );
@@ -321,6 +341,8 @@ export default function LivePreviewEditor({
                 onSave={(updatedData) => handleSectionSave(updatedData, () => setEditingSection(null))}
                 onCancel={() => setEditingSection(null)}
                 isInitialSetup={true}
+                initialFormData={formDataRef.current['basic']}
+                onFormDataChange={(data) => handleFormDataChange({ basic: data })}
               />
             </div>
           )}
