@@ -47,8 +47,8 @@ export function useTabStateManager() {
       const navigationEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
       const navEntry = navigationEntries[0];
       
-      // If page was reloaded or this is the first visit, don't restore scroll
-      if (navEntry && (navEntry.type === 'reload' || navEntry.type === 'navigate')) {
+      // If page was reloaded, don't restore scroll (navigate events are tab switches)
+      if (navEntry && navEntry.type === 'reload') {
         isInitialLoadRef.current = true;
         sessionStorage.removeItem('dashboardState'); // Clear on fresh load
       } else {
