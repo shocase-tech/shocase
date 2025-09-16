@@ -61,22 +61,22 @@ export default function LivePreviewEditor({ profile, onProfileUpdated, user }: L
   });
 
   // Persist state when user switches tabs
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') {
-        // Store scroll position when tab becomes hidden
-        scrollPositionRef.current = window.scrollY;
-      } else {
-        // Restore scroll position when tab becomes visible
-        setTimeout(() => {
-          window.scrollTo(0, scrollPositionRef.current);
-        }, 100);
-      }
-    };
+//  useEffect(() => {
+//    const handleVisibilityChange = () => {
+//      if (document.visibilityState === 'hidden') {
+//        // Store scroll position when tab becomes hidden
+//        scrollPositionRef.current = window.scrollY;
+//      } else {
+//        // Restore scroll position when tab becomes visible
+//        setTimeout(() => {
+//          window.scrollTo(0, scrollPositionRef.current);
+//        }, 100);
+//      }
+ //   };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, []);
+ //   document.addEventListener('visibilitychange', handleVisibilityChange);
+ //   return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+ // }, []);
 
   const handleSectionClick = (sectionId: string) => {
     setEditingSection(editingSection === sectionId ? null : sectionId);
