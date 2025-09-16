@@ -36,7 +36,7 @@ class DashboardStateManager {
     return DashboardStateManager.instance;
   }
 
-  private getStorageKey(): string {
+  public getStorageKey(): string {
     return `dashboardState_${window.location.pathname}`;
   }
 
@@ -79,7 +79,6 @@ class DashboardStateManager {
       });
 
       sessionStorage.setItem(this.getStorageKey(), JSON.stringify(stateToStore));
-      console.log('💾 StateManager: Complete state stored:', stateToStore);
     } catch (error) {
       console.error('❌ StateManager: Failed to store state:', error);
     }
@@ -93,21 +92,17 @@ class DashboardStateManager {
       }
 
       const state = JSON.parse(savedState) as DashboardState;
-      console.log('🔄 StateManager: Restoring state:', state);
 
-      // Only restore if this wasn't a full page reload
-      if (!this.isInitialLoadRef.current) {
-        // Restore scroll position
-        setTimeout(() => {
-          window.scrollTo({
-            top: state.scrollPosition,
-            behavior: 'smooth'
-          });
-        }, 100);
+      // Restore scroll position
+      setTimeout(() => {
+        window.scrollTo({
+          top: state.scrollPosition,
+          behavior: 'smooth'
+        });
+      }, 100);
 
-        // Restore editor states
-        this.restoreEditorStates(state.editorStates);
-      }
+      // Restore editor states
+      this.restoreEditorStates(state.editorStates);
 
       this.hasRestoredRef.current = true;
       return state;
@@ -238,53 +233,28 @@ export function useDashboardStateManager() {
 
   useEffect(() => {
     const handleLoad = () => {
-      const navigationEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
-      const navEntry = navigationEntries[0];
-      const timestamp = new Date().toISOString();
+      // Check if we have existing state in sessionStorage
+      const existingState = sessionStorage.getItem(stateManager.getStorageKey());
       
-      console.log(`🔍 [${timestamp}] StateManager: handleLoad() called`);
-      console.log(`🔍 [${timestamp}] Navigation entries:`, navigationEntries);
-      console.log(`🔍 [${timestamp}] Current navEntry:`, navEntry);
-      console.log(`🔍 [${timestamp}] Navigation type:`, navEntry?.type);
-      console.log(`🔍 [${timestamp}] Document visibility:`, document.visibilityState);
-      console.log(`🔍 [${timestamp}] Page URL:`, window.location.href);
-      
-      // Only clear state on actual page reloads, not tab returns
-      if (navEntry && navEntry.type === 'reload') {
-        console.log(`🚨 [${timestamp}] StateManager: CLEARING STATE due to page reload`);
-        console.log(`🚨 [${timestamp}] Full navEntry details:`, {
-          type: navEntry.type,
-          loadEventEnd: navEntry.loadEventEnd,
-          domContentLoadedEventEnd: navEntry.domContentLoadedEventEnd,
-          redirectCount: navEntry.redirectCount,
-          startTime: navEntry.startTime
-        });
+      // If there's no existing state, this is a genuine first load
+      if (!existingState) {
+        console.log('🔄 StateManager: No existing state found - first load');
         stateManager.setInitialLoad(true);
-        stateManager.clearState(); // Clear on fresh load
+        stateManager.clearState();
       } else {
-        console.log(`✅ [${timestamp}] StateManager: NOT clearing state, navigation type: ${navEntry?.type || 'undefined'} (preserving state for tab return)`);
+        // We have existing state, so this is likely a tab switch
+        console.log('✅ StateManager: Existing state found - preserving for tab return');
         stateManager.setInitialLoad(false);
       }
     };
 
     const handleVisibilityChange = () => {
-      const timestamp = new Date().toISOString();
-      const navigationEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
-      const navEntry = navigationEntries[0];
-      
-      console.log(`🔍 [${timestamp}] StateManager: Visibility changed to ${document.visibilityState}`);
-      console.log(`🔍 [${timestamp}] Navigation entries during visibility change:`, navigationEntries);
-      console.log(`🔍 [${timestamp}] Current navEntry during visibility:`, navEntry);
-      
       if (document.visibilityState === 'visible') {
         // Tab became visible - restore state
-        console.log(`👁️ [${timestamp}] StateManager: Tab became VISIBLE - attempting to restore state`);
         preventReloadRef.current = false;
-        const restoredState = stateManager.restoreState();
-        console.log(`👁️ [${timestamp}] StateManager: Restored state result:`, restoredState);
+        stateManager.restoreState();
       } else {
-        // Tab became hidden - store current state and prevent reload
-        console.log(`👁️ [${timestamp}] StateManager: Tab became HIDDEN - storing state`);
+        // Tab became hidden - store current state
         preventReloadRef.current = true;
         stateManager.storeState();
         

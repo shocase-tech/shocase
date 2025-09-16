@@ -14,7 +14,6 @@ import { cn } from "@/lib/utils";
 import LivePreviewEditor from "@/components/LivePreviewEditor";
 import FloatingProgressIndicator from "@/components/FloatingProgressIndicator";
 import { PreviewModal } from "@/components/PreviewModal";
-import { DashboardDebugPanel } from "@/components/DashboardDebugPanel";
 import { useScrollVisibility } from "@/hooks/useScrollVisibility";
 import { useScrollPosition } from "@/hooks/useScrollPosition";
 import { useDashboardStateManager } from "@/hooks/useDashboardStateManager";
@@ -531,9 +530,6 @@ export default function Dashboard() {
           profile={profile}
           onPublish={togglePublishStatus}
         />
-        
-        {/* Debug Panel */}
-        <DashboardDebugPanel />
       </main>
     </div>
   );
