@@ -53,55 +53,6 @@ export default function Dashboard() {
   // Tab state management for preventing tab reload issues
   useTabStateManager();
   
-  // DEBUG: Page load tracking
-  useEffect(() => {
-    console.log('🔄 Dashboard component mounted at:', new Date().toISOString());
-    const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
-    console.log('🔄 Navigation type:', navEntries[0]?.type || 'unknown');
-    
-    // Debug listeners for tab switching
-    const handleFocus = () => {
-      console.log('🎯 Tab focused at:', new Date().toISOString());
-    };
-    
-    const handleBlur = () => {
-      console.log('👋 Tab blurred at:', new Date().toISOString());
-    };
-    
-    const handleVisibilityChange = () => {
-      console.log('👁️ Visibility changed:', document.visibilityState, 'at:', new Date().toISOString());
-    };
-    
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      console.log('⚠️ Page unloading triggered by:', e.type, 'at:', new Date().toISOString());
-      // Only prevent if there are actual unsaved changes
-      const hasUnsavedChanges = document.querySelector('[data-unsaved="true"]');
-      if (hasUnsavedChanges) {
-        e.preventDefault();
-        return 'You have unsaved changes';
-      }
-    };
-    
-    // Track navigation events that might cause reloads
-    const handlePopState = (e: PopStateEvent) => {
-      console.log('🔙 PopState event:', e.state, 'at:', new Date().toISOString());
-    };
-    
-    window.addEventListener('focus', handleFocus);
-    window.addEventListener('blur', handleBlur);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    window.addEventListener('popstate', handlePopState);
-    
-    return () => {
-      window.removeEventListener('focus', handleFocus);
-      window.removeEventListener('blur', handleBlur);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      window.removeEventListener('popstate', handlePopState);
-    };
-  }, []);
-  
   // Refs for scroll visibility detection
   const progressCardRef = useRef<HTMLDivElement>(null);
   
@@ -110,35 +61,21 @@ export default function Dashboard() {
   
   // Alternative scroll-based approach for comparison
   const { scrollY, isAboveThreshold } = useScrollPosition({ threshold: 500 });
-  
-  // Debug logging for scroll visibility
-  console.log('📋 Dashboard scroll state:', {
-    hasProgressCardRef: !!progressCardRef.current,
-    isProgressCardVisible,
-    scrollY,
-    isAboveThreshold,
-    shouldShowFloating: isProgressCardVisible || isAboveThreshold
-  });
 
   useEffect(() => {
     const getSession = async () => {
-      console.log('🔐 Checking auth session...');
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) {
-        console.log('❌ No session found, navigating to auth');
         navigate("/auth");
         return;
       }
-      console.log('✅ Session found for user:', session.user.email);
       setUser(session.user);
     };
 
     getSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('🔐 Auth state changed:', event, session?.user?.email || 'no user');
       if (!session?.user) {
-        console.log('❌ Auth lost, navigating to auth');
         navigate("/auth");
         return;
       }
@@ -146,7 +83,6 @@ export default function Dashboard() {
     });
 
     return () => {
-      console.log('🧹 Cleaning up auth subscription');
       subscription.unsubscribe();
     };
   }, [navigate]);
@@ -255,12 +191,10 @@ export default function Dashboard() {
   };
 
   const handleProfileUpdated = useCallback((updatedData?: Partial<DashboardArtistProfile>) => {
-    console.log('📝 Profile updated locally:', Object.keys(updatedData || {}));
     // Update local state instead of refetching from database to prevent reloads
     if (updatedData && profile) {
       setProfile({ ...profile, ...updatedData });
     }
-    // CRITICAL: No fetchProfile() call to prevent page reloads
   }, [profile]);
 
   const togglePublishStatus = async () => {
@@ -280,16 +214,12 @@ export default function Dashboard() {
       let urlSlug = profile.url_slug;
 
       if (newStatus && !urlSlug) {
-        console.log("Generating URL slug for:", profile.artist_name);
         const { data: slugData, error: slugError } = await supabase
           .rpc('generate_url_slug', { artist_name: profile.artist_name });
         
         if (slugError) throw slugError;
         urlSlug = slugData;
-        console.log("Generated slug:", urlSlug);
       }
-
-      console.log("Updating profile publish status:", { newStatus, urlSlug });
 
       const { error } = await supabase
         .from('artist_profiles')
@@ -310,7 +240,6 @@ export default function Dashboard() {
           : "Your press kit is now private",
       });
     } catch (error: any) {
-      console.error("Toggle publish error:", error);
       toast({
         title: "Error",
         description: "Failed to update publish status: " + error.message,
@@ -346,7 +275,6 @@ export default function Dashboard() {
     if (profile.is_published) {
       // For published EPKs, open in new tab
       const publicUrl = `/${identifier}`;
-      console.log("Opening public EPK URL:", publicUrl);
       window.open(publicUrl, '_blank');
     } else {
       // For unpublished EPKs, show preview modal

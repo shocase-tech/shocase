@@ -14,12 +14,6 @@ export function useScrollPosition(options: UseScrollPositionOptions = {}) {
       const currentScrollY = window.scrollY;
       setScrollY(currentScrollY);
       setIsAboveThreshold(currentScrollY > threshold);
-      
-      console.log('📊 Scroll Position Update:', {
-        scrollY: currentScrollY,
-        threshold,
-        isAboveThreshold: currentScrollY > threshold
-      });
     };
 
     // Initial check
@@ -32,8 +26,6 @@ export function useScrollPosition(options: UseScrollPositionOptions = {}) {
       window.removeEventListener('scroll', updateScrollPosition);
     };
   }, [threshold]);
-
-  console.log('🎯 useScrollPosition: Current state:', { scrollY, isAboveThreshold, threshold });
 
   return { scrollY, isAboveThreshold };
 }

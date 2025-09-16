@@ -58,16 +58,12 @@ export function useTabStateManager() {
 
     // Handle visibility changes (tab switching)
     const handleVisibilityChange = () => {
-      console.log('👁️ Tab visibility changed to:', document.visibilityState);
-      
       if (document.visibilityState === 'visible') {
         // Tab became visible - restore state
-        console.log('🔄 Tab became visible, restoring state');
         preventReloadRef.current = false;
         restoreState();
       } else {
         // Tab became hidden - store current state and prevent reload
-        console.log('💾 Tab became hidden, storing state');
         preventReloadRef.current = true;
         storeState();
         
@@ -80,13 +76,11 @@ export function useTabStateManager() {
 
     // Handle before unload (page closing/refreshing)
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      console.log('🛡️ beforeunload triggered, storing state');
       storeState();
       
       // Prevent accidental reloads during tab switching
       if (preventReloadRef.current) {
         e.preventDefault();
-        console.log('🚫 Prevented accidental reload');
       }
     };
 
