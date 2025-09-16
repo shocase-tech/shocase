@@ -16,7 +16,7 @@ import FloatingProgressIndicator from "@/components/FloatingProgressIndicator";
 import { PreviewModal } from "@/components/PreviewModal";
 import { useScrollVisibility } from "@/hooks/useScrollVisibility";
 import { useScrollPosition } from "@/hooks/useScrollPosition";
-import { useTabStateManager } from "@/hooks/useTabStateManager";
+import { useDashboardStateManager } from "@/hooks/useDashboardStateManager";
 
 interface DashboardArtistProfile {
   id: string;
@@ -50,8 +50,14 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  // Tab state management for preventing tab reload issues
-  useTabStateManager();
+  // Enhanced dashboard state management
+  const {
+    storeState,
+    restoreState,
+    updateProfileData,
+    updateEditingSection,
+    getEditingSection
+  } = useDashboardStateManager();
   
   // Refs for scroll visibility detection
   const progressCardRef = useRef<HTMLDivElement>(null);
@@ -193,9 +199,12 @@ export default function Dashboard() {
   const handleProfileUpdated = useCallback((updatedData?: Partial<DashboardArtistProfile>) => {
     // Update local state instead of refetching from database to prevent reloads
     if (updatedData && profile) {
-      setProfile({ ...profile, ...updatedData });
+      const newProfile = { ...profile, ...updatedData };
+      setProfile(newProfile);
+      // Update state manager with new profile data
+      updateProfileData(newProfile);
     }
-  }, [profile]);
+  }, [profile, updateProfileData]);
 
   const togglePublishStatus = async () => {
     if (!profile || !user) return;

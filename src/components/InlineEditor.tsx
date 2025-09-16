@@ -19,6 +19,7 @@ import PhotoUpload from "@/components/PhotoUpload";
 import PrivateImage from "@/components/PrivateImage";
 import { ImageStorageService } from "@/lib/imageStorage";
 import { useClickOutside } from "@/hooks/useClickOutside";
+import { useDashboardStateManager } from "@/hooks/useDashboardStateManager";
 
 interface InlineEditorProps {
   sectionId: string;
@@ -34,6 +35,32 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
   const [loading, setLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
+  
+  // Enhanced state management
+  const { registerEditor, unregisterEditor, updateEditorActiveState } = useDashboardStateManager();
+  const editorId = `inline-editor-${sectionId}`;
+
+  // Register this editor with the state manager
+  useEffect(() => {
+    const registration = {
+      editorId,
+      getState: () => formData,
+      setState: (state: any) => {
+        console.log(`🔄 InlineEditor: Restoring state for ${sectionId}:`, state);
+        setFormData(state);
+      },
+      isActive: true
+    };
+    
+    registerEditor(registration);
+    updateEditorActiveState(editorId, true);
+    
+    return () => {
+      console.log(`🗑️ InlineEditor: Unregistering ${editorId}`);
+      updateEditorActiveState(editorId, false);
+      unregisterEditor(editorId);
+    };
+  }, [registerEditor, unregisterEditor, updateEditorActiveState, editorId, formData]);
 
   useEffect(() => {
     if (profile) {
@@ -173,7 +200,7 @@ export default function InlineEditor({ sectionId, profile, user, onSave, onCance
     }
   }, [isSaving, onCancel, formData]);
   
-  // Click outside detection
+  // Click outside detection with enhanced drag operation handling
   const editorRef = useClickOutside<HTMLDivElement>(handleAutoSaveAndClose);
 
   const addGenre = (genre: string) => {
