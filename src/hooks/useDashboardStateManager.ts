@@ -196,10 +196,17 @@ class DashboardStateManager {
   };
 
   public clearState = (): void => {
+    const timestamp = new Date().toISOString();
+    const stackTrace = new Error().stack;
+    console.log(`🚨 [${timestamp}] StateManager: CLEARING STATE - Called from:`);
+    console.log(`🚨 [${timestamp}] Stack trace:`, stackTrace);
+    console.log(`🚨 [${timestamp}] Storage key:`, this.getStorageKey());
+    console.log(`🚨 [${timestamp}] Registered editors before clear:`, Array.from(this.registeredEditors.keys()));
+    
     sessionStorage.removeItem(this.getStorageKey());
     this.registeredEditors.clear();
     this.hasRestoredRef.current = false;
-    console.log('🗑️ StateManager: State cleared');
+    console.log(`🗑️ [${timestamp}] StateManager: State cleared completely`);
   };
 
   public updateProfileData = (profileData: any): void => {
@@ -233,23 +240,51 @@ export function useDashboardStateManager() {
     const handleLoad = () => {
       const navigationEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
       const navEntry = navigationEntries[0];
+      const timestamp = new Date().toISOString();
+      
+      console.log(`🔍 [${timestamp}] StateManager: handleLoad() called`);
+      console.log(`🔍 [${timestamp}] Navigation entries:`, navigationEntries);
+      console.log(`🔍 [${timestamp}] Current navEntry:`, navEntry);
+      console.log(`🔍 [${timestamp}] Navigation type:`, navEntry?.type);
+      console.log(`🔍 [${timestamp}] Document visibility:`, document.visibilityState);
+      console.log(`🔍 [${timestamp}] Page URL:`, window.location.href);
       
       // If page was reloaded or this is the first visit, don't restore scroll
       if (navEntry && (navEntry.type === 'reload' || navEntry.type === 'navigate')) {
+        console.log(`🚨 [${timestamp}] StateManager: CLEARING STATE due to navigation type: ${navEntry.type}`);
+        console.log(`🚨 [${timestamp}] Full navEntry details:`, {
+          type: navEntry.type,
+          loadEventEnd: navEntry.loadEventEnd,
+          domContentLoadedEventEnd: navEntry.domContentLoadedEventEnd,
+          redirectCount: navEntry.redirectCount,
+          startTime: navEntry.startTime
+        });
         stateManager.setInitialLoad(true);
         stateManager.clearState(); // Clear on fresh load
       } else {
+        console.log(`✅ [${timestamp}] StateManager: NOT clearing state, navigation type: ${navEntry?.type || 'undefined'}`);
         stateManager.setInitialLoad(false);
       }
     };
 
     const handleVisibilityChange = () => {
+      const timestamp = new Date().toISOString();
+      const navigationEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+      const navEntry = navigationEntries[0];
+      
+      console.log(`🔍 [${timestamp}] StateManager: Visibility changed to ${document.visibilityState}`);
+      console.log(`🔍 [${timestamp}] Navigation entries during visibility change:`, navigationEntries);
+      console.log(`🔍 [${timestamp}] Current navEntry during visibility:`, navEntry);
+      
       if (document.visibilityState === 'visible') {
         // Tab became visible - restore state
+        console.log(`👁️ [${timestamp}] StateManager: Tab became VISIBLE - attempting to restore state`);
         preventReloadRef.current = false;
-        stateManager.restoreState();
+        const restoredState = stateManager.restoreState();
+        console.log(`👁️ [${timestamp}] StateManager: Restored state result:`, restoredState);
       } else {
         // Tab became hidden - store current state and prevent reload
+        console.log(`👁️ [${timestamp}] StateManager: Tab became HIDDEN - storing state`);
         preventReloadRef.current = true;
         stateManager.storeState();
         
