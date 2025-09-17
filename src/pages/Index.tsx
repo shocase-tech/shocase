@@ -1,4 +1,5 @@
 import HeroSection from "@/components/HeroSection";
+import ActionsSection from "@/components/ActionsSection";
 import FeaturesSection from "@/components/FeaturesSection";
 import CTASection from "@/components/CTASection";
 import Header from "@/components/Header";
@@ -19,6 +20,7 @@ const Index = () => {
     <main className="min-h-screen bg-gradient-dark">
       <Header />
       <HeroSection />
+      <ActionsSection />
       <FeaturesSection />
       <CTASection />
     </main>
