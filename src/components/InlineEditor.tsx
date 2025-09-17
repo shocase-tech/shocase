@@ -234,9 +234,7 @@ export default function InlineEditor({
 
   const [bioConfig, setBioConfig] = useState({
     style: '',
-    genres: '',
     influences: '',
-    location: '',
     notable_performances: '',
     musical_background: ''
   });
@@ -288,9 +286,10 @@ export default function InlineEditor({
 
       const requestBody = {
         artist_name: formData.artist_name,
-        genre: bioConfig.genres || formData.genre,
+        genre: Array.isArray(formData.genre) ? formData.genre.join(', ') : formData.genre,
+        performance_type: formData.performance_type,
         influences: bioConfig.influences,
-        location: bioConfig.location,
+        location: formData.location,
         vibe: bioConfig.style,
         notable_performances: bioConfig.notable_performances,
         musical_background: bioConfig.musical_background,
@@ -674,17 +673,7 @@ export default function InlineEditor({
             </div>
 
             {/* AI Configuration Inputs */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="ai_genres">Genres</Label>
-                <Input
-                  id="ai_genres"
-                  value={bioConfig.genres}
-                  onChange={(e) => setBioConfig({ ...bioConfig, genres: e.target.value })}
-                  placeholder="Electronic, Ambient, Jazz"
-                />
-              </div>
-              
+            <div className="grid grid-cols-1 gap-4">
               <div>
                 <Label htmlFor="ai_influences">Musical Influences</Label>
                 <Input
@@ -721,17 +710,6 @@ export default function InlineEditor({
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="ai_location">Location</Label>
-                <Input
-                  id="ai_location"
-                  value={bioConfig.location}
-                  onChange={(e) => setBioConfig({ ...bioConfig, location: e.target.value })}
-                  placeholder="Brooklyn, NY"
-                />
-              </div>
-            </div>
 
             {/* AI Action Buttons */}
             <div className="space-y-3">
