@@ -17,6 +17,7 @@ import appleMusicLightIcon from "@/assets/streaming/apple-music-light.svg";
 import tiktokIcon from "@/assets/social/tiktok-white.png";
 import instagramIcon from "@/assets/social/instagram-gradient.png";
 import PublicImage from "@/components/PublicImage";
+import { FeaturedTrackEmbed } from "@/components/FeaturedTrackEmbed";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { AllShowsModal } from "@/components/AllShowsModal";
@@ -41,7 +42,7 @@ interface SimpleProfile {
   blurb?: string;
   performance_type?: string;
   location?: string;
-  spotify_track_url?: string;
+  featured_track_url?: string;
 }
 
 export default function SimplePublicProfile() {
@@ -359,7 +360,7 @@ export default function SimplePublicProfile() {
                     <Star className="w-5 h-5 ml-2 group-hover:animate-spin" />
                   </a>
                 </Button>
-              ) : profile.spotify_track_url ? (
+              ) : profile.featured_track_url ? (
                 <Button 
                   variant="hero" 
                   size="lg" 
@@ -389,7 +390,7 @@ export default function SimplePublicProfile() {
                 </Button>
               )}
               
-              {profile.spotify_track_url && (
+              {profile.featured_track_url && (
                 <Button 
                   variant="glass" 
                   size="lg" 
@@ -560,20 +561,11 @@ export default function SimplePublicProfile() {
           </Card>
         </section>
 
-        {/* Spotify Track Section */}
-        {profile.spotify_track_url && (
-          <section id="spotify-player" className="mb-8 md:mb-16">
+        {/* Featured Track Section */}
+        {profile.featured_track_url && (
+          <section id="featured-track-player" className="mb-8 md:mb-16">
             <div className="w-full">
-              <iframe
-                src={profile.spotify_track_url.replace('open.spotify.com/track/', 'open.spotify.com/embed/track/')}
-                width="100%"
-                height="152"
-                frameBorder="0"
-                allowTransparency={true}
-                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                loading="lazy"
-                className="rounded-xl shadow-lg"
-              />
+              <FeaturedTrackEmbed trackUrl={profile.featured_track_url} />
             </div>
           </section>
         )}

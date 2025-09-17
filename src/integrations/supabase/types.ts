@@ -21,6 +21,7 @@ export type Database = {
           blurb: string | null
           contact_info: Json | null
           created_at: string
+          featured_track_url: string | null
           gallery_photos: Json[] | null
           genre: string | null
           hero_photo_url: string | null
@@ -37,7 +38,6 @@ export type Database = {
           profile_photo_url: string | null
           show_videos: string[] | null
           social_links: Json | null
-          spotify_track_url: string | null
           streaming_links: Json | null
           upcoming_shows: Json | null
           updated_at: string
@@ -50,6 +50,7 @@ export type Database = {
           blurb?: string | null
           contact_info?: Json | null
           created_at?: string
+          featured_track_url?: string | null
           gallery_photos?: Json[] | null
           genre?: string | null
           hero_photo_url?: string | null
@@ -66,7 +67,6 @@ export type Database = {
           profile_photo_url?: string | null
           show_videos?: string[] | null
           social_links?: Json | null
-          spotify_track_url?: string | null
           streaming_links?: Json | null
           upcoming_shows?: Json | null
           updated_at?: string
@@ -79,6 +79,7 @@ export type Database = {
           blurb?: string | null
           contact_info?: Json | null
           created_at?: string
+          featured_track_url?: string | null
           gallery_photos?: Json[] | null
           genre?: string | null
           hero_photo_url?: string | null
@@ -95,7 +96,6 @@ export type Database = {
           profile_photo_url?: string | null
           show_videos?: string[] | null
           social_links?: Json | null
-          spotify_track_url?: string | null
           streaming_links?: Json | null
           upcoming_shows?: Json | null
           updated_at?: string

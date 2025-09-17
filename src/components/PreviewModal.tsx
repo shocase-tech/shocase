@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket, Mail, Phone, Star, Quote, Play, Users, Award, TrendingUp } from "lucide-react";
 import PublicImage from "@/components/PublicImage";
+import { FeaturedTrackEmbed } from "@/components/FeaturedTrackEmbed";
 import tiktokIcon from "@/assets/social/tiktok-white.png";
 import instagramIcon from "@/assets/social/instagram-gradient.png";
 import { AllShowsModal } from "@/components/AllShowsModal";
@@ -171,7 +172,7 @@ export function PreviewModal({ open, onOpenChange, profile, onPublish }: Preview
               )}
 
               {/* CTA Buttons */}
-              <div className={`flex flex-col sm:flex-row gap-6 justify-center items-center ${!profile.spotify_track_url ? 'justify-center' : ''}`}>
+              <div className={`flex flex-col sm:flex-row gap-6 justify-center items-center ${!profile.featured_track_url ? 'justify-center' : ''}`}>
                 {profile.contact_info && (profile.contact_info as any).email && (
                   <Button variant="hero" size="lg" asChild className="group">
                     <a href={`mailto:${(profile.contact_info as any).email}`}>
@@ -182,7 +183,7 @@ export function PreviewModal({ open, onOpenChange, profile, onPublish }: Preview
                   </Button>
                 )}
                 
-                {profile.spotify_track_url && (
+                {profile.featured_track_url && (
                   <Button 
                     variant="glass" 
                     size="lg" 

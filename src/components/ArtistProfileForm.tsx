@@ -30,7 +30,7 @@ interface ArtistProfile {
   profile_photo_url?: string;
   performance_type?: 'Solo' | 'Duo' | 'Full Band';
   location?: string;
-  spotify_track_url?: string;
+  featured_track_url?: string;
   
   pdf_urls?: string[];
   hero_photo_url?: string;
@@ -63,7 +63,7 @@ export default function ArtistProfileForm({ profile, onSaved, userEmail, userPho
     tiktok: profile?.social_links?.tiktok || "",
     performance_type: profile?.performance_type || "",
     location: profile?.location || "",
-    spotify_track_url: profile?.spotify_track_url || "",
+    featured_track_url: profile?.featured_track_url || "",
     show_videos: profile?.show_videos || [],
     press_quotes: profile?.press_quotes || [],
     press_mentions: profile?.press_mentions || [],
@@ -102,7 +102,7 @@ export default function ArtistProfileForm({ profile, onSaved, userEmail, userPho
         genre: JSON.stringify(formData.genre),
         performance_type: formData.performance_type,
         location: formData.location,
-        spotify_track_url: formData.spotify_track_url,
+        featured_track_url: formData.featured_track_url,
         social_links: {
           website: formData.website,
           instagram: formData.instagram,
@@ -218,10 +218,13 @@ export default function ArtistProfileForm({ profile, onSaved, userEmail, userPho
     }
   };
 
-  // Spotify URL Validation
-  const isValidSpotifyUrl = (url: string): boolean => {
+  // Track URL Validation for multiple streaming services
+  const isValidTrackUrl = (url: string): boolean => {
     const spotifyPattern = /^https:\/\/open\.spotify\.com\/track\/[a-zA-Z0-9]+(\?.*)?$/;
-    return spotifyPattern.test(url);
+    const appleMusicPattern = /^https:\/\/music\.apple\.com\/.+$/;
+    const soundcloudPattern = /^https:\/\/(soundcloud\.com|on\.soundcloud\.com)\/.+$/;
+    
+    return spotifyPattern.test(url) || appleMusicPattern.test(url) || soundcloudPattern.test(url);
   };
 
   const updateField = (field: string, value: any) => {
@@ -614,27 +617,27 @@ export default function ArtistProfileForm({ profile, onSaved, userEmail, userPho
                 </p>
               </div>
 
-              {/* Spotify Track Embed - NEW */}
+              {/* Featured Track - NEW */}
               <div className="space-y-2">
-                <Label htmlFor="spotify_track_url" className="text-sm font-medium">
-                  Featured Spotify Track (Optional)
+                <Label htmlFor="featured_track_url" className="text-sm font-medium">
+                  Featured Track (Optional)
                 </Label>
                 <div className="relative">
                   <Music className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    id="spotify_track_url"
-                    placeholder="Paste Spotify track URL here (e.g., https://open.spotify.com/track/...)"
-                    value={formData.spotify_track_url || ""}
-                    onChange={(e) => updateField('spotify_track_url', e.target.value)}
+                    id="featured_track_url"
+                    placeholder="Paste track URL from Spotify, Apple Music, or SoundCloud"
+                    value={formData.featured_track_url || ""}
+                    onChange={(e) => updateField('featured_track_url', e.target.value)}
                     className="pl-10"
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  This track will be embedded on your EPK page for visitors to play
+                  Supports Spotify, Apple Music, and SoundCloud track links - will embed on your EPK page
                 </p>
-                {formData.spotify_track_url && !isValidSpotifyUrl(formData.spotify_track_url) && (
+                {formData.featured_track_url && !isValidTrackUrl(formData.featured_track_url) && (
                   <p className="text-xs text-red-500">
-                    Please enter a valid Spotify track URL
+                    Please enter a valid track URL from Spotify, Apple Music, or SoundCloud
                   </p>
                 )}
               </div>
@@ -655,7 +658,7 @@ export default function ArtistProfileForm({ profile, onSaved, userEmail, userPho
                   genre: JSON.stringify(formData.genre),
                   performance_type: formData.performance_type,
                   location: formData.location,
-                  spotify_track_url: formData.spotify_track_url,
+                  featured_track_url: formData.featured_track_url,
                   social_links: {
                     website: formData.website,
                     instagram: formData.instagram,

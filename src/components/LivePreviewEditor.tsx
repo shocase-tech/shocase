@@ -10,6 +10,7 @@ import GalleryEditor from "@/components/GalleryEditor";
 import MentionsEditor from "@/components/MentionsEditor";
 import ShowsEditor from "@/components/ShowsEditor";
 import SaveIndicator from "@/components/SaveIndicator";
+import { FeaturedTrackEmbed } from "@/components/FeaturedTrackEmbed";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
@@ -24,8 +25,8 @@ interface LivePreviewEditorProps {
   profile: {
     blurb?: string;
     performance_type?: 'Solo' | 'Duo' | 'Full Band';
-    location?: string;
-    spotify_track_url?: string;
+  location?: string;
+  featured_track_url?: string;
     [key: string]: any;
   };
   onProfileUpdated: (updatedData?: any) => void;
@@ -492,24 +493,11 @@ export default function LivePreviewEditor({
                   </div>
                 )}
                 
-                {/* Featured Spotify Track - Full width on mobile */}
-                {profile.spotify_track_url && (
+                {/* Featured Track - Full width on mobile */}
+                {profile.featured_track_url && (
                   <div className="mt-4">
                     <h4 className="text-sm font-medium mb-2">Featured Track</h4>
-                    <div className="bg-white/5 rounded-lg p-2 md:p-3 border border-white/10 w-full">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Music className="w-4 h-4 text-green-500" />
-                        <span className="text-sm font-medium">Spotify Track</span>
-                      </div>
-                      <iframe
-                        src={profile.spotify_track_url.replace('open.spotify.com/track/', 'open.spotify.com/embed/track/')}
-                        width="100%"
-                        height="80"
-                        frameBorder="0"
-                        allow="encrypted-media"
-                        className="rounded w-full"
-                      />
-                    </div>
+                    <FeaturedTrackEmbed trackUrl={profile.featured_track_url} />
                   </div>
                 )}
               </div>

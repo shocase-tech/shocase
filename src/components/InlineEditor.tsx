@@ -62,7 +62,7 @@ export default function InlineEditor({
       blurb: profile.blurb || '',
       performance_type: profile.performance_type || '',
       location: profile.location || '',
-      spotify_track_url: profile.spotify_track_url || '',
+      featured_track_url: profile.featured_track_url || '',
     } : {
       artist_name: '',
       bio: '',
@@ -77,7 +77,7 @@ export default function InlineEditor({
       blurb: '',
       performance_type: '',
       location: '',
-      spotify_track_url: '',
+      featured_track_url: '',
     });
     
     setFormData(initialData);
@@ -502,17 +502,17 @@ export default function InlineEditor({
         </div>
 
         <div className="space-y-4">
-          <h4 className="text-md font-medium mb-4">Featured Spotify Track</h4>
+          <h4 className="text-md font-medium mb-4">Featured Track</h4>
           <div>
-            <Label htmlFor="spotify_track_url">Spotify Track URL</Label>
+            <Label htmlFor="featured_track_url">Track URL</Label>
             <Input
-              id="spotify_track_url"
-              value={formData.spotify_track_url || ''}
-              onChange={(e) => setFormData({ ...formData, spotify_track_url: e.target.value })}
-              placeholder="https://open.spotify.com/track/..."
+              id="featured_track_url"
+              value={formData.featured_track_url || ''}
+              onChange={(e) => setFormData({ ...formData, featured_track_url: e.target.value })}
+              placeholder="Paste Spotify, Apple Music, or SoundCloud URL..."
             />
             <p className="text-xs text-muted-foreground mt-1">
-              Paste the URL of your favorite Spotify track to feature it on your profile
+              Supports Spotify, Apple Music, and SoundCloud track links
             </p>
           </div>
         </div>

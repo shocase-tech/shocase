@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket, Download, Mail, Phone, Star, Quote, Play, Users, Award, TrendingUp, X } from "lucide-react";
 import PublicImage from "@/components/PublicImage";
+import { FeaturedTrackEmbed } from "@/components/FeaturedTrackEmbed";
 import { Skeleton } from "@/components/ui/skeleton";
 import tiktokIcon from "@/assets/social/tiktok-white.png";
 import instagramIcon from "@/assets/social/instagram-gradient.png";
@@ -19,7 +20,7 @@ type PublicArtistProfile = {
   artist_name: string;
   bio: string | null;
   blurb: string | null;
-  spotify_track_url: string | null;
+  featured_track_url: string | null;
   genre: string | null;
   social_links: any;
   profile_photo_url: string | null;
@@ -382,17 +383,17 @@ export default function PublicArtistProfile() {
 
             {/* Single CTA Button on mobile, both on desktop */}
             <div className="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center items-center">
-              {profile.spotify_track_url && (
+              {profile.featured_track_url && (
                 <Button 
                   variant="glass" 
                   size="lg" 
                   className="group w-full sm:w-auto" 
                   onClick={() => {
-                    const spotifySection = document.getElementById('spotify-track');
-                    if (spotifySection) {
-                      spotifySection.scrollIntoView({ behavior: 'smooth' });
-                      // Try to auto-play the Spotify track
-                      const iframe = spotifySection.querySelector('iframe') as HTMLIFrameElement;
+                    const trackSection = document.getElementById('featured-track');
+                    if (trackSection) {
+                      trackSection.scrollIntoView({ behavior: 'smooth' });
+                      // Try to auto-play the track
+                      const iframe = trackSection.querySelector('iframe') as HTMLIFrameElement;
                       if (iframe) {
                         // Reload iframe with autoplay parameter
                         const currentSrc = iframe.src;
@@ -412,25 +413,15 @@ export default function PublicArtistProfile() {
           </section>
 
           <div className="container mx-auto px-4 py-8 md:py-12 max-w-7xl">
-            {/* Featured Spotify Track */}
-            {profile.spotify_track_url && (
-              <section id="spotify-track" className="mb-12 md:mb-16">
+            {profile.featured_track_url && (
+              <section id="featured-track" className="mb-12 md:mb-16">
                 <div className="glass-card border-glass p-4 md:p-8 rounded-xl">
                   <h2 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-center flex items-center justify-center gap-3">
-                    <Music className="w-6 md:w-8 h-6 md:h-8 text-green-500" />
+                    <Music className="w-6 md:w-8 h-6 md:h-8 text-primary" />
                     Featured Track
                   </h2>
                   <div className="max-w-2xl mx-auto">
-                    <iframe
-                      src={profile.spotify_track_url.replace('track/', 'embed/track/')}
-                      width="100%"
-                      height="352"
-                      frameBorder="0"
-                      allowTransparency={true}
-                      allow="encrypted-media"
-                      className="rounded-xl shadow-lg"
-                      title={`${profile.artist_name} featured track`}
-                    />
+                    <FeaturedTrackEmbed trackUrl={profile.featured_track_url} />
                   </div>
                 </div>
               </section>
