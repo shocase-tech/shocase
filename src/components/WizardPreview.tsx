@@ -17,7 +17,7 @@ const wizardSteps = [
   {
     icon: Camera,
     title: "Photos & Media",
-    description: "Upload hero image and press photos",
+    description: "Upload background image and press photos",
     status: "completed" as const,
     color: "text-primary"
   },

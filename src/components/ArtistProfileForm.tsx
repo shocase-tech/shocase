@@ -491,7 +491,7 @@ export default function ArtistProfileForm({ profile, onSaved, userEmail, userPho
                 />
                 <div className="flex justify-between items-center">
                   <p className="text-xs text-muted-foreground">
-                    Perfect for hero sections and quick introductions
+                    Perfect for background images and quick introductions
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {formData.blurb ? formData.blurb.split(' ').filter(w => w.length > 0).length : 0}/20 words
@@ -676,7 +676,7 @@ export default function ArtistProfileForm({ profile, onSaved, userEmail, userPho
               <div className="space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <h3 className="text-lg font-semibold mb-4">Profile & Hero Photos</h3>
+                    <h3 className="text-lg font-semibold mb-4">Profile & Background Photos</h3>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <FileUpload
@@ -727,17 +727,17 @@ export default function ArtistProfileForm({ profile, onSaved, userEmail, userPho
                       </div>
                       <div className="space-y-2">
                         <FileUpload
-                          label="Hero Photo"
+                          label="Background Photo"
                           accept="image/*"
                           onUpload={(file) => handleFileUpload(file, 'hero')}
                         />
                         {profile.hero_photo_url && (
                           <div className="relative group">
-                            <p className="text-sm text-muted-foreground mb-2">Hero Photo</p>
+                            <p className="text-sm text-muted-foreground mb-2">Background Photo</p>
                             <div className="relative">
                               <PrivateImage 
                                 storagePath={profile.hero_photo_url} 
-                                alt="Hero" 
+                                alt="Background image" 
                                 className="w-full h-24 object-cover rounded" 
                               />
                               <AlertDialog>
@@ -752,9 +752,9 @@ export default function ArtistProfileForm({ profile, onSaved, userEmail, userPho
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
                                   <AlertDialogHeader>
-                                    <AlertDialogTitle>Delete Hero Photo</AlertDialogTitle>
+                                    <AlertDialogTitle>Delete Background Photo</AlertDialogTitle>
                                     <AlertDialogDescription>
-                                      Are you sure you want to delete this hero photo? This action cannot be undone.
+                                      Are you sure you want to delete this background photo? This action cannot be undone.
                                     </AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>

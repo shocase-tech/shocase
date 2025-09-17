@@ -606,6 +606,7 @@ export default function Dashboard() {
             isVisible={isProgressCardVisible || isAboveThreshold}
             profile={profile}
             onTogglePublish={togglePublishStatus}
+            onShowPreview={() => setShowPreviewModal(true)}
           />
         )}
 

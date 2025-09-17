@@ -53,12 +53,12 @@ export default function ArtistProfileView({ profile }: ArtistProfileViewProps) {
   ]);
   return (
     <div className="space-y-6">
-      {/* Hero Section */}
+      {/* Background Image Section */}
       {profile.hero_photo_url && (
         <div className="relative h-48 md:h-64 rounded-lg overflow-hidden">
           <img
             src={profile.hero_photo_url}
-            alt="Hero"
+            alt="Background image"
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />

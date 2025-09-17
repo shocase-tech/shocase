@@ -358,14 +358,14 @@ export default function LivePreviewEditor({
 
   return (
     <div className="space-y-6">
-      {/* Hero Section */}
+      {/* Background Image Section */}
       {renderEditableSection(
-        'hero',
+        'background',
         profile.hero_photo_url ? (
           <div className="relative h-48 md:h-64 rounded-lg overflow-hidden">
             <PrivateImage
               storagePath={profile.hero_photo_url}
-              alt="Hero"
+              alt="Background image"
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -412,7 +412,7 @@ export default function LivePreviewEditor({
                   </div>
                 )}
 
-                {/* Contact info - Mobile optimized layout */}
+                 {/* Contact info - Mobile optimized layout */}
                 <div className="mt-4 space-y-1">
                   {profile.contact_info?.email && (
                     <div className="text-center md:text-left">
@@ -427,10 +427,30 @@ export default function LivePreviewEditor({
                     </div>
                   )}
                 </div>
+              </div>
+              {profile.profile_photo_url && (
+                <PrivateImage
+                  storagePath={profile.profile_photo_url}
+                  alt={profile.artist_name}
+                  className="w-32 h-32 rounded-full object-cover border-4 border-white/20 shadow-lg ml-4"
+                />
+              )}
+            </div>,
+            !!(profile.artist_name || profile.profile_photo_url)
+          )}
+        </CardHeader>
+
+        <CardContent className="space-y-6 md:space-y-8 px-3 md:px-6">
+          {/* Streaming Section */}
+          {renderEditableSection(
+            'streaming',
+            (profile.streaming_links && Object.keys(profile.streaming_links).length > 0) || profile.featured_track_url ? (
+              <div>
+                <h3 className="font-semibold mb-3">Streaming</h3>
                 
                 {/* Streaming Links */}
                 {profile.streaming_links && Object.keys(profile.streaming_links).length > 0 && (
-                  <div className="mt-4">
+                  <div className="mb-4">
                     <h4 className="text-sm font-medium mb-2">Listen</h4>
                     <div className="flex flex-wrap gap-2">
                       {profile.streaming_links.spotify && (
@@ -493,27 +513,18 @@ export default function LivePreviewEditor({
                   </div>
                 )}
                 
-                {/* Featured Track - Full width on mobile */}
+                {/* Featured Track */}
                 {profile.featured_track_url && (
-                  <div className="mt-4">
+                  <div>
                     <h4 className="text-sm font-medium mb-2">Featured Track</h4>
                     <FeaturedTrackEmbed trackUrl={profile.featured_track_url} />
                   </div>
                 )}
               </div>
-              {profile.profile_photo_url && (
-                <PrivateImage
-                  storagePath={profile.profile_photo_url}
-                  alt={profile.artist_name}
-                  className="w-32 h-32 rounded-full object-cover border-4 border-white/20 shadow-lg ml-4"
-                />
-              )}
-            </div>,
-            !!(profile.artist_name || profile.profile_photo_url)
+            ) : null,
+            !!((profile.streaming_links && Object.keys(profile.streaming_links).length > 0) || profile.featured_track_url)
           )}
-        </CardHeader>
 
-        <CardContent className="space-y-6 md:space-y-8 px-3 md:px-6">
           {/* Social Links - Enhanced with proper icons */}
           {renderEditableSection(
             'social',

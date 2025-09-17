@@ -256,13 +256,13 @@ export default function SimplePublicProfile() {
         </div>
       )}
       
-      {/* Hero Section */}
+      {/* Background Image Section */}
       <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
         {profile.hero_photo_url && (
           <div className="absolute inset-0">
             <PublicImage
               storagePath={profile.hero_photo_url}
-              alt={`${profile.artist_name} hero`}
+              alt={`${profile.artist_name} background image`}
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/80 to-background/95"></div>
@@ -274,7 +274,7 @@ export default function SimplePublicProfile() {
         <div className="absolute top-20 left-20 w-32 h-32 bg-primary/20 rounded-full blur-xl animate-pulse"></div>
         <div className="absolute bottom-20 right-20 w-48 h-48 bg-accent/20 rounded-full blur-2xl animate-pulse delay-1000"></div>
 
-        {/* Hero Content */}
+        {/* Background Image Content */}
         <div className="relative z-10 max-w-6xl mx-auto px-6 text-center">
           {/* Decorative icons - hidden on mobile */}
           <div className="hidden md:flex items-center justify-center mb-8">

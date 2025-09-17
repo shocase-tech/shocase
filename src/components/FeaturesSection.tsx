@@ -4,7 +4,7 @@ import { Camera, Video, Music, FileText, Calendar, Users, Download, Globe, Spark
 const features = [{
   icon: Camera,
   title: "Photo Management",
-  description: "Upload hero images and up to 7 press photos. Our system optimizes them for both web and print.",
+  description: "Upload background images and up to 7 press photos. Our system optimizes them for both web and print.",
   badge: "Visual",
   color: "text-primary"
 }, {

@@ -98,7 +98,7 @@ export default function InlineEditor({
     return storagePath;
   };
 
-  const handleHeroPhotoUpload = async (file: File) => {
+  const handleBackgroundImageUpload = async (file: File) => {
     if (!user) throw new Error('User not authenticated');
     const storagePath = await ImageStorageService.uploadFile(file, 'hero', user.id);
     setFormData({ ...formData, hero_photo_url: storagePath });
@@ -835,14 +835,14 @@ export default function InlineEditor({
     </div>
   );
 
-  const renderHeroSection = () => (
+  const renderBackgroundImageSection = () => (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Hero Image</h3>
+      <h3 className="text-lg font-semibold">Background Image</h3>
       {formData.hero_photo_url ? (
         <div className="relative inline-block">
           <PrivateImage
             storagePath={formData.hero_photo_url}
-            alt="Hero image"
+            alt="Background image"
             className="w-full max-w-md h-48 object-cover rounded-lg"
           />
           <Button
@@ -864,15 +864,15 @@ export default function InlineEditor({
                 const file = e.target.files?.[0];
                 if (file) {
                   try {
-                    await handleHeroPhotoUpload(file);
+                    await handleBackgroundImageUpload(file);
                     toast({
                       title: "Photo uploaded",
-                      description: "Hero image uploaded successfully",
+                      description: "Background image uploaded successfully",
                     });
                   } catch (error) {
                     toast({
                       title: "Upload failed",
-                      description: "Failed to upload hero image",
+                      description: "Failed to upload background image",
                       variant: "destructive",
                     });
                   }
@@ -881,7 +881,7 @@ export default function InlineEditor({
               className="hidden"
             />
             <Camera className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">Upload hero image</p>
+            <p className="text-sm text-muted-foreground">Upload background image</p>
           </Label>
         </div>
       )}
@@ -1001,8 +1001,8 @@ export default function InlineEditor({
         return renderBioSection();
       case 'social':
         return renderSocialSection();
-      case 'hero':
-        return renderHeroSection();
+      case 'background':
+        return renderBackgroundImageSection();
       case 'videos':
         return renderVideosSection();
       case 'gallery':
