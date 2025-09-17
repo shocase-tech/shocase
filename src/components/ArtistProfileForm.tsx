@@ -47,9 +47,11 @@ interface ArtistProfile {
 interface ArtistProfileFormProps {
   profile?: ArtistProfile | any; // Allow flexibility for different profile types
   onSaved: () => void;
+  userEmail?: string; // Auto-populate from signup
+  userPhone?: string; // Auto-populate from signup
 }
 
-export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFormProps) {
+export default function ArtistProfileForm({ profile, onSaved, userEmail, userPhone }: ArtistProfileFormProps) {
   const [formData, setFormData] = useState({
     artist_name: profile?.artist_name || "",
     bio: profile?.bio || "",
@@ -69,7 +71,10 @@ export default function ArtistProfileForm({ profile, onSaved }: ArtistProfileFor
     playlists: profile?.playlists || [],
     past_shows: profile?.past_shows || [],
     upcoming_shows: profile?.upcoming_shows || [],
-    contact_info: profile?.contact_info || { email: "", phone: "" },
+    contact_info: {
+      email: profile?.contact_info?.email || userEmail || "",
+      phone: profile?.contact_info?.phone || userPhone || "",
+    },
   });
   const [loading, setLoading] = useState(false);
   const [bioGenerating, setBioGenerating] = useState(false);

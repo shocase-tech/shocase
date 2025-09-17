@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import LivePreviewEditor from "@/components/LivePreviewEditor";
 import FloatingProgressIndicator from "@/components/FloatingProgressIndicator";
 import { PreviewModal } from "@/components/PreviewModal";
+import OnboardingWizard from "@/components/OnboardingWizard";
 import { useScrollVisibility } from "@/hooks/useScrollVisibility";
 import { useScrollPosition } from "@/hooks/useScrollPosition";
 import { useTabStateManager } from "@/hooks/useTabStateManager";
@@ -49,6 +50,8 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [editingSection, setEditingSection] = useState<string | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [userSignupData, setUserSignupData] = useState<{email?: string, phone?: string}>({});
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -99,6 +102,14 @@ export default function Dashboard() {
         return;
       }
       setUser(session.user);
+      
+      // Extract signup data from user metadata
+      if (session.user.user_metadata) {
+        setUserSignupData({
+          email: session.user.email,
+          phone: session.user.user_metadata.phone
+        });
+      }
     };
 
     getSession();
@@ -109,6 +120,14 @@ export default function Dashboard() {
         return;
       }
       setUser(session.user);
+      
+      // Extract signup data from user metadata
+      if (session.user.user_metadata) {
+        setUserSignupData({
+          email: session.user.email,
+          phone: session.user.user_metadata.phone
+        });
+      }
     });
 
     return () => {
@@ -156,8 +175,14 @@ export default function Dashboard() {
               data.gallery_photos as unknown as { url: string; label?: string }[]) : [],
         };
         setProfile(transformedProfile);
+        
+        // Check if onboarding is needed (new user without basic setup)
+        const needsOnboarding = !data.artist_name || !data.performance_type;
+        setShowOnboarding(needsOnboarding);
       } else {
+        // No profile exists, show onboarding
         setProfile(null);
+        setShowOnboarding(true);
       }
     } catch (error: any) {
       toast({
@@ -200,21 +225,28 @@ export default function Dashboard() {
   const getCompletionMilestones = () => {
     if (!profile) return [];
     
-    return [
-      { label: 'Add artist name', completed: !!profile.artist_name },
-      { label: 'Write your bio', completed: !!profile.bio },
-      { label: 'Upload profile photo', completed: !!profile.profile_photo_url },
-      { label: 'Add 2+ gallery photos', completed: (profile.gallery_photos?.length || 0) >= 2 },
-      { label: 'Add 1+ video', completed: (profile.show_videos?.length || 0) >= 1 },
-      { label: 'Add 1+ press mention', completed: (profile.press_mentions?.length || 0) >= 1 },
-      { label: 'Connect social links', completed: Object.keys(profile.social_links || {}).length > 0 }
+    const milestones = [
+      { key: 'artist_name', label: 'Artist name', weight: 15 },
+      { key: 'bio', label: 'Bio', weight: 20 },
+      { key: 'profile_photo_url', label: 'Profile photo', weight: 15 },
+      { key: 'gallery_photos', label: 'Gallery photos (min 2)', weight: 20, condition: (p: any) => p.gallery_photos?.length >= 2 },
+      { key: 'show_videos', label: 'Videos (min 1)', weight: 15, condition: (p: any) => p.show_videos?.length >= 1 },
+      { key: 'press_mentions', label: 'Press mentions (min 1)', weight: 10, condition: (p: any) => p.press_mentions?.length >= 1 },
+      { key: 'social_links', label: 'Social links', weight: 5, condition: (p: any) => Object.keys(p.social_links || {}).length > 0 }
     ];
+
+    return milestones.map(milestone => ({
+      ...milestone,
+      completed: milestone.condition 
+        ? milestone.condition(profile)
+        : !!profile[milestone.key as keyof DashboardArtistProfile]
+    }));
   };
 
   const handleSignOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      await supabase.auth.signOut();
+      navigate("/auth");
     } catch (error: any) {
       toast({
         title: "Error",
@@ -230,6 +262,25 @@ export default function Dashboard() {
       setProfile({ ...profile, ...updatedData });
     }
   }, [profile]);
+
+  const handleOnboardingComplete = (newProfile: any) => {
+    const transformedProfile: DashboardArtistProfile = {
+      ...newProfile,
+      genre: newProfile.genre ? (typeof newProfile.genre === 'string' ? JSON.parse(newProfile.genre) : newProfile.genre) : [],
+      press_quotes: [],
+      press_mentions: [],
+      past_shows: [],
+      upcoming_shows: [],
+      gallery_photos: [],
+    };
+    setProfile(transformedProfile);
+    setShowOnboarding(false);
+    
+    toast({
+      title: "Welcome to Shocase! 🎉",
+      description: "Your artist profile has been created. Let's build your EPK!",
+    });
+  };
 
   const togglePublishStatus = async () => {
     if (!profile || !user) return;
@@ -302,26 +353,33 @@ export default function Dashboard() {
   };
 
   const previewProfile = () => {
-    if (!profile) return;
-    
-    const identifier = profile.url_slug || profile.id;
-    
-    if (profile.is_published) {
+    if (profile?.is_published && profile.url_slug) {
       // For published EPKs, open in new tab
-      const publicUrl = `/${identifier}`;
-      window.open(publicUrl, '_blank');
+      window.open(`/${profile.url_slug}`, '_blank');
     } else {
       // For unpublished EPKs, show preview modal
       setShowPreviewModal(true);
     }
   };
 
+  // Show onboarding for new users
+  if (showOnboarding) {
+    return (
+      <OnboardingWizard 
+        user={user}
+        onComplete={handleOnboardingComplete}
+        userEmail={userSignupData.email}
+        userPhone={userSignupData.phone}
+      />
+    );
+  }
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Loading your dashboard...</p>
+      <div className="min-h-screen bg-gradient-dark flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="text-muted-foreground">Loading your dashboard...</p>
         </div>
       </div>
     );
@@ -353,53 +411,69 @@ export default function Dashboard() {
             <div className="flex items-center">
               <img 
                 src={showcaseIcon} 
-                alt="SHOCASE" 
-                className="w-6 h-6 md:hidden"
+                alt="Shocase" 
+                className="w-8 h-8 md:hidden"
               />
-              <h1 className="hidden md:block text-xl font-bold gradient-text">Press Kit Builder</h1>
+              <span className="hidden md:block text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                Shocase
+              </span>
             </div>
-            {getStatusBadge()}
+            
+            {/* Status Badge */}
+            <div className="flex items-center gap-2">
+              {getStatusBadge()}
+            </div>
           </div>
           
-          {/* Desktop: Show individual buttons */}
+          {/* Desktop Menu */}
           <div className="hidden md:flex items-center gap-3">
-            {profile && (
-              <Button
-                onClick={previewProfile}
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2"
-              >
-                <ExternalLink className="w-4 h-4" />
-                {profile.is_published ? "View EPK" : "Preview"}
-              </Button>
+            {profile?.is_published && (
+              <>
+                <Button
+                  onClick={copyPublicLink}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <Copy className="w-4 h-4" />
+                  Copy Link
+                </Button>
+                <Button
+                  onClick={previewProfile}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  View EPK
+                </Button>
+              </>
             )}
-            <Button variant="outline" size="sm" onClick={handleSignOut}>
+            <Button onClick={handleSignOut} variant="ghost" size="sm" className="flex items-center gap-2">
+              <Edit3 className="w-4 h-4" />
               Sign Out
             </Button>
           </div>
 
-          {/* Mobile: Show hamburger menu */}
+          {/* Mobile Dropdown Menu */}
           <div className="md:hidden">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="p-2">
+                <Button variant="outline" size="sm">
                   <Menu className="w-4 h-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 bg-popover/95 backdrop-blur-sm border border-white/10">
-                {profile && (
+              <DropdownMenuContent align="end" className="w-48">
+                {profile?.is_published && (
                   <>
                     <DropdownMenuItem onClick={previewProfile} className="flex items-center gap-2">
-                      <ExternalLink className="w-4 h-4" />
-                      {profile.is_published ? "View EPK" : "Preview"}
+                      <Globe className="w-4 h-4" />
+                      View EPK
                     </DropdownMenuItem>
-                    {profile.is_published && (
-                      <DropdownMenuItem onClick={copyPublicLink} className="flex items-center gap-2">
-                        <Copy className="w-4 h-4" />
-                        Copy Link
-                      </DropdownMenuItem>
-                    )}
+                    <DropdownMenuItem onClick={copyPublicLink} className="flex items-center gap-2">
+                      <Copy className="w-4 h-4" />
+                      Copy Link
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                   </>
                 )}

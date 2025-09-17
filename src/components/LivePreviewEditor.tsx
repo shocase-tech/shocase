@@ -34,6 +34,8 @@ interface LivePreviewEditorProps {
   onEditingSectionChange?: (section: string | null) => void;
   onFormDataChange?: (data: Record<string, any>) => void;
   initialFormData?: Record<string, any>;
+  userEmail?: string;
+  userPhone?: string;
 }
 
 export default function LivePreviewEditor({ 
@@ -43,7 +45,9 @@ export default function LivePreviewEditor({
   editingSection: externalEditingSection,
   onEditingSectionChange,
   onFormDataChange,
-  initialFormData
+  initialFormData,
+  userEmail,
+  userPhone
 }: LivePreviewEditorProps) {
   // Use external state if provided, otherwise fall back to internal state
   const [internalEditingSection, setInternalEditingSection] = useState<string | null>(null);
