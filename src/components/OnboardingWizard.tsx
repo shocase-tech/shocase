@@ -46,20 +46,17 @@ export default function OnboardingWizard({ user, onComplete, userEmail, userPhon
     {
       type: "Solo" as const,
       icon: User,
-      title: "Solo Artist",
-      description: "Just me, my music, and the stage"
+      title: "Solo Artist"
     },
     {
       type: "Duo" as const,
       icon: Users,
-      title: "Duo",
-      description: "Two artists, one sound"
+      title: "Duo"
     },
     {
       type: "Full Band" as const,
       icon: Music,
-      title: "Full Band",
-      description: "The whole crew bringing the energy"
+      title: "Full Band"
     }
   ];
 
@@ -277,38 +274,37 @@ export default function OnboardingWizard({ user, onComplete, userEmail, userPhon
 
               {/* Step 2: Performance Type */}
               <div className={cn(
-                "absolute inset-0 p-8 flex flex-col items-center justify-center transition-all duration-500 ease-in-out",
+                "absolute inset-0 p-4 md:p-8 flex flex-col items-center justify-center transition-all duration-500 ease-in-out overflow-y-auto",
                 currentStep === 2 
                   ? "translate-x-0 opacity-100" 
                   : currentStep < 2 
                     ? "translate-x-full opacity-0" 
                     : "-translate-x-full opacity-0"
               )}>
-                <h2 className="text-3xl font-bold mb-2 text-center">{STEPS[1].title}</h2>
-                <p className="text-muted-foreground text-center mb-8">{STEPS[1].subtitle}</p>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-2xl">
-                  {performanceOptions.map((option) => {
-                    const Icon = option.icon;
-                    return (
-                      <Button
-                        key={option.type}
-                        variant={performanceType === option.type ? "default" : "outline"}
-                        className={cn(
-                          "h-auto p-6 flex flex-col items-center gap-3 transition-all duration-200",
-                          performanceType === option.type 
-                            ? "bg-gradient-primary border-primary/50 shadow-glow" 
-                            : "hover:border-primary/30"
-                        )}
-                        onClick={() => setPerformanceType(option.type)}
-                      >
-                        <Icon className="w-8 h-8" />
-                        <div className="text-center">
-                          <div className="font-semibold">{option.title}</div>
-                          <div className="text-xs text-muted-foreground mt-1">{option.description}</div>
-                        </div>
-                      </Button>
-                    );
-                  })}
+                <div className="flex flex-col items-center w-full max-w-2xl">
+                  <h2 className="text-3xl font-bold mb-2 text-center">{STEPS[1].title}</h2>
+                  <p className="text-muted-foreground text-center mb-8">{STEPS[1].subtitle}</p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+                    {performanceOptions.map((option) => {
+                      const Icon = option.icon;
+                      return (
+                        <Button
+                          key={option.type}
+                          variant={performanceType === option.type ? "default" : "outline"}
+                          className={cn(
+                            "h-auto p-8 flex flex-col items-center gap-4 transition-all duration-200",
+                            performanceType === option.type 
+                              ? "bg-gradient-primary border-primary/50 shadow-glow" 
+                              : "hover:border-primary/30"
+                          )}
+                          onClick={() => setPerformanceType(option.type)}
+                        >
+                          <Icon className="w-12 h-12" />
+                          <div className="text-lg font-semibold">{option.title}</div>
+                        </Button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
 
@@ -325,13 +321,15 @@ export default function OnboardingWizard({ user, onComplete, userEmail, userPhon
                 <h2 className="text-3xl font-bold mb-2 text-center">{STEPS[2].title}</h2>
                 <p className="text-muted-foreground text-center mb-8">{STEPS[2].subtitle}</p>
                 <div className="w-full max-w-md">
-                  <GenreInput
-                    genres={genres}
-                    onChange={(newGenres) => setGenres(newGenres.slice(0, 5))}
-                    placeholder="Add genres (max 5)"
-                  />
+                  {genres.length < 5 && (
+                    <GenreInput
+                      genres={genres}
+                      onChange={(newGenres) => setGenres(newGenres.slice(0, 5))}
+                      placeholder="Type genre and press Enter"
+                    />
+                  )}
                   <p className="text-xs text-muted-foreground mt-2 text-center">
-                    {genres.length}/5 genres • You can always change these later
+                    Press Enter to add genre • {genres.length}/5 genres
                   </p>
                 </div>
               </div>

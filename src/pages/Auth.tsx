@@ -9,12 +9,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import CountryCodeSelector from "@/components/CountryCodeSelector";
 
 export default function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [countryCode, setCountryCode] = useState("+1");
   const [birthday, setBirthday] = useState("");
   const [loading, setLoading] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
@@ -153,7 +155,7 @@ export default function Auth() {
           emailRedirectTo: redirectUrl,
           data: {
             birthday,
-            ...(phoneNumber && { phone: phoneNumber })
+            ...(phoneNumber && { phone: `${countryCode}${phoneNumber}` })
           }
         }
       };
@@ -344,17 +346,19 @@ export default function Auth() {
                   <div className="space-y-2">
                     <Label htmlFor="phone-number">Phone Number <span className="text-muted-foreground">(optional)</span></Label>
                     <div className="flex">
-                      <div className="flex items-center px-3 py-2 bg-muted/50 border border-r-0 rounded-l-md border-input">
-                        <span className="text-sm text-muted-foreground">+1</span>
-                      </div>
+                      <CountryCodeSelector
+                        value={countryCode}
+                        onChange={setCountryCode}
+                        className="rounded-r-none border-r-0"
+                      />
                       <Input
                         id="phone-number"
                         type="tel"
                         value={phoneNumber}
                         onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
-                        placeholder="(555) 123-4567"
+                        placeholder="123-456-7890"
                         className="rounded-l-none transition-all duration-200 focus:ring-2 focus:ring-primary/50"
-                        maxLength={10}
+                        maxLength={15}
                       />
                     </div>
                   </div>
