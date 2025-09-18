@@ -136,7 +136,7 @@ const NewExperienceSection = () => {
                     transform: `translateY(${(1 - actionsAnim.elevateOpacity) * 20}px)`,
                   }}
                 >
-                  <h2 className="text-7xl lg:text-8xl xl:text-9xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                  <h2 className="text-8xl lg:text-9xl xl:text-[10rem] font-bold bg-gradient-primary bg-clip-text text-transparent">
                     elevate
                   </h2>
                 </div>
@@ -148,7 +148,7 @@ const NewExperienceSection = () => {
                     transform: `translateY(${(1 - actionsAnim.bookShowsOpacity) * 20}px)`,
                   }}
                 >
-                  <h2 className="text-7xl lg:text-8xl xl:text-9xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                  <h2 className="text-8xl lg:text-9xl xl:text-[10rem] font-bold bg-gradient-primary bg-clip-text text-transparent">
                     book shows
                   </h2>
                 </div>
@@ -160,7 +160,7 @@ const NewExperienceSection = () => {
                     transform: `translateY(${(1 - actionsAnim.buildBrandOpacity) * 20}px)`,
                   }}
                 >
-                  <h2 className="text-7xl lg:text-8xl xl:text-9xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                  <h2 className="text-8xl lg:text-9xl xl:text-[10rem] font-bold bg-gradient-primary bg-clip-text text-transparent">
                     build your brand
                   </h2>
                 </div>
