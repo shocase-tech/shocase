@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { useToast, toast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { X, Save, Lightbulb, Upload, Camera, Loader2 } from "lucide-react";
 import GenreInput from "@/components/GenreInput";
@@ -19,6 +19,7 @@ import PhotoUpload from "@/components/PhotoUpload";
 import PrivateImage from "@/components/PrivateImage";
 import { ImageStorageService } from "@/lib/imageStorage";
 import { useClickOutside } from "@/hooks/useClickOutside";
+import { BioPreviewModal } from "./BioPreviewModal";
 
 interface InlineEditorProps {
   sectionId: string;
@@ -243,6 +244,7 @@ export default function InlineEditor({
   const [lastGenerationTime, setLastGenerationTime] = useState(0);
   const GENERATION_COOLDOWN = 3000; // 3 seconds between requests
   const [generatedBioPreview, setGeneratedBioPreview] = useState('');
+  const [bioModalOpen, setBioModalOpen] = useState(false);
   
   // Character counter for bio
   const bioWordCount = formData.bio ? formData.bio.trim().split(/\s+/).filter(word => word.length > 0).length : 0;
@@ -332,9 +334,10 @@ export default function InlineEditor({
 
       if (data?.bio) {
         setGeneratedBioPreview(data.bio);
+        setBioModalOpen(true);
         toast({
           title: "Bio generated!",
-          description: `Your ${isRemix ? 'remixed' : 'new'} bio has been created. Review it below.`,
+          description: `Your ${isRemix ? 'remixed' : 'new'} bio has been created. Review it in the preview.`,
         });
       } else {
         throw new Error('No bio content received from the API');
@@ -719,47 +722,24 @@ export default function InlineEditor({
             </div>
           </div>
 
-          {/* Generated Bio Preview */}
-          {generatedBioPreview && (
-            <div className="space-y-4 p-4 border rounded-lg bg-background">
-              <div className="flex items-center justify-between">
-                <h5 className="font-medium">Generated Bio Preview</h5>
-                <div className="text-xs text-muted-foreground">
-                  {generatedBioPreview.trim().split(/\s+/).length} words
-                </div>
-              </div>
-              
-              <div className="text-sm leading-relaxed p-3 bg-muted/30 rounded border-l-4 border-primary">
-                {generatedBioPreview}
-              </div>
-              
-              <div className="flex gap-3">
-                <Button 
-                  onClick={() => {
-                    setFormData({ ...formData, bio: generatedBioPreview });
-                    setGeneratedBioPreview('');
-                    toast({
-                      title: "Bio applied!",
-                      description: "The generated bio has been set as your artist bio.",
-                    });
-                  }}
-                  className="flex-1"
-                >
-                  Use This Bio
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => generateBio(false)}
-                  disabled={generatingBio}
-                  className="flex-1"
-                >
-                  Regenerate
-                </Button>
-              </div>
-            </div>
-          )}
         </TabsContent>
       </Tabs>
+
+      <BioPreviewModal
+        isOpen={bioModalOpen}
+        onClose={() => setBioModalOpen(false)}
+        generatedBio={generatedBioPreview}
+        onUseBio={(bio) => {
+          setFormData({ ...formData, bio });
+          setBioMode('manual');
+          toast({
+            title: "Bio applied!",
+            description: "The bio has been set and you're now in manual editing mode.",
+          });
+        }}
+        onRegenerate={() => generateBio(formData.bio?.trim())}
+        isRegenerating={generatingBio}
+      />
     </div>
   );
 
