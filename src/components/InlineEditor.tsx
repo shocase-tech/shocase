@@ -491,37 +491,6 @@ export default function InlineEditor({
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-4">
-          <h4 className="text-md font-medium mb-4">Contact Information</h4>
-          <div>
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={formData.contact_info?.email || ''}
-              onChange={(e) => setFormData({
-                ...formData,
-                contact_info: { ...formData.contact_info, email: e.target.value }
-              })}
-              placeholder="booking@artist.com"
-            />
-          </div>
-          <div>
-            <Label htmlFor="phone">Phone</Label>
-            <Input
-              id="phone"
-              type="tel"
-              value={formData.contact_info?.phone || ''}
-              onChange={(e) => setFormData({
-                ...formData,
-                contact_info: { ...formData.contact_info, phone: e.target.value }
-              })}
-              placeholder="+1 (555) 123-4567"
-            />
-          </div>
-        </div>
-      </div>
 
     </div>
   );
@@ -992,6 +961,8 @@ export default function InlineEditor({
         return renderBioSection();
       case 'social':
         return renderSocialSection();
+      case 'streaming':
+        return renderStreamingSection();
       case 'background':
         return renderBackgroundImageSection();
       case 'videos':
