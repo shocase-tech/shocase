@@ -82,8 +82,20 @@ const NewExperienceSection = () => {
   return (
     <section 
       ref={elementRef}
-      className="relative min-h-[200vh] bg-gradient-to-br from-background via-background/95 to-muted/20"
+      className="relative min-h-[200vh] bg-gradient-dark"
     >
+      {/* Ambient floating elements for visual continuity */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Floating orbs */}
+        <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-primary/5 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/3 right-1/4 w-24 h-24 bg-accent/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-1/2 right-1/3 w-20 h-20 bg-primary/3 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '4s' }} />
+        
+        {/* Subtle gradient overlays */}
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary/2 via-transparent to-accent/2 opacity-50" />
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-tl from-muted/5 via-transparent to-transparent" />
+      </div>
+
       {/* Scroll Progress Indicator */}
       {isLocked && (
         <div className="fixed top-4 right-4 z-50 bg-primary/10 backdrop-blur-sm rounded-full px-3 py-1 text-sm text-primary border border-primary/20">
@@ -95,7 +107,7 @@ const NewExperienceSection = () => {
       <div className="sticky top-0 h-screen overflow-hidden">
         {/* PHASE 1: Actions Section */}
         {currentPhase === 0 && (
-          <div className="absolute inset-0 flex items-center bg-gradient-to-br from-background via-background/95 to-muted/20">
+          <div className="absolute inset-0 flex items-center">
             {/* Microphone - Better sized, bottom-right positioned with bottom cropped */}
             <div 
               className="absolute -bottom-10 -right-20 pointer-events-none transition-opacity duration-300 overflow-hidden"
@@ -159,7 +171,7 @@ const NewExperienceSection = () => {
 
         {/* PHASE 2: Message Section */}
         {currentPhase === 1 && (
-          <div className="absolute inset-0 bg-black flex items-center justify-center">
+          <div className="absolute inset-0 flex items-center justify-center">
             <div 
               className="text-center transition-all duration-500 ease-out"
               style={{
@@ -184,7 +196,7 @@ const NewExperienceSection = () => {
 
         {/* PHASE 3: Features Grid Section */}
         {currentPhase === 2 && (
-          <div className="absolute inset-0 py-24 px-6 bg-gradient-to-b from-background to-secondary/20">
+          <div className="absolute inset-0 py-24 px-6">
             <div className="max-w-7xl mx-auto h-full flex flex-col justify-center">
               <div 
                 className="text-center mb-16 transition-all duration-500"
