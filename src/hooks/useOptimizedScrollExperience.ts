@@ -17,8 +17,8 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
   const lastScrollTimeRef = useRef(0);
   const animationFrameRef = useRef<number>();
   
-  // Total scroll distance for the entire experience
-  const totalScrollDistance = 3000;
+  // Total scroll distance for the entire experience (reduced for smoother control)
+  const totalScrollDistance = 2000;
   
   // Throttled scroll handler for better performance
   const updateScrollProgress = useCallback(() => {
@@ -36,12 +36,18 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
     const elementInView = rect.top < windowHeight && rect.bottom > 0;
     const triggerPoint = windowHeight * threshold;
     
-    if (elementInView && rect.top <= triggerPoint && !isLockedRef.current) {
-      // Lock scroll
+    if (elementInView && rect.top <= 0 && !isLockedRef.current) {
+      // Lock scroll when element reaches top of screen
       isLockedRef.current = true;
       setIsLocked(true);
       document.body.style.overflow = 'hidden';
       accumulatedScrollRef.current = 0;
+      // Prevent any hero section bleed-through
+      element.style.position = 'fixed';
+      element.style.top = '0';
+      element.style.left = '0';
+      element.style.right = '0';
+      element.style.zIndex = '50';
     }
   }, [threshold]);
   
@@ -67,6 +73,14 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
       isLockedRef.current = false;
       setIsLocked(false);
       document.body.style.overflow = 'unset';
+      // Reset positioning
+      if (elementRef.current) {
+        elementRef.current.style.position = 'relative';
+        elementRef.current.style.top = 'unset';
+        elementRef.current.style.left = 'unset';
+        elementRef.current.style.right = 'unset';
+        elementRef.current.style.zIndex = 'unset';
+      }
     }
     
     // Unlock when at beginning and scrolling up
@@ -74,6 +88,14 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
       isLockedRef.current = false;
       setIsLocked(false);
       document.body.style.overflow = 'unset';
+      // Reset positioning
+      if (elementRef.current) {
+        elementRef.current.style.position = 'relative';
+        elementRef.current.style.top = 'unset';
+        elementRef.current.style.left = 'unset';
+        elementRef.current.style.right = 'unset';
+        elementRef.current.style.zIndex = 'unset';
+      }
     }
   }, [totalScrollDistance]);
   
@@ -90,28 +112,59 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
     };
   }, [scrollProgress]);
   
-  // Phase 2: Message animation (33-67%)
+  // Phase 2: Message animation (33-67%) - slower movement with center pause
   const getMessageAnimation = useCallback(() => {
-    if (scrollProgress < 0.33) return { horizontalPosition: -100 };
-    if (scrollProgress > 0.67) return { horizontalPosition: 100 };
+    if (scrollProgress < 0.33) return { horizontalPosition: -100, opacity: 0 };
+    if (scrollProgress > 0.67) return { horizontalPosition: 100, opacity: 0 };
     
     const phaseProgress = (scrollProgress - 0.33) / 0.34;
+    let horizontalPosition = -100;
+    
+    if (phaseProgress < 0.4) {
+      // Move from left to center (slower)
+      horizontalPosition = -100 + (phaseProgress / 0.4) * 100; // -100 to 0
+    } else if (phaseProgress < 0.6) {
+      // Hold in center
+      horizontalPosition = 0;
+    } else {
+      // Move from center to right (slower)
+      horizontalPosition = ((phaseProgress - 0.6) / 0.4) * 100; // 0 to 100
+    }
+    
     return {
-      horizontalPosition: -100 + (phaseProgress * 200), // -100 to +100
+      horizontalPosition,
+      opacity: 1,
     };
   }, [scrollProgress]);
   
-  // Phase 3: Features animation (67-100%)
+  // Phase 3: Features animation (67-100%) - visible throughout with staggered entry
   const getFeatureAnimation = useCallback((cardIndex: number) => {
-    if (scrollProgress < 0.67) return 0;
+    if (scrollProgress < 0.67) return { opacity: 0, transform: 40 };
     
     const phaseProgress = (scrollProgress - 0.67) / 0.33;
     const totalCards = 8;
-    const staggerDelay = cardIndex / totalCards * 0.3; // 30% of phase duration for stagger
-    const animationDuration = 0.4;
+    const staggerDelay = cardIndex / totalCards * 0.2; // Reduced stagger for smoother effect
+    const animationDuration = 0.3;
     
     const cardProgress = Math.min(1, Math.max(0, (phaseProgress - staggerDelay) / animationDuration));
-    return cardProgress;
+    
+    return {
+      opacity: cardProgress,
+      transform: (1 - cardProgress) * 40, // Move up from 40px to 0
+    };
+  }, [scrollProgress]);
+  
+  // Header fade animation for features section
+  const getHeaderFadeAnimation = useCallback(() => {
+    if (scrollProgress < 0.67) return { opacity: 0, transform: 20 };
+    
+    const phaseProgress = (scrollProgress - 0.67) / 0.33;
+    const fadeProgress = Math.min(1, phaseProgress / 0.2); // Fade in quickly
+    
+    return {
+      opacity: fadeProgress,
+      transform: (1 - fadeProgress) * 20,
+    };
   }, [scrollProgress]);
   
   useEffect(() => {
@@ -141,6 +194,13 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
       
       // Cleanup
       document.body.style.overflow = 'unset';
+      if (elementRef.current) {
+        elementRef.current.style.position = 'relative';
+        elementRef.current.style.top = 'unset';
+        elementRef.current.style.left = 'unset';
+        elementRef.current.style.right = 'unset';
+        elementRef.current.style.zIndex = 'unset';
+      }
     };
   }, [updateScrollProgress, handleWheelEvent]);
   
@@ -152,5 +212,6 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
     getActionsAnimation,
     getMessageAnimation,
     getFeatureAnimation,
+    getHeaderFadeAnimation,
   };
 };

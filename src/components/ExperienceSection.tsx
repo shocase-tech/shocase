@@ -71,11 +71,13 @@ const NewExperienceSection = () => {
     elementRef, 
     getActionsAnimation,
     getMessageAnimation,
-    getFeatureAnimation 
+    getFeatureAnimation,
+    getHeaderFadeAnimation
   } = useOptimizedScrollExperience();
 
   const actionsAnim = getActionsAnimation();
   const messageAnim = getMessageAnimation();
+  const headerAnim = getHeaderFadeAnimation();
 
   return (
     <section 
@@ -91,24 +93,26 @@ const NewExperienceSection = () => {
 
       {/* PHASE 1: Actions Section */}
       <div className="sticky top-0 h-screen overflow-hidden flex items-center">
-        {/* Microphone */}
+        {/* Microphone - Much bigger, bottom-right positioned with bottom cropped */}
         <div 
-          className="absolute bottom-[20%] right-[20%] pointer-events-none transition-opacity duration-300"
+          className="absolute -bottom-20 -right-10 pointer-events-none transition-opacity duration-300 overflow-hidden"
           style={{
             opacity: actionsAnim.microphoneOpacity,
-            transform: 'rotate(10deg) scale(1.2)',
+            transform: 'rotate(10deg) scale(2.5)',
+            width: '600px',
+            height: '800px',
           }}
         >
           <img 
             src={microphoneImage} 
             alt="Professional microphone"
-            className="w-80 h-auto"
+            className="w-full h-auto object-cover"
             draggable={false}
           />
         </div>
 
-        {/* Action Text */}
-        <div className="absolute left-8 md:left-16 lg:left-24 top-1/2 -translate-y-1/2">
+        {/* Action Text - Can overlap with microphone image */}
+        <div className="absolute left-8 md:left-16 lg:left-24 top-1/2 -translate-y-1/2 z-10">
           <div className="space-y-4">
             <div 
               className="transform transition-all duration-300"
@@ -152,9 +156,10 @@ const NewExperienceSection = () => {
       {/* PHASE 2: Message Section */}
       <div className="sticky top-0 h-screen bg-black flex items-center justify-center overflow-hidden">
         <div 
-          className="text-center"
+          className="text-center transition-all duration-500 ease-out"
           style={{
             transform: `translateX(${messageAnim.horizontalPosition}%)`,
+            opacity: messageAnim.opacity,
           }}
         >
           {/* Desktop: Single line */}
@@ -174,7 +179,13 @@ const NewExperienceSection = () => {
       {/* PHASE 3: Features Grid Section */}
       <div className="sticky top-0 h-screen py-24 px-6 bg-gradient-to-b from-background to-secondary/20 overflow-hidden">
         <div className="max-w-7xl mx-auto h-full flex flex-col justify-center">
-          <div className="text-center mb-16">
+          <div 
+            className="text-center mb-16 transition-all duration-500"
+            style={{
+              opacity: headerAnim.opacity,
+              transform: `translateY(${headerAnim.transform}px)`,
+            }}
+          >
             <div className="flex items-center justify-center mb-6">
               <Zap className="w-8 h-8 text-primary mr-3" />
               <h2 className="text-4xl md:text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent">
@@ -188,15 +199,15 @@ const NewExperienceSection = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => {
-              const cardProgress = getFeatureAnimation(index);
+              const cardAnim = getFeatureAnimation(index);
               
               return (
                 <Card 
                   key={index}
                   className="group hover:shadow-card transition-all duration-300 border-glass bg-gradient-card backdrop-blur-sm"
                   style={{
-                    opacity: cardProgress,
-                    transform: `translateY(${(1 - cardProgress) * 40}px)`,
+                    opacity: cardAnim.opacity,
+                    transform: `translateY(-${cardAnim.transform}px)`, // Move UP not down
                   }}
                 >
                   <CardContent className="p-6">

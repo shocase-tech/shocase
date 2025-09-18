@@ -23,7 +23,7 @@ const CTASection = () => {
                   Start with our free plan and upgrade when you're ready.
                 </p>
                 
-                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <div className="flex justify-center">
                   <Button 
                     variant="hero" 
                     size="lg" 
@@ -32,9 +32,6 @@ const CTASection = () => {
                   >
                     Start Building Now
                     <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                  <Button variant="glass" size="lg">
-                    Watch Demo Video
                   </Button>
                 </div>
               </CardContent>
@@ -65,9 +62,12 @@ const CTASection = () => {
 
             {/* Right - Contact */}
             <div className="text-center md:text-right">
-              <p className="text-foreground text-sm font-medium">
+              <a 
+                href="mailto:shocase.artists@gmail.com"
+                className="text-foreground text-sm font-medium hover:text-primary transition-colors duration-200"
+              >
                 Contact
-              </p>
+              </a>
             </div>
           </div>
         </div>
