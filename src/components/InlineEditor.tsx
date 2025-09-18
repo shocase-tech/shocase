@@ -493,26 +493,32 @@ export default function InlineEditor({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
-          <h4 className="text-md font-medium mb-4">Streaming Links</h4>
-          <StreamingLinksInput
-            streamingLinks={formData.streaming_links || {}}
-            onChange={(links) => setFormData({ ...formData, streaming_links: links })}
-          />
-        </div>
-
-        <div className="space-y-4">
-          <h4 className="text-md font-medium mb-4">Featured Track</h4>
+          <h4 className="text-md font-medium mb-4">Contact Information</h4>
           <div>
-            <Label htmlFor="featured_track_url">Track URL</Label>
+            <Label htmlFor="email">Email</Label>
             <Input
-              id="featured_track_url"
-              value={formData.featured_track_url || ''}
-              onChange={(e) => setFormData({ ...formData, featured_track_url: e.target.value })}
-              placeholder="Paste Spotify, Apple Music, or SoundCloud URL..."
+              id="email"
+              type="email"
+              value={formData.contact_info?.email || ''}
+              onChange={(e) => setFormData({
+                ...formData,
+                contact_info: { ...formData.contact_info, email: e.target.value }
+              })}
+              placeholder="booking@artist.com"
             />
-            <p className="text-xs text-muted-foreground mt-1">
-              Supports Spotify, Apple Music, and SoundCloud track links
-            </p>
+          </div>
+          <div>
+            <Label htmlFor="phone">Phone</Label>
+            <Input
+              id="phone"
+              type="tel"
+              value={formData.contact_info?.phone || ''}
+              onChange={(e) => setFormData({
+                ...formData,
+                contact_info: { ...formData.contact_info, phone: e.target.value }
+              })}
+              placeholder="+1 (555) 123-4567"
+            />
           </div>
         </div>
       </div>
@@ -933,47 +939,32 @@ export default function InlineEditor({
   );
 
   const renderStreamingSection = () => (
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Streaming Links</h3>
+    <div className="space-y-6">
+      <h3 className="text-lg font-semibold">Streaming & Music Links</h3>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="spotify_streaming">Spotify</Label>
-          <Input
-            id="spotify_streaming"
-            value={formData.streaming_links?.spotify || ''}
-            onChange={(e) => setFormData({
-              ...formData,
-              streaming_links: { ...formData.streaming_links, spotify: e.target.value }
-            })}
-            placeholder="https://open.spotify.com/..."
-          />
-        </div>
-        
-        <div>
-          <Label htmlFor="apple_music">Apple Music</Label>
-          <Input
-            id="apple_music"
-            value={formData.streaming_links?.apple_music || ''}
-            onChange={(e) => setFormData({
-              ...formData,
-              streaming_links: { ...formData.streaming_links, apple_music: e.target.value }
-            })}
-            placeholder="https://music.apple.com/..."
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-4">
+          <h4 className="text-md font-medium mb-4">Streaming Platforms</h4>
+          <StreamingLinksInput
+            streamingLinks={formData.streaming_links || {}}
+            onChange={(links) => setFormData({ ...formData, streaming_links: links })}
           />
         </div>
 
-        <div>
-          <Label htmlFor="bandcamp">Bandcamp</Label>
-          <Input
-            id="bandcamp"
-            value={formData.streaming_links?.bandcamp || ''}
-            onChange={(e) => setFormData({
-              ...formData,
-              streaming_links: { ...formData.streaming_links, bandcamp: e.target.value }
-            })}
-            placeholder="https://yourband.bandcamp.com"
-          />
+        <div className="space-y-4">
+          <h4 className="text-md font-medium mb-4">Featured Track</h4>
+          <div>
+            <Label htmlFor="featured_track_url">Track URL</Label>
+            <Input
+              id="featured_track_url"
+              value={formData.featured_track_url || ''}
+              onChange={(e) => setFormData({ ...formData, featured_track_url: e.target.value })}
+              placeholder="Paste Spotify, Apple Music, or SoundCloud URL..."
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Supports Spotify, Apple Music, and SoundCloud track links
+            </p>
+          </div>
         </div>
       </div>
     </div>
