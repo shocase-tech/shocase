@@ -110,10 +110,10 @@ const NewExperienceSection = () => {
           <div className="absolute inset-0 flex items-center">
             {/* Microphone - Better sized, bottom-right positioned with bottom cropped */}
             <div 
-              className="absolute -bottom-10 -right-20 pointer-events-none transition-all duration-300 overflow-hidden"
+              className="absolute -bottom-10 -right-20 pointer-events-none transition-opacity duration-300 overflow-hidden"
               style={{
                 opacity: actionsAnim.microphoneOpacity,
-                transform: `translate(${actionsAnim.horizontalPosition}%, 0) rotate(10deg) scale(1.2)`,
+                transform: 'rotate(10deg) scale(1.2)',
                 width: '600px',
                 height: '800px',
               }}
@@ -127,12 +127,7 @@ const NewExperienceSection = () => {
             </div>
 
             {/* Action Text - Can overlap with microphone image */}
-            <div 
-              className="absolute left-8 md:left-16 lg:left-24 top-1/2 -translate-y-1/2 z-10 transition-transform duration-300"
-              style={{
-                transform: `translate(${actionsAnim.horizontalPosition}%, -50%)`,
-              }}
-            >
+            <div className="absolute left-8 md:left-16 lg:left-24 top-1/2 -translate-y-1/2 z-10">
               <div className="space-y-12">
                 <div 
                   className="transform transition-all duration-300"

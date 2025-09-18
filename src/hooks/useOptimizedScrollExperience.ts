@@ -109,54 +109,38 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
     }
   }, [totalScrollDistance]);
   
-  // Phase 1: Actions animation (0-33%) with pan-right transition
+  // Phase 1: Actions animation (0-33%)
   const getActionsAnimation = useCallback(() => {
-    if (scrollProgress > 0.33) return { 
-      microphoneOpacity: 0, 
-      elevateOpacity: 0, 
-      bookShowsOpacity: 0, 
-      buildBrandOpacity: 0,
-      horizontalPosition: 100
-    };
+    if (scrollProgress > 0.33) return { microphoneOpacity: 0, elevateOpacity: 1, bookShowsOpacity: 1, buildBrandOpacity: 1 };
     
     const phaseProgress = scrollProgress / 0.33;
-    
-    // Start panning right when 80% through the phase (at 26.4% overall progress)
-    const panStartPoint = 0.8;
-    const panProgress = Math.max(0, (phaseProgress - panStartPoint) / (1 - panStartPoint));
-    
     return {
-      microphoneOpacity: Math.max(0, 0.7 - phaseProgress * 0.3 - panProgress * 0.4),
-      elevateOpacity: Math.min(1, Math.max(0, (phaseProgress - 0.1) / 0.25)) * (1 - panProgress),
-      bookShowsOpacity: Math.min(1, Math.max(0, (phaseProgress - 0.4) / 0.25)) * (1 - panProgress),
-      buildBrandOpacity: Math.min(1, Math.max(0, (phaseProgress - 0.7) / 0.25)) * (1 - panProgress),
-      horizontalPosition: panProgress * 100, // Pan right 0 to 100%
+      microphoneOpacity: Math.max(0, 0.7 - phaseProgress * 0.3),
+      elevateOpacity: Math.min(1, Math.max(0, (phaseProgress - 0.1) / 0.25)),
+      bookShowsOpacity: Math.min(1, Math.max(0, (phaseProgress - 0.4) / 0.25)),
+      buildBrandOpacity: Math.min(1, Math.max(0, (phaseProgress - 0.7) / 0.25)),
     };
   }, [scrollProgress]);
   
-  // Phase 2: Message animation - starts when actions are 80% gone (26.4% progress)
+  // Phase 2: Message animation (33-67%) - much slower movement with extended center pause
   const getMessageAnimation = useCallback(() => {
-    // Start message animation when actions are 80% through (at 26.4% overall progress)
-    const messageStartPoint = 0.264; // 80% of 33%
-    const messageEndPoint = 0.67;
+    if (scrollProgress < 0.33) return { horizontalPosition: -100, opacity: 0 };
+    if (scrollProgress > 0.67) return { horizontalPosition: 100, opacity: 0 };
     
-    if (scrollProgress < messageStartPoint) return { horizontalPosition: -100, opacity: 0 };
-    if (scrollProgress > messageEndPoint) return { horizontalPosition: 100, opacity: 0 };
-    
-    const phaseProgress = (scrollProgress - messageStartPoint) / (messageEndPoint - messageStartPoint);
+    const phaseProgress = (scrollProgress - 0.33) / 0.34;
     let horizontalPosition = -100;
     
-    if (phaseProgress < 0.25) {
-      // Move from left to center
-      const easedProgress = phaseProgress / 0.25;
+    if (phaseProgress < 0.3) {
+      // Move from left to center (much slower with easing)
+      const easedProgress = phaseProgress / 0.3;
       const eased = 1 - Math.pow(1 - easedProgress, 3); // Ease out cubic
       horizontalPosition = -100 + eased * 100; // -100 to 0
-    } else if (phaseProgress < 0.75) {
-      // Hold in center
+    } else if (phaseProgress < 0.7) {
+      // Hold in center (extended pause)
       horizontalPosition = 0;
     } else {
-      // Move from center to right
-      const easedProgress = (phaseProgress - 0.75) / 0.25;
+      // Move from center to right (much slower with easing)
+      const easedProgress = (phaseProgress - 0.7) / 0.3;
       const eased = Math.pow(easedProgress, 3); // Ease in cubic
       horizontalPosition = eased * 100; // 0 to 100
     }
