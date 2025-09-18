@@ -1,6 +1,15 @@
 import { useState, useEffect } from "react";
 import { ImageStorageService } from "@/lib/imageStorage";
 
+// URL cache with 30-minute expiration
+interface CachedUrl {
+  url: string;
+  timestamp: number;
+}
+
+const publicUrlCache = new Map<string, CachedUrl>();
+const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
+
 interface PublicImageProps {
   storagePath: string;
   alt: string;
@@ -29,10 +38,30 @@ export default function PublicImage({ storagePath, alt, className, fallback }: P
       }
 
       try {
-        // For published press kits, use long-lived "public" URLs (24-hour signed URLs)
-        const publicUrl = await ImageStorageService.getPublicUrl(storagePath);
-        setImageUrl(publicUrl);
-        setError(!publicUrl);
+        // Check cache first
+        const cached = publicUrlCache.get(storagePath);
+        const now = Date.now();
+        
+        if (cached && (now - cached.timestamp) < CACHE_DURATION) {
+          console.log("Using cached public URL for:", storagePath);
+          setImageUrl(cached.url);
+          setError(!cached.url);
+        } else {
+          console.log("Generating new public URL for:", storagePath);
+          // For published press kits, use long-lived "public" URLs (24-hour signed URLs)
+          const publicUrl = await ImageStorageService.getPublicUrl(storagePath);
+          
+          // Cache the new URL
+          if (publicUrl) {
+            publicUrlCache.set(storagePath, {
+              url: publicUrl,
+              timestamp: now
+            });
+          }
+          
+          setImageUrl(publicUrl);
+          setError(!publicUrl);
+        }
       } catch (err) {
         console.error("Error loading public image:", err);
         setError(true);

@@ -1,6 +1,15 @@
 import { useState, useEffect } from "react";
 import { ImageStorageService } from "@/lib/imageStorage";
 
+// URL cache with 30-minute expiration
+interface CachedUrl {
+  url: string;
+  timestamp: number;
+}
+
+const urlCache = new Map<string, CachedUrl>();
+const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
+
 interface PrivateImageProps {
   storagePath: string | any; // Allow objects for nested path format
   alt: string;
@@ -49,11 +58,30 @@ export default function PrivateImage({ storagePath, alt, className, fallback }: 
       }
 
       try {
-        console.log("Getting signed URL for storage path:", actualPath);
-        const signedUrl = await ImageStorageService.getSignedUrl(actualPath);
-        console.log("Received signed URL:", signedUrl);
-        setImageUrl(signedUrl);
-        setError(!signedUrl);
+        // Check cache first
+        const cached = urlCache.get(actualPath);
+        const now = Date.now();
+        
+        if (cached && (now - cached.timestamp) < CACHE_DURATION) {
+          console.log("Using cached URL for:", actualPath);
+          setImageUrl(cached.url);
+          setError(!cached.url);
+        } else {
+          console.log("Generating new URL for:", actualPath);
+          const signedUrl = await ImageStorageService.getSignedUrl(actualPath);
+          console.log("Received signed URL:", signedUrl);
+          
+          // Cache the new URL
+          if (signedUrl) {
+            urlCache.set(actualPath, {
+              url: signedUrl,
+              timestamp: now
+            });
+          }
+          
+          setImageUrl(signedUrl);
+          setError(!signedUrl);
+        }
       } catch (err) {
         console.error("Error loading image:", err);
         setError(true);
