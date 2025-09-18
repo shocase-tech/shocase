@@ -1,7 +1,7 @@
 import HeroSection from "@/components/HeroSection";
 import ActionsSection from "@/components/ActionsSection";
 import MessageSection from "@/components/MessageSection";
-import FeaturesSection from "@/components/FeaturesSection";
+import FeatureGridSection from "@/components/FeatureGridSection";
 import CTASection from "@/components/CTASection";
 import Header from "@/components/Header";
 import { useEffect } from "react";
@@ -23,7 +23,7 @@ const Index = () => {
       <HeroSection />
       <ActionsSection />
       <MessageSection />
-      <FeaturesSection />
+      <FeatureGridSection />
       <CTASection />
     </main>
   );
