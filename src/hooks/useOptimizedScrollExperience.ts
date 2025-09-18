@@ -75,9 +75,9 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
       isLockedRef.current = false;
       setIsLocked(false);
       document.body.style.overflow = 'unset';
-      // Smooth reset positioning - no jumping
+      // Reset positioning immediately to allow natural scroll flow
       if (elementRef.current) {
-        elementRef.current.style.position = 'static';
+        elementRef.current.style.position = 'relative';
         elementRef.current.style.top = 'unset';
         elementRef.current.style.left = 'unset';
         elementRef.current.style.right = 'unset';
@@ -85,13 +85,8 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
         elementRef.current.style.width = 'unset';
         elementRef.current.style.height = 'unset';
       }
-      // Force smooth scroll to next section
-      setTimeout(() => {
-        const nextSection = elementRef.current?.nextElementSibling;
-        if (nextSection) {
-          nextSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }, 100);
+      // Allow immediate scroll to next section without timeout
+      window.scrollBy(0, 1);
     }
     
     // Unlock when at beginning and scrolling up - smooth transition to previous section
@@ -99,9 +94,9 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
       isLockedRef.current = false;
       setIsLocked(false);
       document.body.style.overflow = 'unset';
-      // Smooth reset positioning
+      // Reset positioning immediately
       if (elementRef.current) {
-        elementRef.current.style.position = 'static';
+        elementRef.current.style.position = 'relative';
         elementRef.current.style.top = 'unset';
         elementRef.current.style.left = 'unset';
         elementRef.current.style.right = 'unset';
@@ -109,6 +104,8 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
         elementRef.current.style.width = 'unset';
         elementRef.current.style.height = 'unset';
       }
+      // Allow scroll to previous section
+      window.scrollBy(0, -1);
     }
   }, [totalScrollDistance]);
   
@@ -212,7 +209,7 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
       // Cleanup
       document.body.style.overflow = 'unset';
       if (elementRef.current) {
-        elementRef.current.style.position = 'static';
+        elementRef.current.style.position = 'relative';
         elementRef.current.style.top = 'unset';
         elementRef.current.style.left = 'unset';
         elementRef.current.style.right = 'unset';

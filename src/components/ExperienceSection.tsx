@@ -82,7 +82,7 @@ const NewExperienceSection = () => {
   return (
     <section 
       ref={elementRef}
-      className="relative min-h-[200vh] bg-gradient-dark"
+      className="relative min-h-screen bg-gradient-dark"
     >
       {/* Ambient floating elements for visual continuity */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -136,7 +136,7 @@ const NewExperienceSection = () => {
                     transform: `translateY(${(1 - actionsAnim.elevateOpacity) * 20}px)`,
                   }}
                 >
-                  <h2 className="text-8xl md:text-9xl lg:text-[10rem] xl:text-[12rem] font-bold bg-gradient-primary bg-clip-text text-transparent">
+                  <h2 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold bg-gradient-primary bg-clip-text text-transparent">
                     elevate
                   </h2>
                 </div>
@@ -148,7 +148,7 @@ const NewExperienceSection = () => {
                     transform: `translateY(${(1 - actionsAnim.bookShowsOpacity) * 20}px)`,
                   }}
                 >
-                  <h2 className="text-8xl md:text-9xl lg:text-[10rem] xl:text-[12rem] font-bold bg-gradient-primary bg-clip-text text-transparent">
+                  <h2 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold bg-gradient-primary bg-clip-text text-transparent">
                     book shows
                   </h2>
                 </div>
@@ -160,7 +160,7 @@ const NewExperienceSection = () => {
                     transform: `translateY(${(1 - actionsAnim.buildBrandOpacity) * 20}px)`,
                   }}
                 >
-                  <h2 className="text-8xl md:text-9xl lg:text-[10rem] xl:text-[12rem] font-bold bg-gradient-primary bg-clip-text text-transparent">
+                  <h2 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold bg-gradient-primary bg-clip-text text-transparent">
                     build your brand
                   </h2>
                 </div>
@@ -180,12 +180,12 @@ const NewExperienceSection = () => {
               }}
             >
               {/* Desktop: Single line */}
-              <h2 className="hidden md:block text-6xl lg:text-7xl xl:text-8xl font-bold bg-gradient-primary bg-clip-text text-transparent whitespace-nowrap">
+              <h2 className="hidden md:block text-7xl lg:text-8xl xl:text-9xl font-bold bg-gradient-primary bg-clip-text text-transparent whitespace-nowrap">
                 shocase your music
               </h2>
               
               {/* Mobile: Stacked */}
-              <div className="block md:hidden text-5xl sm:text-6xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+              <div className="block md:hidden text-6xl sm:text-7xl font-bold bg-gradient-primary bg-clip-text text-transparent">
                 <div>shocase</div>
                 <div>your</div>
                 <div>music</div>
