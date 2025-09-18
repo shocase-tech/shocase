@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Lightbulb } from 'lucide-react';
-import { VinylSpinner } from '@/components/ui/vinyl-spinner';
 
 interface BioPreviewModalProps {
   isOpen: boolean;
@@ -77,7 +76,7 @@ export const BioPreviewModal = ({
             disabled={isRegenerating}
             className="flex-1 sm:flex-none"
           >
-            {isRegenerating ? <VinylSpinner size={16} className="mr-2" /> : <Lightbulb className="w-4 h-4 mr-2" />}
+            <Lightbulb className="w-4 h-4 mr-2" />
             {isRegenerating ? "Regenerating..." : "Regenerate"}
           </Button>
           <Button 

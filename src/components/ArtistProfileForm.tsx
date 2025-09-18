@@ -10,7 +10,6 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ImageStorageService } from "@/lib/imageStorage";
 import { Loader2, Sparkles, Plus, Trash2, User, Users, Music, MapPin } from "lucide-react";
-import { VinylSpinner } from "@/components/ui/vinyl-spinner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import FileUpload from "./FileUpload";
 import GenreInput from "./GenreInput";
@@ -397,7 +396,7 @@ export default function ArtistProfileForm({ profile, onSaved, userEmail, userPho
                   >
                     {bioGenerating ? (
                       <>
-                        <VinylSpinner size={16} className="mr-2" />
+                        <Loader2 className="w-4 h-4 animate-spin" />
                         Generating...
                       </>
                     ) : (
@@ -465,7 +464,7 @@ export default function ArtistProfileForm({ profile, onSaved, userEmail, userPho
                   >
                     {blurbGenerating ? (
                       <>
-                        <VinylSpinner size={16} className="mr-2" />
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                         Generating...
                       </>
                     ) : (

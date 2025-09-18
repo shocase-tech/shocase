@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle, Circle, Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { VinylSpinner } from "@/components/ui/vinyl-spinner";
 
 type FloatingPosition = 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
 type DisplayMode = 'corner' | 'banner';
@@ -273,7 +272,7 @@ export default function FloatingProgressIndicator({
             <div className="flex items-center justify-between gap-4">
               {/* Progress Info */}
               <div className="flex items-center gap-3 min-w-0 flex-1">
-                <VinylSpinner size={36} percentage={completionPercentage} showPercentage={true} />
+                <ProgressRing size={36} strokeWidth={3} percentage={completionPercentage} />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-foreground truncate">
                     EPK Progress ({completedCount}/{milestones.length})
@@ -336,7 +335,7 @@ export default function FloatingProgressIndicator({
       <div className="backdrop-blur-md bg-background/80 border border-border/30 rounded-xl shadow-elegant min-w-[280px] p-4">
         <div className="flex items-center gap-3 mb-3">
           {/* Circular Progress Ring */}
-          <VinylSpinner size={48} percentage={completionPercentage} showPercentage={true} />
+          <ProgressRing size={48} strokeWidth={4} percentage={completionPercentage} />
           
           <div>
             <p className="text-sm font-medium text-foreground">

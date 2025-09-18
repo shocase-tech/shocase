@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Save } from "lucide-react";
-import { VinylSpinner } from "@/components/ui/vinyl-spinner";
 
 interface SectionSaveButtonProps {
   onSave: () => void;
@@ -19,7 +18,7 @@ export default function SectionSaveButton({ onSave, loading = false, sectionName
           className="w-full gap-2"
           size="lg"
         >
-          {loading ? <VinylSpinner size={16} className="mr-2" /> : <Save className="w-4 h-4" />}
+          <Save className="w-4 h-4" />
           {loading ? "Saving..." : `Update ${sectionName}`}
         </Button>
       </CardContent>
