@@ -86,29 +86,19 @@ const NewExperienceSection = () => {
     >
       {/* Scroll Progress Indicator */}
       {isLocked && (
-        <div className="fixed top-4 right-4 z-[60] bg-primary/10 backdrop-blur-sm rounded-full px-3 py-1 text-sm text-primary border border-primary/20">
+        <div className="fixed top-4 right-4 z-50 bg-primary/10 backdrop-blur-sm rounded-full px-3 py-1 text-sm text-primary border border-primary/20">
           {Math.round(scrollProgress * 100)}%
         </div>
       )}
 
-      {/* Ambient floating elements for visual continuity */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-[45]">
-        <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-primary/20 rounded-full animate-pulse" 
-             style={{ animationDelay: '0s', animationDuration: '3s' }} />
-        <div className="absolute top-3/4 right-1/3 w-1 h-1 bg-accent/30 rounded-full animate-pulse" 
-             style={{ animationDelay: '1s', animationDuration: '4s' }} />
-        <div className="absolute top-1/2 right-1/4 w-1.5 h-1.5 bg-primary/15 rounded-full animate-pulse" 
-             style={{ animationDelay: '2s', animationDuration: '5s' }} />
-      </div>
-
-      {/* Single sticky container with phase switching - Higher z-index to cover CTA */}
-      <div className={`sticky top-0 h-screen overflow-hidden ${isLocked ? 'z-[50]' : 'z-10'}`}>
-        {/* PHASE 1: Actions Section - Larger text and better spacing */}
+      {/* Single sticky container with phase switching */}
+      <div className="sticky top-0 h-screen overflow-hidden">
+        {/* PHASE 1: Actions Section */}
         {currentPhase === 0 && (
-          <div className="absolute inset-0 flex items-center bg-gradient-to-br from-background via-background/98 to-muted/30">
+          <div className="absolute inset-0 flex items-center bg-gradient-to-br from-background via-background/95 to-muted/20">
             {/* Microphone - Better sized, bottom-right positioned with bottom cropped */}
             <div 
-              className="absolute -bottom-10 -right-20 pointer-events-none transition-opacity duration-500 overflow-hidden"
+              className="absolute -bottom-10 -right-20 pointer-events-none transition-opacity duration-300 overflow-hidden"
               style={{
                 opacity: actionsAnim.microphoneOpacity,
                 transform: 'rotate(10deg) scale(1.2)',
@@ -124,41 +114,41 @@ const NewExperienceSection = () => {
               />
             </div>
 
-            {/* Action Text - Larger with better spacing */}
+            {/* Action Text - Can overlap with microphone image */}
             <div className="absolute left-8 md:left-16 lg:left-24 top-1/2 -translate-y-1/2 z-10">
-              <div className="space-y-8 md:space-y-12">
+              <div className="space-y-4">
                 <div 
-                  className="transform transition-all duration-500"
+                  className="transform transition-all duration-300"
                   style={{
                     opacity: actionsAnim.elevateOpacity,
-                    transform: `translateY(${(1 - actionsAnim.elevateOpacity) * 30}px)`,
+                    transform: `translateY(${(1 - actionsAnim.elevateOpacity) * 20}px)`,
                   }}
                 >
-                  <h2 className="text-7xl md:text-8xl lg:text-9xl xl:text-[10rem] font-bold bg-gradient-primary bg-clip-text text-transparent">
+                  <h2 className="text-6xl md:text-7xl lg:text-8xl font-bold bg-gradient-primary bg-clip-text text-transparent">
                     elevate
                   </h2>
                 </div>
 
                 <div 
-                  className="transform transition-all duration-500"
+                  className="transform transition-all duration-300"
                   style={{
                     opacity: actionsAnim.bookShowsOpacity,
-                    transform: `translateY(${(1 - actionsAnim.bookShowsOpacity) * 30}px)`,
+                    transform: `translateY(${(1 - actionsAnim.bookShowsOpacity) * 20}px)`,
                   }}
                 >
-                  <h2 className="text-7xl md:text-8xl lg:text-9xl xl:text-[10rem] font-bold bg-gradient-primary bg-clip-text text-transparent">
+                  <h2 className="text-6xl md:text-7xl lg:text-8xl font-bold bg-gradient-primary bg-clip-text text-transparent">
                     book shows
                   </h2>
                 </div>
 
                 <div 
-                  className="transform transition-all duration-500"
+                  className="transform transition-all duration-300"
                   style={{
                     opacity: actionsAnim.buildBrandOpacity,
-                    transform: `translateY(${(1 - actionsAnim.buildBrandOpacity) * 30}px)`,
+                    transform: `translateY(${(1 - actionsAnim.buildBrandOpacity) * 20}px)`,
                   }}
                 >
-                  <h2 className="text-7xl md:text-8xl lg:text-9xl xl:text-[10rem] font-bold bg-gradient-primary bg-clip-text text-transparent">
+                  <h2 className="text-6xl md:text-7xl lg:text-8xl font-bold bg-gradient-primary bg-clip-text text-transparent">
                     build your brand
                   </h2>
                 </div>
@@ -167,14 +157,9 @@ const NewExperienceSection = () => {
           </div>
         )}
 
-        {/* PHASE 2: Message Section - Smooth slide up transition */}
+        {/* PHASE 2: Message Section */}
         {currentPhase === 1 && (
-          <div 
-            className="absolute inset-0 bg-gradient-to-b from-black via-black/95 to-black/90 flex items-center justify-center transition-all duration-700"
-            style={{
-              transform: `translateY(${messageAnim.slideProgress * -100}vh)`,
-            }}
-          >
+          <div className="absolute inset-0 bg-black flex items-center justify-center">
             <div 
               className="text-center transition-all duration-500 ease-out"
               style={{
@@ -197,29 +182,24 @@ const NewExperienceSection = () => {
           </div>
         )}
 
-        {/* PHASE 3: Features Grid Section - Smooth slide up transition */}
+        {/* PHASE 3: Features Grid Section */}
         {currentPhase === 2 && (
-          <div 
-            className="absolute inset-0 py-24 px-6 bg-gradient-to-b from-background via-background/98 to-secondary/30 transition-all duration-700"
-            style={{
-              transform: `translateY(${headerAnim.slideProgress * -100}vh)`,
-            }}
-          >
+          <div className="absolute inset-0 py-24 px-6 bg-gradient-to-b from-background to-secondary/20">
             <div className="max-w-7xl mx-auto h-full flex flex-col justify-center">
               <div 
-                className="text-center mb-20 transition-all duration-700"
+                className="text-center mb-16 transition-all duration-500"
                 style={{
                   opacity: headerAnim.opacity,
                   transform: `translateY(${headerAnim.transform}px)`,
                 }}
               >
-                <div className="flex items-center justify-center mb-8">
-                  <Zap className="w-10 h-10 text-primary mr-4" />
-                  <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                <div className="flex items-center justify-center mb-6">
+                  <Zap className="w-8 h-8 text-primary mr-3" />
+                  <h2 className="text-4xl md:text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent">
                     Everything You Need
                   </h2>
                 </div>
-                <p className="text-xl md:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
+                <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
                   Professional press kit tools designed specifically for musicians and music industry professionals
                 </p>
               </div>
@@ -231,10 +211,10 @@ const NewExperienceSection = () => {
                   return (
                     <Card 
                       key={index}
-                      className="group hover:shadow-card transition-all duration-500 border-glass bg-gradient-card backdrop-blur-sm"
+                      className="group hover:shadow-card transition-all duration-300 border-glass bg-gradient-card backdrop-blur-sm"
                       style={{
                         opacity: cardAnim.opacity,
-                        transform: `translateY(${cardAnim.transform}px)`, // Slide up from below
+                        transform: `translateY(-${cardAnim.transform}px)`, // Move UP not down
                       }}
                     >
                       <CardContent className="p-6">

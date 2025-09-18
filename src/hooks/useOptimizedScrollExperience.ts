@@ -18,7 +18,7 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
   const animationFrameRef = useRef<number>();
   
   // Total scroll distance for the entire experience (much larger for scroll resistance)
-  const totalScrollDistance = 12000;
+  const totalScrollDistance = 8000;
   
   // Throttled scroll handler for better performance
   const updateScrollProgress = useCallback(() => {
@@ -58,7 +58,7 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
     
     e.preventDefault();
     
-    const delta = e.deltaY * 0.2; // Add scroll resistance - much slower progression
+    const delta = e.deltaY * 0.3; // Add scroll resistance - much slower progression
     const newAccumulated = Math.max(0, Math.min(totalScrollDistance, accumulatedScrollRef.current + delta));
     accumulatedScrollRef.current = newAccumulated;
     
@@ -112,41 +112,38 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
     }
   }, [totalScrollDistance]);
   
-  // Phase 1: Actions animation (0-33%) - Extended hold periods
+  // Phase 1: Actions animation (0-33%)
   const getActionsAnimation = useCallback(() => {
     if (scrollProgress > 0.33) return { microphoneOpacity: 0, elevateOpacity: 1, bookShowsOpacity: 1, buildBrandOpacity: 1 };
     
     const phaseProgress = scrollProgress / 0.33;
     return {
-      microphoneOpacity: Math.max(0, 0.7 - phaseProgress * 0.2),
-      elevateOpacity: Math.min(1, Math.max(0, (phaseProgress - 0.05) / 0.2)),
-      bookShowsOpacity: Math.min(1, Math.max(0, (phaseProgress - 0.3) / 0.2)),
-      buildBrandOpacity: Math.min(1, Math.max(0, (phaseProgress - 0.55) / 0.2)),
+      microphoneOpacity: Math.max(0, 0.7 - phaseProgress * 0.3),
+      elevateOpacity: Math.min(1, Math.max(0, (phaseProgress - 0.1) / 0.25)),
+      bookShowsOpacity: Math.min(1, Math.max(0, (phaseProgress - 0.4) / 0.25)),
+      buildBrandOpacity: Math.min(1, Math.max(0, (phaseProgress - 0.7) / 0.25)),
     };
   }, [scrollProgress]);
   
   // Phase 2: Message animation (33-67%) - much slower movement with extended center pause
   const getMessageAnimation = useCallback(() => {
-    if (scrollProgress < 0.33) return { horizontalPosition: -100, opacity: 0, slideProgress: 0 };
-    if (scrollProgress > 0.67) return { horizontalPosition: 100, opacity: 0, slideProgress: 1 };
+    if (scrollProgress < 0.33) return { horizontalPosition: -100, opacity: 0 };
+    if (scrollProgress > 0.67) return { horizontalPosition: 100, opacity: 0 };
     
     const phaseProgress = (scrollProgress - 0.33) / 0.34;
     let horizontalPosition = -100;
     
-    // Slide up transition at start of phase
-    const slideProgress = Math.min(1, phaseProgress / 0.15); // Quick slide up
-    
-    if (phaseProgress < 0.2) {
+    if (phaseProgress < 0.3) {
       // Move from left to center (much slower with easing)
-      const easedProgress = phaseProgress / 0.2;
+      const easedProgress = phaseProgress / 0.3;
       const eased = 1 - Math.pow(1 - easedProgress, 3); // Ease out cubic
       horizontalPosition = -100 + eased * 100; // -100 to 0
-    } else if (phaseProgress < 0.8) {
-      // Hold in center (extended pause - 60% of phase time)
+    } else if (phaseProgress < 0.7) {
+      // Hold in center (extended pause)
       horizontalPosition = 0;
     } else {
       // Move from center to right (much slower with easing)
-      const easedProgress = (phaseProgress - 0.8) / 0.2;
+      const easedProgress = (phaseProgress - 0.7) / 0.3;
       const eased = Math.pow(easedProgress, 3); // Ease in cubic
       horizontalPosition = eased * 100; // 0 to 100
     }
@@ -154,45 +151,36 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
     return {
       horizontalPosition,
       opacity: 1,
-      slideProgress,
     };
   }, [scrollProgress]);
   
   // Phase 3: Features animation (67-100%) - visible throughout with staggered entry
   const getFeatureAnimation = useCallback((cardIndex: number) => {
-    if (scrollProgress < 0.67) return { opacity: 0, transform: 60 };
+    if (scrollProgress < 0.67) return { opacity: 0, transform: 40 };
     
     const phaseProgress = (scrollProgress - 0.67) / 0.33;
     const totalCards = 8;
-    const staggerDelay = cardIndex / totalCards * 0.15; // Reduced stagger for smoother effect
-    const animationDuration = 0.25;
+    const staggerDelay = cardIndex / totalCards * 0.2; // Reduced stagger for smoother effect
+    const animationDuration = 0.3;
     
-    // Start animations later to give header more time
-    const adjustedProgress = Math.max(0, phaseProgress - 0.3);
-    const cardProgress = Math.min(1, Math.max(0, (adjustedProgress - staggerDelay) / animationDuration));
+    const cardProgress = Math.min(1, Math.max(0, (phaseProgress - staggerDelay) / animationDuration));
     
     return {
       opacity: cardProgress,
-      transform: (1 - cardProgress) * 60, // Slide up from 60px below
+      transform: (1 - cardProgress) * 40, // Move up from 40px to 0
     };
   }, [scrollProgress]);
   
   // Header fade animation for features section
   const getHeaderFadeAnimation = useCallback(() => {
-    if (scrollProgress < 0.67) return { opacity: 0, transform: 30, slideProgress: 0 };
+    if (scrollProgress < 0.67) return { opacity: 0, transform: 20 };
     
     const phaseProgress = (scrollProgress - 0.67) / 0.33;
-    
-    // Slide up transition at start of phase
-    const slideProgress = Math.min(1, phaseProgress / 0.15); // Quick slide up
-    
-    // Extended delay before header appears - longer pause
-    const fadeProgress = Math.min(1, Math.max(0, (phaseProgress - 0.15) / 0.25)); // Longer delay
+    const fadeProgress = Math.min(1, phaseProgress / 0.2); // Fade in quickly
     
     return {
       opacity: fadeProgress,
-      transform: (1 - fadeProgress) * 30,
-      slideProgress,
+      transform: (1 - fadeProgress) * 20,
     };
   }, [scrollProgress]);
   
