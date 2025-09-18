@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { Save, X, GripVertical, Upload, AlertTriangle, Edit, Loader2, Trash2 } from "lucide-react";
+import { VinylSpinner } from "@/components/ui/vinyl-spinner";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragStartEvent, DragEndEvent, DragOverEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
@@ -615,7 +616,7 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
       <CardContent className="pt-6 space-y-6">
         {isSaving && (
           <div className="flex items-center justify-center gap-2 p-2 bg-muted/30 rounded-lg">
-            <Loader2 className="w-4 h-4 animate-spin" />
+            <VinylSpinner size={16} />
             <span className="text-sm">Saving gallery...</span>
           </div>
         )}
@@ -632,7 +633,7 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
             <span>Gallery Progress</span>
             <span>{Math.round(progressPercentage)}%</span>
           </div>
-          <Progress value={progressPercentage} className="h-2" />
+          <VinylSpinner size={40} percentage={progressPercentage} showPercentage={true} />
         </div>
 
         {/* File Upload Section */}
@@ -670,7 +671,7 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
                   <span>Uploading photo...</span>
                   <span>{uploadProgress}%</span>
                 </div>
-                <Progress value={uploadProgress} className="h-2" />
+                <VinylSpinner size={40} percentage={uploadProgress} showPercentage={true} />
               </div>
             )}
 

@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast, toast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { X, Save, Lightbulb, Upload, Camera, Loader2 } from "lucide-react";
+import { VinylSpinner } from "@/components/ui/vinyl-spinner";
 import GenreInput from "@/components/GenreInput";
 import StreamingLinksInput from "@/components/StreamingLinksInput";
 import PhotoUpload from "@/components/PhotoUpload";
@@ -958,7 +959,7 @@ export default function InlineEditor({
     <div ref={editorRef} className="space-y-4">
       {isSaving && (
         <div className="flex items-center justify-center gap-2 p-2 bg-muted/30 rounded-lg">
-          <Loader2 className="w-4 h-4 animate-spin" />
+          <VinylSpinner size={16} />
           <span className="text-sm">Saving...</span>
         </div>
       )}
@@ -974,7 +975,7 @@ export default function InlineEditor({
           >
             {loading ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                <VinylSpinner size={16} className="mr-2" />
                 Creating...
               </>
             ) : (

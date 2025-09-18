@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { CheckCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { VinylSpinner } from "@/components/ui/vinyl-spinner";
 
 interface SaveIndicatorProps {
   isSaving: boolean;
@@ -28,7 +29,7 @@ export default function SaveIndicator({
   if (isSaving) {
     return (
       <div className={cn("flex items-center gap-1 text-xs text-muted-foreground", className)}>
-        <Loader2 className="w-3 h-3 animate-spin" />
+        <VinylSpinner size={12} />
         <span>Saving...</span>
       </div>
     );
