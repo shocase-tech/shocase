@@ -128,7 +128,7 @@ const NewExperienceSection = () => {
 
             {/* Action Text - Can overlap with microphone image */}
             <div className="absolute left-8 md:left-16 lg:left-24 top-1/2 -translate-y-1/2 z-10">
-              <div className="space-y-4">
+              <div className="space-y-12">
                 <div 
                   className="transform transition-all duration-300"
                   style={{
@@ -136,7 +136,7 @@ const NewExperienceSection = () => {
                     transform: `translateY(${(1 - actionsAnim.elevateOpacity) * 20}px)`,
                   }}
                 >
-                  <h2 className="text-6xl md:text-7xl lg:text-8xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                  <h2 className="text-8xl md:text-9xl lg:text-[10rem] xl:text-[12rem] font-bold bg-gradient-primary bg-clip-text text-transparent">
                     elevate
                   </h2>
                 </div>
@@ -148,7 +148,7 @@ const NewExperienceSection = () => {
                     transform: `translateY(${(1 - actionsAnim.bookShowsOpacity) * 20}px)`,
                   }}
                 >
-                  <h2 className="text-6xl md:text-7xl lg:text-8xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                  <h2 className="text-8xl md:text-9xl lg:text-[10rem] xl:text-[12rem] font-bold bg-gradient-primary bg-clip-text text-transparent">
                     book shows
                   </h2>
                 </div>
@@ -160,7 +160,7 @@ const NewExperienceSection = () => {
                     transform: `translateY(${(1 - actionsAnim.buildBrandOpacity) * 20}px)`,
                   }}
                 >
-                  <h2 className="text-6xl md:text-7xl lg:text-8xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                  <h2 className="text-8xl md:text-9xl lg:text-[10rem] xl:text-[12rem] font-bold bg-gradient-primary bg-clip-text text-transparent">
                     build your brand
                   </h2>
                 </div>
@@ -180,12 +180,12 @@ const NewExperienceSection = () => {
               }}
             >
               {/* Desktop: Single line */}
-              <h2 className="hidden md:block text-8xl lg:text-9xl xl:text-[10rem] font-bold bg-gradient-primary bg-clip-text text-transparent whitespace-nowrap">
+              <h2 className="hidden md:block text-6xl lg:text-7xl xl:text-8xl font-bold bg-gradient-primary bg-clip-text text-transparent whitespace-nowrap">
                 shocase your music
               </h2>
               
               {/* Mobile: Stacked */}
-              <div className="block md:hidden text-6xl sm:text-7xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+              <div className="block md:hidden text-5xl sm:text-6xl font-bold bg-gradient-primary bg-clip-text text-transparent">
                 <div>shocase</div>
                 <div>your</div>
                 <div>music</div>
@@ -205,15 +205,12 @@ const NewExperienceSection = () => {
                   transform: `translateY(${headerAnim.transform}px)`,
                 }}
               >
-                <div className="flex items-center justify-center mb-6">
-                  <Zap className="w-8 h-8 text-primary mr-3" />
-                  <h2 className="text-4xl md:text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                <div className="flex items-center justify-center">
+                  <Zap className="w-10 h-10 text-primary mr-4" />
+                  <h2 className="text-6xl md:text-7xl font-bold bg-gradient-primary bg-clip-text text-transparent">
                     Everything You Need
                   </h2>
                 </div>
-                <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                  Professional press kit tools designed specifically for musicians and music industry professionals
-                </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
