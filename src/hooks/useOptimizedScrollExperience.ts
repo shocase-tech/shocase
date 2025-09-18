@@ -17,8 +17,8 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
   const lastScrollTimeRef = useRef(0);
   const animationFrameRef = useRef<number>();
   
-  // Total scroll distance for the entire experience (reduced for smoother control)
-  const totalScrollDistance = 2000;
+  // Total scroll distance for the entire experience (much larger for scroll resistance)
+  const totalScrollDistance = 8000;
   
   // Throttled scroll handler for better performance
   const updateScrollProgress = useCallback(() => {
@@ -58,7 +58,7 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
     
     e.preventDefault();
     
-    const delta = e.deltaY;
+    const delta = e.deltaY * 0.3; // Add scroll resistance - much slower progression
     const newAccumulated = Math.max(0, Math.min(totalScrollDistance, accumulatedScrollRef.current + delta));
     accumulatedScrollRef.current = newAccumulated;
     
@@ -70,33 +70,44 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
     else if (progress <= 0.6666) setCurrentPhase(1);
     else setCurrentPhase(2);
     
-    // Unlock when reaching end and scrolling down
+    // Unlock when reaching end and scrolling down - smooth transition to next section
     if (newAccumulated >= totalScrollDistance && delta > 0) {
       isLockedRef.current = false;
       setIsLocked(false);
       document.body.style.overflow = 'unset';
-      // Reset positioning
+      // Smooth reset positioning - no jumping
       if (elementRef.current) {
-        elementRef.current.style.position = 'relative';
+        elementRef.current.style.position = 'static';
         elementRef.current.style.top = 'unset';
         elementRef.current.style.left = 'unset';
         elementRef.current.style.right = 'unset';
         elementRef.current.style.zIndex = 'unset';
+        elementRef.current.style.width = 'unset';
+        elementRef.current.style.height = 'unset';
       }
+      // Force smooth scroll to next section
+      setTimeout(() => {
+        const nextSection = elementRef.current?.nextElementSibling;
+        if (nextSection) {
+          nextSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
     }
     
-    // Unlock when at beginning and scrolling up
+    // Unlock when at beginning and scrolling up - smooth transition to previous section
     if (newAccumulated <= 0 && delta < 0) {
       isLockedRef.current = false;
       setIsLocked(false);
       document.body.style.overflow = 'unset';
-      // Reset positioning
+      // Smooth reset positioning
       if (elementRef.current) {
-        elementRef.current.style.position = 'relative';
+        elementRef.current.style.position = 'static';
         elementRef.current.style.top = 'unset';
         elementRef.current.style.left = 'unset';
         elementRef.current.style.right = 'unset';
         elementRef.current.style.zIndex = 'unset';
+        elementRef.current.style.width = 'unset';
+        elementRef.current.style.height = 'unset';
       }
     }
   }, [totalScrollDistance]);
@@ -201,11 +212,13 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
       // Cleanup
       document.body.style.overflow = 'unset';
       if (elementRef.current) {
-        elementRef.current.style.position = 'relative';
+        elementRef.current.style.position = 'static';
         elementRef.current.style.top = 'unset';
         elementRef.current.style.left = 'unset';
         elementRef.current.style.right = 'unset';
         elementRef.current.style.zIndex = 'unset';
+        elementRef.current.style.width = 'unset';
+        elementRef.current.style.height = 'unset';
       }
     };
   }, [updateScrollProgress, handleWheelEvent]);

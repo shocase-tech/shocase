@@ -82,7 +82,7 @@ const NewExperienceSection = () => {
   return (
     <section 
       ref={elementRef}
-      className="relative min-h-[300vh] bg-gradient-to-br from-background via-background/95 to-muted/20"
+      className="relative min-h-[200vh] bg-gradient-to-br from-background via-background/95 to-muted/20"
     >
       {/* Scroll Progress Indicator */}
       {isLocked && (
