@@ -586,7 +586,7 @@ export default function LivePreviewEditor({
                     <p className="text-sm text-muted-foreground italic">{profile.blurb}</p>
                   </div>
                 )}
-                <p className="text-muted-foreground leading-relaxed">{profile.bio}</p>
+                <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">{profile.bio}</p>
               </div>
             ) : null,
             !!profile.bio

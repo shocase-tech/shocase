@@ -619,7 +619,7 @@ export default function SimplePublicProfile() {
                   </div>
                   {/* Desktop: Full bio */}
                   <div className="hidden md:block">
-                    <p>{profile.bio}</p>
+                    <p className="whitespace-pre-wrap">{profile.bio}</p>
                   </div>
                 </div>
               </section>

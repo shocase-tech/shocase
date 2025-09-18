@@ -39,7 +39,7 @@ Generate just the blurb text, nothing else.`;
   }
 
   if (is_remix && existing_bio) {
-    return `Enhance and rewrite this artist bio for ${artist_name}:
+    return `Rewrite and enhance this artist bio for ${artist_name} to tell a more complete and informative story:
 
 "${existing_bio}"
 
@@ -51,7 +51,13 @@ ${notable_performances ? `- Major Performances: ${notable_performances}` : ''}
 ${musical_background ? `- Background: ${musical_background}` : ''}
 ${vibe ? `- Tone: ${vibe === 'casual' ? 'conversational and approachable' : vibe === 'professional' ? 'industry-focused and polished' : vibe}` : ''}
 
-Create a compelling 250-300 word bio that flows as a cohesive narrative, emphasizing credibility and what makes this artist bookable to industry professionals.`;
+Create an informative 250-300 word bio that:
+• Tells the artist's authentic story and artistic journey
+• Focuses on their creative evolution and what drives their music
+• Presents achievements naturally within the narrative context
+• Helps readers understand their unique artistic perspective
+• Avoids hyperbolic language or excessive promotional tone
+• Shows both where they've been and where they're heading artistically`;
   }
 
   // Build comprehensive new bio prompt
@@ -77,21 +83,24 @@ Create a compelling 250-300 word bio that flows as a cohesive narrative, emphasi
     ? `Write with a ${vibe} tone.`
     : 'Write in a professional yet engaging tone.';
 
-  return `Write a compelling artist bio for ${artist_name}${genre ? `, a ${genre} artist` : ''}${location ? ` based in ${location}` : ''}.
+  return `Write an informative artist biography for ${artist_name}${genre ? `, a ${genre} artist` : ''}${location ? ` based in ${location}` : ''} that tells their story and gives readers a complete picture of who they are as an artist.
 
 ${contextElements.length > 0 ? `Key Information:
 ${contextElements.map(element => `• ${element}`).join('\n')}` : ''}
 
 Requirements:
 • 250-300 words maximum
-• Third person narrative that flows naturally
-• Emphasize credibility and what makes them bookable
-• Weave in achievements and background organically
+• Third person narrative that tells their artistic journey and story
+• Focus on their musical evolution, creative process, and authentic artistic identity
+• Provide context about their background, influences, and what drives their creativity
+• Include achievements naturally within the story rather than as a list
+• Show where they've been and where they're heading artistically
 • ${toneGuidance}
-• Focus on impressive elements that would interest industry professionals
-• No fabricated details or placeholder information
+• Avoid hyperbolic language or excessive praise
+• Present facts and story in an engaging but grounded way
+• Help readers understand the artist's unique perspective and artistic vision
 
-Create a bio that would make booking agents and industry professionals take notice.`;
+Create a bio that tells the artist's authentic story and helps readers connect with their artistic journey.`;
 }
 
 serve(async (req) => {

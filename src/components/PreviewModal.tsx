@@ -293,7 +293,7 @@ export function PreviewModal({ open, onOpenChange, profile, onPublish }: Preview
                 {profile.bio && (
                   <section className="glass-card border-glass p-8 rounded-xl">
                     <h2 className="text-3xl font-bold mb-6">Artist Biography</h2>
-                    <p className="text-muted-foreground leading-relaxed text-lg">{profile.bio}</p>
+                    <p className="text-muted-foreground leading-relaxed text-lg whitespace-pre-wrap">{profile.bio}</p>
                   </section>
                 )}
 

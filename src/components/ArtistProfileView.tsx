@@ -158,7 +158,7 @@ export default function ArtistProfileView({ profile }: ArtistProfileViewProps) {
                     <DragDropSection key="bio" id="bio">
                       <div className="mb-6">
                         <h3 className="font-semibold mb-2">Bio</h3>
-                        <p className="text-muted-foreground leading-relaxed">{profile.bio}</p>
+                        <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">{profile.bio}</p>
                       </div>
                     </DragDropSection>
                   );

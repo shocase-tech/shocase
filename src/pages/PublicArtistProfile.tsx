@@ -563,7 +563,7 @@ export default function PublicArtistProfile() {
                         </Button>
                       </>
                     ) : (
-                      <p>{profile.bio}</p>
+                      <p className="whitespace-pre-wrap">{profile.bio}</p>
                     )}
                   </div>
                 </section>
