@@ -42,12 +42,14 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
       setIsLocked(true);
       document.body.style.overflow = 'hidden';
       accumulatedScrollRef.current = 0;
-      // Prevent any hero section bleed-through
+      // Prevent any hero section bleed-through - ensure exact top alignment
       element.style.position = 'fixed';
-      element.style.top = '0';
-      element.style.left = '0';
-      element.style.right = '0';
+      element.style.top = '0px';
+      element.style.left = '0px';
+      element.style.right = '0px';
       element.style.zIndex = '50';
+      element.style.width = '100vw';
+      element.style.height = '100vh';
     }
   }, [threshold]);
   
@@ -63,9 +65,9 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
     const progress = newAccumulated / totalScrollDistance;
     setScrollProgress(progress);
     
-    // Update current phase
-    if (progress < 0.33) setCurrentPhase(0);
-    else if (progress < 0.67) setCurrentPhase(1);
+    // Update current phase - ensure exact 33.33% boundaries
+    if (progress <= 0.3333) setCurrentPhase(0);
+    else if (progress <= 0.6666) setCurrentPhase(1);
     else setCurrentPhase(2);
     
     // Unlock when reaching end and scrolling down
@@ -112,7 +114,7 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
     };
   }, [scrollProgress]);
   
-  // Phase 2: Message animation (33-67%) - slower movement with center pause
+  // Phase 2: Message animation (33-67%) - much slower movement with extended center pause
   const getMessageAnimation = useCallback(() => {
     if (scrollProgress < 0.33) return { horizontalPosition: -100, opacity: 0 };
     if (scrollProgress > 0.67) return { horizontalPosition: 100, opacity: 0 };
@@ -120,15 +122,19 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
     const phaseProgress = (scrollProgress - 0.33) / 0.34;
     let horizontalPosition = -100;
     
-    if (phaseProgress < 0.4) {
-      // Move from left to center (slower)
-      horizontalPosition = -100 + (phaseProgress / 0.4) * 100; // -100 to 0
-    } else if (phaseProgress < 0.6) {
-      // Hold in center
+    if (phaseProgress < 0.3) {
+      // Move from left to center (much slower with easing)
+      const easedProgress = phaseProgress / 0.3;
+      const eased = 1 - Math.pow(1 - easedProgress, 3); // Ease out cubic
+      horizontalPosition = -100 + eased * 100; // -100 to 0
+    } else if (phaseProgress < 0.7) {
+      // Hold in center (extended pause)
       horizontalPosition = 0;
     } else {
-      // Move from center to right (slower)
-      horizontalPosition = ((phaseProgress - 0.6) / 0.4) * 100; // 0 to 100
+      // Move from center to right (much slower with easing)
+      const easedProgress = (phaseProgress - 0.7) / 0.3;
+      const eased = Math.pow(easedProgress, 3); // Ease in cubic
+      horizontalPosition = eased * 100; // 0 to 100
     }
     
     return {

@@ -93,12 +93,12 @@ const NewExperienceSection = () => {
 
       {/* PHASE 1: Actions Section */}
       <div className="sticky top-0 h-screen overflow-hidden flex items-center">
-        {/* Microphone - Much bigger, bottom-right positioned with bottom cropped */}
+        {/* Microphone - Better sized, bottom-right positioned with bottom cropped */}
         <div 
-          className="absolute -bottom-20 -right-10 pointer-events-none transition-opacity duration-300 overflow-hidden"
+          className="absolute -bottom-10 -right-20 pointer-events-none transition-opacity duration-300 overflow-hidden"
           style={{
             opacity: actionsAnim.microphoneOpacity,
-            transform: 'rotate(10deg) scale(2.5)',
+            transform: 'rotate(10deg) scale(1.2)',
             width: '600px',
             height: '800px',
           }}
@@ -106,7 +106,7 @@ const NewExperienceSection = () => {
           <img 
             src={microphoneImage} 
             alt="Professional microphone"
-            className="w-full h-auto object-cover"
+            className="w-full h-auto object-cover opacity-70"
             draggable={false}
           />
         </div>
