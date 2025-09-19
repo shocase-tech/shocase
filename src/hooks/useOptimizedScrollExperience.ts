@@ -181,10 +181,16 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
   // Phase 2: Features animation (59-84%) - visible throughout with staggered entry
   const getFeatureAnimation = useCallback((cardIndex: number) => {
     if (scrollProgress < 0.59) return { opacity: 0, transform: 40, panUpTransform: 0 };
+    
+    // Parallax scroll effect from 84-90%
     if (scrollProgress > 0.84) {
-      // Parallax pan up effect from 84-90%
-      const panProgress = scrollProgress > 0.84 ? Math.min(1, (scrollProgress - 0.84) / 0.06) : 0;
-      return { opacity: 1, transform: 0, panUpTransform: panProgress * -100 };
+      const panProgress = (scrollProgress - 0.84) / 0.06; // 0 to 1 over 6% scroll
+      const easeOutQuart = 1 - Math.pow(1 - panProgress, 4); // Smooth easing
+      return { 
+        opacity: Math.max(0, 1 - panProgress * 1.5), // Fade out as they move
+        transform: 0, 
+        panUpTransform: easeOutQuart * -150 // All cards move up together
+      };
     }
     
     const phaseProgress = (scrollProgress - 0.59) / 0.25;
@@ -204,9 +210,16 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
   // Header fade animation for features section
   const getHeaderFadeAnimation = useCallback(() => {
     if (scrollProgress < 0.59) return { opacity: 0, transform: 20, panUpTransform: 0 };
+    
+    // Parallax scroll effect from 84-90%
     if (scrollProgress > 0.84) {
-      const panProgress = scrollProgress > 0.84 ? Math.min(1, (scrollProgress - 0.84) / 0.06) : 0;
-      return { opacity: 1, transform: 0, panUpTransform: panProgress * -100 };
+      const panProgress = (scrollProgress - 0.84) / 0.06; // 0 to 1 over 6% scroll
+      const easeOutQuart = 1 - Math.pow(1 - panProgress, 4); // Smooth easing
+      return { 
+        opacity: Math.max(0, 1 - panProgress * 1.5), // Fade out as it moves
+        transform: 0, 
+        panUpTransform: easeOutQuart * -200 // Header moves up faster for parallax
+      };
     }
     
     const phaseProgress = (scrollProgress - 0.59) / 0.25;

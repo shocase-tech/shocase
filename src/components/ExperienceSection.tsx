@@ -234,18 +234,13 @@ const NewExperienceSection = () => {
 
         {/* PHASE 2: Features Grid Section */}
         {currentPhase === 2 && (
-          <div 
-            className="absolute inset-0 py-24 px-6 transition-transform duration-300 ease-out"
-            style={{
-              transform: `translateY(${headerAnim.panUpTransform || 0}px)`,
-            }}
-          >
+          <div className="absolute inset-0 py-24 px-6">
             <div className="max-w-7xl mx-auto h-full flex flex-col justify-center">
               <div 
-                className="text-center mb-16 transition-all duration-500"
+                className="text-center mb-16 transition-all duration-300 ease-out"
                 style={{
                   opacity: headerAnim.opacity,
-                  transform: `translateY(${headerAnim.transform}px)`,
+                  transform: `translateY(${headerAnim.transform + (headerAnim.panUpTransform || 0)}px)`,
                 }}
               >
                 <div className="flex items-center justify-center">
@@ -267,7 +262,7 @@ const NewExperienceSection = () => {
                       className="group hover:shadow-card transition-all duration-300 border-glass bg-gradient-card backdrop-blur-sm"
                       style={{
                         opacity: cardAnim.opacity,
-                        transform: `translateY(-${cardAnim.transform}px)`,
+                        transform: `translateY(-${cardAnim.transform + (cardAnim.panUpTransform || 0)}px)`,
                       }}
                     >
                       <CardContent className="p-6">
@@ -302,7 +297,7 @@ const NewExperienceSection = () => {
                       className="group hover:shadow-card transition-all duration-300 border-glass bg-gradient-card backdrop-blur-sm"
                       style={{
                         opacity: cardAnim.opacity,
-                        transform: `translateY(-${cardAnim.transform}px)`,
+                        transform: `translateY(-${cardAnim.transform + (cardAnim.panUpTransform || 0)}px)`,
                       }}
                     >
                       <CardContent className="p-4">
