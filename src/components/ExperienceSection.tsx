@@ -103,9 +103,8 @@ const NewExperienceSection = () => {
         </div>
       )}
 
-      {/* Single container with phase switching - positioning controlled by JavaScript */}
-      <div className="h-screen overflow-hidden"
-           style={{ position: isLocked ? 'fixed' : 'relative' }}>
+      {/* Single sticky container with phase switching */}
+      <div className="sticky top-0 h-screen overflow-hidden">
         {/* PHASE 1: Actions Section */}
         {currentPhase === 0 && (
           <div className="absolute inset-0 flex items-center">
