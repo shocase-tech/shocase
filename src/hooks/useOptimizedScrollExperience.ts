@@ -77,16 +77,19 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
       document.body.style.overflow = 'unset';
       // Reset positioning immediately to allow natural scroll flow
       if (elementRef.current) {
-        elementRef.current.style.position = 'relative';
-        elementRef.current.style.top = 'unset';
-        elementRef.current.style.left = 'unset';
-        elementRef.current.style.right = 'unset';
-        elementRef.current.style.zIndex = 'unset';
-        elementRef.current.style.width = 'unset';
-        elementRef.current.style.height = 'unset';
+        const element = elementRef.current;
+        element.style.position = 'static';
+        element.style.top = 'unset';
+        element.style.left = 'unset';
+        element.style.right = 'unset';
+        element.style.zIndex = 'unset';
+        element.style.width = 'unset';
+        element.style.height = 'unset';
       }
-      // Allow immediate scroll to next section without timeout
-      window.scrollBy(0, 1);
+      // Force scroll unlock and allow progression to CTA section
+      setTimeout(() => {
+        window.scrollBy(0, 50);
+      }, 100);
     }
     
     // Unlock when at beginning and scrolling up - smooth transition to previous section
@@ -96,7 +99,7 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
       document.body.style.overflow = 'unset';
       // Reset positioning immediately
       if (elementRef.current) {
-        elementRef.current.style.position = 'relative';
+        elementRef.current.style.position = 'static';
         elementRef.current.style.top = 'unset';
         elementRef.current.style.left = 'unset';
         elementRef.current.style.right = 'unset';
@@ -209,7 +212,7 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
       // Cleanup
       document.body.style.overflow = 'unset';
       if (elementRef.current) {
-        elementRef.current.style.position = 'relative';
+        elementRef.current.style.position = 'static';
         elementRef.current.style.top = 'unset';
         elementRef.current.style.left = 'unset';
         elementRef.current.style.right = 'unset';
