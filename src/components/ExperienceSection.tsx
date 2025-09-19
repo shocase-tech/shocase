@@ -1,8 +1,11 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Camera, Video, Music, Calendar, Users, Globe, Phone, Sparkles, Zap } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Camera, Video, Music, Calendar, Users, Globe, Phone, Sparkles, Zap, ArrowRight } from "lucide-react";
 import { useOptimizedScrollExperience } from "@/hooks/useOptimizedScrollExperience";
+import { useNavigate } from "react-router-dom";
 import microphoneImage from "@/assets/microphone.png";
+import showcaseLogo from "@/assets/shocase-logo-new.png";
 
 const features = [
   {
@@ -64,6 +67,7 @@ const features = [
 ];
 
 const NewExperienceSection = () => {
+  const navigate = useNavigate();
   const { 
     scrollProgress, 
     currentPhase,
@@ -72,12 +76,14 @@ const NewExperienceSection = () => {
     getActionsAnimation,
     getMessageAnimation,
     getFeatureAnimation,
-    getHeaderFadeAnimation
+    getHeaderFadeAnimation,
+    getCTAAnimation
   } = useOptimizedScrollExperience();
 
   const actionsAnim = getActionsAnimation();
   const messageAnim = getMessageAnimation();
   const headerAnim = getHeaderFadeAnimation();
+  const ctaAnim = getCTAAnimation();
 
   return (
     <section 
@@ -272,6 +278,85 @@ const NewExperienceSection = () => {
                     </Card>
                   );
                 })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* PHASE 4: CTA/Footer Section */}
+        {currentPhase === 3 && (
+          <div className="absolute inset-0 flex flex-col justify-center">
+            {/* CTA Section */}
+            <div 
+              className="flex-1 flex items-center justify-center px-6"
+              style={{
+                opacity: ctaAnim.opacity,
+                transform: `translateY(${ctaAnim.transform}px)`,
+              }}
+            >
+              <div className="max-w-2xl mx-auto text-center">
+                <Card className="bg-gradient-card backdrop-blur-glass border border-glass">
+                  <CardContent className="p-8">
+                    <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+                      Ready to Create Your Press Kit?
+                    </h2>
+                    <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
+                      Join thousands of artists who've already created professional press kits with our platform. 
+                      Start with our free plan and upgrade when you're ready.
+                    </p>
+                    
+                    <div className="flex justify-center">
+                      <Button 
+                        variant="hero" 
+                        size="lg" 
+                        className="group"
+                        onClick={() => navigate("/auth")}
+                      >
+                        Start Building Now
+                        <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+
+            {/* Footer Section */}
+            <div 
+              className="border-t border-glass bg-background/50 backdrop-blur-sm"
+              style={{
+                opacity: ctaAnim.opacity,
+                transform: `translateY(${ctaAnim.transform}px)`,
+              }}
+            >
+              <div className="max-w-7xl mx-auto px-6 py-8">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                  {/* Left - Logo */}
+                  <div className="flex items-center">
+                    <img 
+                      src={showcaseLogo} 
+                      alt="Shocase" 
+                      className="h-8 w-auto opacity-80"
+                    />
+                  </div>
+
+                  {/* Center - Copyright */}
+                  <div className="text-center">
+                    <p className="text-muted-foreground text-sm">
+                      © 2025 Shocase. All rights reserved.
+                    </p>
+                  </div>
+
+                  {/* Right - Contact */}
+                  <div className="text-center md:text-right">
+                    <a 
+                      href="mailto:shocase.artists@gmail.com"
+                      className="text-foreground text-sm font-medium hover:text-primary transition-colors duration-200"
+                    >
+                      Contact
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

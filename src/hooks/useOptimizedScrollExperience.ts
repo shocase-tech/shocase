@@ -18,7 +18,7 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
   const animationFrameRef = useRef<number>();
   
   // Total scroll distance for the entire experience (much larger for scroll resistance)
-  const totalScrollDistance = 8000;
+  const totalScrollDistance = 12000;
   
   // Throttled scroll handler for better performance
   const updateScrollProgress = useCallback(() => {
@@ -58,17 +58,18 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
     
     e.preventDefault();
     
-    const delta = e.deltaY * 0.3; // Add scroll resistance - much slower progression
+    const delta = e.deltaY * 0.2; // Add scroll resistance - much slower progression
     const newAccumulated = Math.max(0, Math.min(totalScrollDistance, accumulatedScrollRef.current + delta));
     accumulatedScrollRef.current = newAccumulated;
     
     const progress = newAccumulated / totalScrollDistance;
     setScrollProgress(progress);
     
-    // Update current phase - ensure exact 33.33% boundaries
-    if (progress <= 0.3333) setCurrentPhase(0);
-    else if (progress <= 0.6666) setCurrentPhase(1);
-    else setCurrentPhase(2);
+    // Update current phase - 4 equal phases (25/50/75/100)
+    if (progress <= 0.25) setCurrentPhase(0);
+    else if (progress <= 0.5) setCurrentPhase(1);
+    else if (progress <= 0.75) setCurrentPhase(2);
+    else setCurrentPhase(3);
     
     // Unlock when reaching end and scrolling down - smooth transition to next section
     if (newAccumulated >= totalScrollDistance && delta > 0) {
@@ -109,11 +110,11 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
     }
   }, [totalScrollDistance]);
   
-  // Phase 1: Actions animation (0-33%)
+  // Phase 1: Actions animation (0-25%)
   const getActionsAnimation = useCallback(() => {
-    if (scrollProgress > 0.33) return { microphoneOpacity: 0, elevateOpacity: 1, bookShowsOpacity: 1, buildBrandOpacity: 1 };
+    if (scrollProgress > 0.25) return { microphoneOpacity: 0, elevateOpacity: 1, bookShowsOpacity: 1, buildBrandOpacity: 1 };
     
-    const phaseProgress = scrollProgress / 0.33;
+    const phaseProgress = scrollProgress / 0.25;
     return {
       microphoneOpacity: Math.max(0, 0.7 - phaseProgress * 0.3),
       elevateOpacity: Math.min(1, Math.max(0, (phaseProgress - 0.1) / 0.25)),
@@ -122,12 +123,12 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
     };
   }, [scrollProgress]);
   
-  // Phase 2: Message animation (33-67%) - much slower movement with extended center pause
+  // Phase 2: Message animation (25-50%) - much slower movement with extended center pause
   const getMessageAnimation = useCallback(() => {
-    if (scrollProgress < 0.33) return { horizontalPosition: -100, opacity: 0 };
-    if (scrollProgress > 0.67) return { horizontalPosition: 100, opacity: 0 };
+    if (scrollProgress < 0.25) return { horizontalPosition: -100, opacity: 0 };
+    if (scrollProgress > 0.5) return { horizontalPosition: 100, opacity: 0 };
     
-    const phaseProgress = (scrollProgress - 0.33) / 0.34;
+    const phaseProgress = (scrollProgress - 0.25) / 0.25;
     let horizontalPosition = -100;
     
     if (phaseProgress < 0.3) {
@@ -151,11 +152,12 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
     };
   }, [scrollProgress]);
   
-  // Phase 3: Features animation (67-100%) - visible throughout with staggered entry
+  // Phase 3: Features animation (50-75%) - visible throughout with staggered entry
   const getFeatureAnimation = useCallback((cardIndex: number) => {
-    if (scrollProgress < 0.67) return { opacity: 0, transform: 40 };
+    if (scrollProgress < 0.5) return { opacity: 0, transform: 40 };
+    if (scrollProgress > 0.75) return { opacity: 1, transform: 0 };
     
-    const phaseProgress = (scrollProgress - 0.67) / 0.33;
+    const phaseProgress = (scrollProgress - 0.5) / 0.25;
     const totalCards = 8;
     const staggerDelay = cardIndex / totalCards * 0.2; // Reduced stagger for smoother effect
     const animationDuration = 0.3;
@@ -170,14 +172,28 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
   
   // Header fade animation for features section
   const getHeaderFadeAnimation = useCallback(() => {
-    if (scrollProgress < 0.67) return { opacity: 0, transform: 20 };
+    if (scrollProgress < 0.5) return { opacity: 0, transform: 20 };
+    if (scrollProgress > 0.75) return { opacity: 1, transform: 0 };
     
-    const phaseProgress = (scrollProgress - 0.67) / 0.33;
+    const phaseProgress = (scrollProgress - 0.5) / 0.25;
     const fadeProgress = Math.min(1, phaseProgress / 0.2); // Fade in quickly
     
     return {
       opacity: fadeProgress,
       transform: (1 - fadeProgress) * 20,
+    };
+  }, [scrollProgress]);
+
+  // Phase 4: CTA/Footer animation (75-100%)
+  const getCTAAnimation = useCallback(() => {
+    if (scrollProgress < 0.75) return { opacity: 0, transform: 40 };
+    
+    const phaseProgress = (scrollProgress - 0.75) / 0.25;
+    const fadeProgress = Math.min(1, phaseProgress / 0.3); // Fade in quickly
+    
+    return {
+      opacity: fadeProgress,
+      transform: (1 - fadeProgress) * 40,
     };
   }, [scrollProgress]);
   
@@ -229,5 +245,6 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
     getMessageAnimation,
     getFeatureAnimation,
     getHeaderFadeAnimation,
+    getCTAAnimation,
   };
 };
