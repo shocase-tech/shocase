@@ -23,8 +23,8 @@ const HeroSection = () => {
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
     
-    const deltaX = (e.clientX - centerX) * 0.1;
-    const deltaY = (e.clientY - centerY) * 0.1;
+    const deltaX = (e.clientX - centerX) * 0.03;
+    const deltaY = (e.clientY - centerY) * 0.03;
     
     setLogoTransform(`translate(${deltaX}px, ${deltaY}px)`);
   };
@@ -39,7 +39,8 @@ const HeroSection = () => {
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: `url(${stageLightingBackground})`
+          backgroundImage: `url(${stageLightingBackground})`,
+          opacity: 0.8
         }}
       />
 
@@ -47,7 +48,7 @@ const HeroSection = () => {
       <div className="relative z-10 flex flex-col items-center justify-center text-center px-6 space-y-8">
         {/* Logo with hover effect */}
         <div
-          className="cursor-pointer transition-transform duration-300 ease-out"
+          className="cursor-pointer transition-transform duration-700 ease-out"
           style={{
             transform: logoTransform,
           }}
