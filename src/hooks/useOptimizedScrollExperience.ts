@@ -110,26 +110,42 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
   // Phase 0: Actions animation (0-34%)
   const getActionsAnimation = useCallback(() => {
     if (scrollProgress > 0.34) {
-      // Parallax pan up effect from 27-34%
-      const panProgress = Math.min(1, (scrollProgress - 0.27) / 0.07);
+      // Fully scrolled off screen after phase 0
       return { 
         microphoneOpacity: 0, 
-        elevateOpacity: 1, 
-        bookShowsOpacity: 1, 
-        buildBrandOpacity: 1,
-        panUpTransform: panProgress * -100 // Pan everything up
+        elevateOpacity: 0, 
+        bookShowsOpacity: 0, 
+        buildBrandOpacity: 0,
+        microphoneTransform: -200, // Microphone moves faster (parallax)
+        textTransform: -150 // Text moves slower
       };
     }
     
     const phaseProgress = scrollProgress / 0.34;
-    const panProgress = scrollProgress > 0.27 ? (scrollProgress - 0.27) / 0.07 : 0;
+    
+    // Regular animations until 27%
+    if (scrollProgress < 0.27) {
+      return {
+        microphoneOpacity: Math.max(0, 0.7 - phaseProgress * 0.3),
+        elevateOpacity: scrollProgress >= 0.09 ? 1 : Math.max(0, (scrollProgress - 0.05) / 0.04),
+        bookShowsOpacity: scrollProgress >= 0.18 ? 1 : Math.max(0, (scrollProgress - 0.14) / 0.04),
+        buildBrandOpacity: scrollProgress >= 0.27 ? 1 : Math.max(0, (scrollProgress - 0.23) / 0.04),
+        microphoneTransform: 0,
+        textTransform: 0
+      };
+    }
+    
+    // Parallax scroll effect from 27-34%
+    const panProgress = (scrollProgress - 0.27) / 0.07; // 0 to 1 over 7% scroll
+    const easeOutQuart = 1 - Math.pow(1 - panProgress, 4); // Smooth easing
     
     return {
-      microphoneOpacity: Math.max(0, 0.7 - phaseProgress * 0.3),
-      elevateOpacity: scrollProgress >= 0.09 ? 1 : Math.max(0, (scrollProgress - 0.05) / 0.04),
-      bookShowsOpacity: scrollProgress >= 0.18 ? 1 : Math.max(0, (scrollProgress - 0.14) / 0.04),
-      buildBrandOpacity: scrollProgress >= 0.27 ? 1 : Math.max(0, (scrollProgress - 0.23) / 0.04),
-      panUpTransform: panProgress * -100
+      microphoneOpacity: Math.max(0, 0.4 - panProgress), // Fade out as it moves
+      elevateOpacity: Math.max(0, 1 - panProgress * 1.5), // Fade out faster
+      bookShowsOpacity: Math.max(0, 1 - panProgress * 1.5),
+      buildBrandOpacity: Math.max(0, 1 - panProgress * 1.5),
+      microphoneTransform: easeOutQuart * -200, // Microphone moves faster (parallax)
+      textTransform: easeOutQuart * -150 // Text moves slower for parallax effect
     };
   }, [scrollProgress]);
   
