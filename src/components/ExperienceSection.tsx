@@ -138,9 +138,14 @@ const NewExperienceSection = () => {
 
       {/* Single sticky container with phase switching */}
       <div className="sticky top-0 h-screen overflow-hidden">
-        {/* PHASE 1: Actions Section */}
+        {/* PHASE 0: Actions Section */}
         {currentPhase === 0 && (
-          <div className="absolute inset-0 flex items-center">
+          <div 
+            className="absolute inset-0 flex items-center transition-transform duration-300 ease-out"
+            style={{
+              transform: `translateY(${actionsAnim.panUpTransform || 0}px)`,
+            }}
+          >
             {/* Microphone - Better sized, bottom-right positioned with bottom cropped */}
             <div 
               className="absolute -bottom-10 -right-20 pointer-events-none transition-opacity duration-300 overflow-hidden"
@@ -202,7 +207,7 @@ const NewExperienceSection = () => {
           </div>
         )}
 
-        {/* PHASE 2: Message Section */}
+        {/* PHASE 1: Message Section */}
         {currentPhase === 1 && (
           <div className="absolute inset-0 flex items-center justify-center">
             <div 
@@ -227,9 +232,14 @@ const NewExperienceSection = () => {
           </div>
         )}
 
-        {/* PHASE 3: Features Grid Section */}
+        {/* PHASE 2: Features Grid Section */}
         {currentPhase === 2 && (
-          <div className="absolute inset-0 py-24 px-6">
+          <div 
+            className="absolute inset-0 py-24 px-6 transition-transform duration-300 ease-out"
+            style={{
+              transform: `translateY(${headerAnim.panUpTransform || 0}px)`,
+            }}
+          >
             <div className="max-w-7xl mx-auto h-full flex flex-col justify-center">
               <div 
                 className="text-center mb-16 transition-all duration-500"
@@ -240,13 +250,14 @@ const NewExperienceSection = () => {
               >
                 <div className="flex items-center justify-center">
                   <Zap className="w-10 h-10 text-primary mr-4" />
-                  <h2 className="text-6xl md:text-7xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                  <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold bg-gradient-primary bg-clip-text text-transparent">
                     Everything You Need
                   </h2>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {/* Desktop Grid: 4x2 */}
+              <div className="hidden md:grid grid-cols-4 gap-8">
                 {features.map((feature, index) => {
                   const cardAnim = getFeatureAnimation(index);
                   
@@ -256,7 +267,7 @@ const NewExperienceSection = () => {
                       className="group hover:shadow-card transition-all duration-300 border-glass bg-gradient-card backdrop-blur-sm"
                       style={{
                         opacity: cardAnim.opacity,
-                        transform: `translateY(-${cardAnim.transform}px)`, // Move UP not down
+                        transform: `translateY(-${cardAnim.transform}px)`,
                       }}
                     >
                       <CardContent className="p-6">
@@ -279,11 +290,43 @@ const NewExperienceSection = () => {
                   );
                 })}
               </div>
+
+              {/* Mobile Grid: 2x4 - Compact version */}
+              <div className="md:hidden grid grid-cols-2 gap-4">
+                {features.map((feature, index) => {
+                  const cardAnim = getFeatureAnimation(index);
+                  
+                  return (
+                    <Card 
+                      key={index}
+                      className="group hover:shadow-card transition-all duration-300 border-glass bg-gradient-card backdrop-blur-sm"
+                      style={{
+                        opacity: cardAnim.opacity,
+                        transform: `translateY(-${cardAnim.transform}px)`,
+                      }}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="w-10 h-10 rounded-xl bg-glass border border-glass flex items-center justify-center group-hover:shadow-glow transition-all duration-300">
+                            <feature.icon className={`w-5 h-5 ${feature.color}`} />
+                          </div>
+                          <Badge variant="secondary" className="text-xs">
+                            {feature.badge}
+                          </Badge>
+                        </div>
+                        <h3 className="text-sm font-semibold text-foreground">
+                          {feature.title}
+                        </h3>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
             </div>
           </div>
         )}
 
-        {/* PHASE 4: CTA/Footer Section */}
+        {/* PHASE 3: CTA/Footer Section */}
         {currentPhase === 3 && (
           <div className="absolute inset-0 flex flex-col justify-center">
             {/* CTA Section */}

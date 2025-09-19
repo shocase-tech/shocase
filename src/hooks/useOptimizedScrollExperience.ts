@@ -65,29 +65,26 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
     const progress = newAccumulated / totalScrollDistance;
     setScrollProgress(progress);
     
-    // Update current phase - 4 equal phases (25/50/75/100)
-    if (progress <= 0.25) setCurrentPhase(0);
-    else if (progress <= 0.5) setCurrentPhase(1);
-    else if (progress <= 0.75) setCurrentPhase(2);
+    // Update current phase with new boundaries
+    if (progress <= 0.34) setCurrentPhase(0);
+    else if (progress <= 0.59) setCurrentPhase(1);
+    else if (progress <= 0.84) setCurrentPhase(2);
     else setCurrentPhase(3);
     
-    // Unlock when reaching end and scrolling down - smooth transition to next section
-    if (newAccumulated >= totalScrollDistance && delta > 0) {
-      isLockedRef.current = false;
-      setIsLocked(false);
-      document.body.style.overflow = 'unset';
-      // Reset positioning immediately to allow natural scroll flow
-      if (elementRef.current) {
-        elementRef.current.style.position = 'relative';
-        elementRef.current.style.top = 'unset';
-        elementRef.current.style.left = 'unset';
-        elementRef.current.style.right = 'unset';
-        elementRef.current.style.zIndex = 'unset';
-        elementRef.current.style.width = 'unset';
-        elementRef.current.style.height = 'unset';
+    // Hard stop at 100% - this is the bottom of the landing page
+    if (newAccumulated >= totalScrollDistance) {
+      // Lock at exactly 100% - no further scrolling allowed
+      accumulatedScrollRef.current = totalScrollDistance;
+      setScrollProgress(1);
+      setCurrentPhase(3);
+      
+      // Only unlock if scrolling up from 100%
+      if (delta < 0) {
+        // Allow slight scroll back into the experience
+        const backScrollAmount = Math.min(100, -delta);
+        accumulatedScrollRef.current = totalScrollDistance - backScrollAmount;
       }
-      // Allow immediate scroll to next section without timeout
-      window.scrollBy(0, 1);
+      return; // Prevent any downward scrolling past 100%
     }
     
     // Unlock when at beginning and scrolling up - smooth transition to previous section
@@ -110,25 +107,38 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
     }
   }, [totalScrollDistance]);
   
-  // Phase 1: Actions animation (0-25%)
+  // Phase 0: Actions animation (0-34%)
   const getActionsAnimation = useCallback(() => {
-    if (scrollProgress > 0.25) return { microphoneOpacity: 0, elevateOpacity: 1, bookShowsOpacity: 1, buildBrandOpacity: 1 };
+    if (scrollProgress > 0.34) {
+      // Parallax pan up effect from 27-34%
+      const panProgress = Math.min(1, (scrollProgress - 0.27) / 0.07);
+      return { 
+        microphoneOpacity: 0, 
+        elevateOpacity: 1, 
+        bookShowsOpacity: 1, 
+        buildBrandOpacity: 1,
+        panUpTransform: panProgress * -100 // Pan everything up
+      };
+    }
     
-    const phaseProgress = scrollProgress / 0.25;
+    const phaseProgress = scrollProgress / 0.34;
+    const panProgress = scrollProgress > 0.27 ? (scrollProgress - 0.27) / 0.07 : 0;
+    
     return {
       microphoneOpacity: Math.max(0, 0.7 - phaseProgress * 0.3),
-      elevateOpacity: Math.min(1, Math.max(0, (phaseProgress - 0.1) / 0.25)),
-      bookShowsOpacity: Math.min(1, Math.max(0, (phaseProgress - 0.4) / 0.25)),
-      buildBrandOpacity: Math.min(1, Math.max(0, (phaseProgress - 0.7) / 0.25)),
+      elevateOpacity: scrollProgress >= 0.09 ? 1 : Math.max(0, (scrollProgress - 0.05) / 0.04),
+      bookShowsOpacity: scrollProgress >= 0.18 ? 1 : Math.max(0, (scrollProgress - 0.14) / 0.04),
+      buildBrandOpacity: scrollProgress >= 0.27 ? 1 : Math.max(0, (scrollProgress - 0.23) / 0.04),
+      panUpTransform: panProgress * -100
     };
   }, [scrollProgress]);
   
-  // Phase 2: Message animation (25-50%) - much slower movement with extended center pause
+  // Phase 1: Message animation (34-59%) - much slower movement with extended center pause
   const getMessageAnimation = useCallback(() => {
-    if (scrollProgress < 0.25) return { horizontalPosition: -100, opacity: 0 };
-    if (scrollProgress > 0.5) return { horizontalPosition: 100, opacity: 0 };
+    if (scrollProgress < 0.34) return { horizontalPosition: -100, opacity: 0 };
+    if (scrollProgress > 0.59) return { horizontalPosition: 100, opacity: 0 };
     
-    const phaseProgress = (scrollProgress - 0.25) / 0.25;
+    const phaseProgress = (scrollProgress - 0.34) / 0.25;
     let horizontalPosition = -100;
     
     if (phaseProgress < 0.3) {
@@ -152,12 +162,16 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
     };
   }, [scrollProgress]);
   
-  // Phase 3: Features animation (50-75%) - visible throughout with staggered entry
+  // Phase 2: Features animation (59-84%) - visible throughout with staggered entry
   const getFeatureAnimation = useCallback((cardIndex: number) => {
-    if (scrollProgress < 0.5) return { opacity: 0, transform: 40 };
-    if (scrollProgress > 0.75) return { opacity: 1, transform: 0 };
+    if (scrollProgress < 0.59) return { opacity: 0, transform: 40, panUpTransform: 0 };
+    if (scrollProgress > 0.84) {
+      // Parallax pan up effect from 84-90%
+      const panProgress = scrollProgress > 0.84 ? Math.min(1, (scrollProgress - 0.84) / 0.06) : 0;
+      return { opacity: 1, transform: 0, panUpTransform: panProgress * -100 };
+    }
     
-    const phaseProgress = (scrollProgress - 0.5) / 0.25;
+    const phaseProgress = (scrollProgress - 0.59) / 0.25;
     const totalCards = 8;
     const staggerDelay = cardIndex / totalCards * 0.2; // Reduced stagger for smoother effect
     const animationDuration = 0.3;
@@ -167,28 +181,33 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
     return {
       opacity: cardProgress,
       transform: (1 - cardProgress) * 40, // Move up from 40px to 0
+      panUpTransform: 0
     };
   }, [scrollProgress]);
   
   // Header fade animation for features section
   const getHeaderFadeAnimation = useCallback(() => {
-    if (scrollProgress < 0.5) return { opacity: 0, transform: 20 };
-    if (scrollProgress > 0.75) return { opacity: 1, transform: 0 };
+    if (scrollProgress < 0.59) return { opacity: 0, transform: 20, panUpTransform: 0 };
+    if (scrollProgress > 0.84) {
+      const panProgress = scrollProgress > 0.84 ? Math.min(1, (scrollProgress - 0.84) / 0.06) : 0;
+      return { opacity: 1, transform: 0, panUpTransform: panProgress * -100 };
+    }
     
-    const phaseProgress = (scrollProgress - 0.5) / 0.25;
+    const phaseProgress = (scrollProgress - 0.59) / 0.25;
     const fadeProgress = Math.min(1, phaseProgress / 0.2); // Fade in quickly
     
     return {
       opacity: fadeProgress,
       transform: (1 - fadeProgress) * 20,
+      panUpTransform: 0
     };
   }, [scrollProgress]);
 
-  // Phase 4: CTA/Footer animation (75-100%)
+  // Phase 3: CTA/Footer animation (90-100%)
   const getCTAAnimation = useCallback(() => {
-    if (scrollProgress < 0.75) return { opacity: 0, transform: 40 };
+    if (scrollProgress < 0.90) return { opacity: 0, transform: 40 };
     
-    const phaseProgress = (scrollProgress - 0.75) / 0.25;
+    const phaseProgress = (scrollProgress - 0.90) / 0.10;
     const fadeProgress = Math.min(1, phaseProgress / 0.3); // Fade in quickly
     
     return {
