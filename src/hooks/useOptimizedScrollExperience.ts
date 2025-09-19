@@ -10,62 +10,30 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
   const [currentPhase, setCurrentPhase] = useState(0);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
   
   const elementRef = useRef<HTMLElement>(null);
   const isLockedRef = useRef(false);
   const accumulatedScrollRef = useRef(0);
   const lastScrollTimeRef = useRef(0);
   const animationFrameRef = useRef<number>();
+  const isMobile = useRef(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
   
   // Total scroll distance for the entire experience (much larger for scroll resistance)
   const totalScrollDistance = 12000;
   
-  // Throttled scroll handler for better performance
-  const updateScrollProgress = useCallback(() => {
-    if (!elementRef.current) return;
-    
-    const now = performance.now();
-    if (now - lastScrollTimeRef.current < 16) return; // ~60fps throttle
-    lastScrollTimeRef.current = now;
-    
-    const element = elementRef.current;
-    const rect = element.getBoundingClientRect();
-    const windowHeight = window.innerHeight;
-    
-    // Check if element is in view
-    const elementInView = rect.top < windowHeight && rect.bottom > 0;
-    const triggerPoint = windowHeight * threshold;
-    
-    if (elementInView && rect.top <= 0 && !isLockedRef.current) {
-      // Lock scroll when element reaches top of screen
-      isLockedRef.current = true;
-      setIsLocked(true);
-      document.body.style.overflow = 'hidden';
-      accumulatedScrollRef.current = 0;
-      // Prevent any hero section bleed-through - ensure exact top alignment
-      element.style.position = 'fixed';
-      element.style.top = '0px';
-      element.style.left = '0px';
-      element.style.right = '0px';
-      element.style.zIndex = '50';
-      element.style.width = '100vw';
-      element.style.height = '100vh';
-    }
-  }, [threshold]);
-  
-  const handleWheelEvent = useCallback((e: WheelEvent) => {
+  // Shared scroll logic for both wheel and touch events
+  const updateScrollDelta = useCallback((delta: number) => {
     if (!isLockedRef.current) return;
     
-    e.preventDefault();
-    
-    const delta = e.deltaY * 0.2; // Add scroll resistance - much slower progression
-    const newAccumulated = Math.max(0, Math.min(totalScrollDistance, accumulatedScrollRef.current + delta));
+    const scrollDelta = delta * 0.2; // Add scroll resistance - much slower progression
+    const newAccumulated = Math.max(0, Math.min(totalScrollDistance, accumulatedScrollRef.current + scrollDelta));
     accumulatedScrollRef.current = newAccumulated;
     
     const progress = newAccumulated / totalScrollDistance;
     setScrollProgress(progress);
     
-    // Update current phase with new boundaries
+    // Update current phase with boundaries
     if (progress <= 0.34) setCurrentPhase(0);
     else if (progress <= 0.59) setCurrentPhase(1);
     else if (progress <= 0.84) setCurrentPhase(2);
@@ -106,6 +74,68 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
       window.scrollBy(0, -1);
     }
   }, [totalScrollDistance]);
+  
+  // Throttled scroll handler for better performance
+  const updateScrollProgress = useCallback(() => {
+    if (!elementRef.current) return;
+    
+    const now = performance.now();
+    if (now - lastScrollTimeRef.current < 16) return; // ~60fps throttle
+    lastScrollTimeRef.current = now;
+    
+    const element = elementRef.current;
+    const rect = element.getBoundingClientRect();
+    const windowHeight = window.innerHeight;
+    
+    // Check if element is in view
+    const elementInView = rect.top < windowHeight && rect.bottom > 0;
+    const triggerPoint = windowHeight * threshold;
+    
+    if (elementInView && rect.top <= 0 && !isLockedRef.current) {
+      // Lock scroll when element reaches top of screen
+      isLockedRef.current = true;
+      setIsLocked(true);
+      document.body.style.overflow = 'hidden';
+      accumulatedScrollRef.current = 0;
+      // Prevent any hero section bleed-through - ensure exact top alignment
+      element.style.position = 'fixed';
+      element.style.top = '0px';
+      element.style.left = '0px';
+      element.style.right = '0px';
+      element.style.zIndex = '50';
+      element.style.width = '100vw';
+      element.style.height = '100vh';
+    }
+  }, [threshold]);
+  
+  const handleWheelEvent = useCallback((e: WheelEvent) => {
+    if (!isLockedRef.current) return;
+    
+    e.preventDefault();
+    updateScrollDelta(e.deltaY);
+  }, [updateScrollDelta]);
+
+  // Touch event handlers for mobile support
+  const handleTouchStart = useCallback((e: TouchEvent) => {
+    if (!isLockedRef.current) return;
+    setTouchStart(e.touches[0].clientY);
+  }, []);
+
+  const handleTouchMove = useCallback((e: TouchEvent) => {
+    if (!isLockedRef.current || touchStart === null) return;
+    
+    e.preventDefault();
+    
+    const touchCurrent = e.touches[0].clientY;
+    const delta = (touchStart - touchCurrent) * 2; // Simulate wheel deltaY with increased sensitivity
+    
+    updateScrollDelta(delta);
+    setTouchStart(touchCurrent);
+  }, [touchStart, updateScrollDelta]);
+
+  const handleTouchEnd = useCallback(() => {
+    setTouchStart(null);
+  }, []);
   
   // Phase 0: Actions animation (0-34%)
   const getActionsAnimation = useCallback(() => {
@@ -259,12 +289,20 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
     window.addEventListener('resize', throttledScroll, { passive: true });
     window.addEventListener('wheel', handleWheelEvent, { passive: false });
     
+    // Add touch event listeners for mobile support
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+    window.addEventListener('touchend', handleTouchEnd, { passive: true });
+    
     updateScrollProgress();
     
     return () => {
       window.removeEventListener('scroll', throttledScroll);
       window.removeEventListener('resize', throttledScroll);
       window.removeEventListener('wheel', handleWheelEvent);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
       
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
@@ -282,7 +320,7 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
         elementRef.current.style.height = 'unset';
       }
     };
-  }, [updateScrollProgress, handleWheelEvent]);
+  }, [updateScrollProgress, handleWheelEvent, handleTouchStart, handleTouchMove, handleTouchEnd]);
   
   return {
     scrollProgress,
