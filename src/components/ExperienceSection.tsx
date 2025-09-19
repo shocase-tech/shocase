@@ -96,11 +96,38 @@ const NewExperienceSection = () => {
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-tl from-muted/5 via-transparent to-transparent" />
       </div>
 
-      {/* Scroll Progress Indicator */}
+      {/* Progress Indicators */}
       {isLocked && (
-        <div className="fixed top-4 right-4 z-50 bg-primary/10 backdrop-blur-sm rounded-full px-3 py-1 text-sm text-primary border border-primary/20">
-          {Math.round(scrollProgress * 100)}%
-        </div>
+        <>
+          {/* Existing percentage indicator */}
+          <div className="fixed top-4 right-4 z-50 bg-primary/10 backdrop-blur-sm rounded-full px-3 py-1 text-sm text-primary border border-primary/20">
+            {Math.round(scrollProgress * 100)}%
+          </div>
+
+          {/* Vertical Progress Bar - Right Edge */}
+          <div className="fixed top-0 right-0 z-40 w-1 bg-gradient-to-b from-primary/20 to-primary/10">
+            <div 
+              className="w-full bg-primary transition-all duration-150 ease-out shadow-[0_0_8px_2px] shadow-primary/30"
+              style={{ height: `${scrollProgress * 100}%` }}
+            />
+          </div>
+
+          {/* Vinyl Record Progress Indicator */}
+          <div className="fixed top-6 right-16 z-50">
+            <div 
+              className="w-12 h-12 rounded-full border-2 border-muted-foreground/30 transition-all duration-150 ease-out"
+              style={{
+                background: `conic-gradient(from 0deg, hsl(var(--primary)) 0deg, hsl(var(--primary)) ${scrollProgress * 360}deg, transparent ${scrollProgress * 360}deg, transparent 360deg)`,
+                boxShadow: scrollProgress > 0 ? '0 0 12px 2px hsl(var(--primary) / 0.3)' : 'none'
+              }}
+            >
+              {/* Inner circle for vinyl record appearance */}
+              <div className="absolute inset-2 rounded-full bg-background/80 border border-muted-foreground/20">
+                <div className="absolute inset-1/2 w-2 h-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-muted-foreground/40" />
+              </div>
+            </div>
+          </div>
+        </>
       )}
 
       {/* Single sticky container with phase switching */}
