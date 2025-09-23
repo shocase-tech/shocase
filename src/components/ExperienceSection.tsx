@@ -5,7 +5,6 @@ import { Camera, Video, Music, Calendar, Users, Globe, Phone, Sparkles, Zap, Arr
 import { useOptimizedScrollExperience } from "@/hooks/useOptimizedScrollExperience";
 import { useNavigate } from "react-router-dom";
 import microphoneImage from "@/assets/microphone.png";
-import showcaseLogo from "@/assets/shocase-logo-new.png";
 
 const features = [
   {
@@ -105,11 +104,6 @@ const NewExperienceSection = () => {
       {/* Progress Indicators */}
       {isLocked && (
         <>
-          {/* Existing percentage indicator */}
-          <div className="fixed top-4 right-4 z-50 bg-primary/10 backdrop-blur-sm rounded-full px-3 py-1 text-sm text-primary border border-primary/20">
-            {Math.round(scrollProgress * 100)}%
-          </div>
-
           {/* Vertical Progress Bar - Right Edge */}
           <div className="fixed top-0 right-0 z-40 w-1 bg-gradient-to-b from-primary/20 to-primary/10">
             <div 
@@ -132,6 +126,13 @@ const NewExperienceSection = () => {
                 <div className="absolute inset-1/2 w-2 h-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-muted-foreground/40" />
               </div>
             </div>
+          </div>
+
+          {/* Percentage indicator - positioned to the right of vinyl record */}
+          <div className="fixed top-6 right-4 z-50">
+            <span className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+              {Math.round(scrollProgress * 100)}%
+            </span>
           </div>
         </>
       )}
@@ -372,7 +373,7 @@ const NewExperienceSection = () => {
                   {/* Left - Logo */}
                   <div className="flex items-center">
                     <img 
-                      src={showcaseLogo} 
+                      src="/src/assets/shocase-logo-new.png" 
                       alt="Shocase" 
                       className="h-8 w-auto opacity-80"
                     />
