@@ -53,7 +53,7 @@ export default function Dashboard() {
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [userSignupData, setUserSignupData] = useState<{email?: string, phone?: string}>({});
+  const [userSignupData, setUserSignupData] = useState<{email?: string, phone?: string, location?: string}>({});
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -109,7 +109,8 @@ export default function Dashboard() {
       if (session.user.user_metadata) {
         setUserSignupData({
           email: session.user.email,
-          phone: session.user.user_metadata.phone
+          phone: session.user.user_metadata.phone,
+          location: session.user.user_metadata.location
         });
       }
     };
@@ -127,7 +128,8 @@ export default function Dashboard() {
       if (session.user.user_metadata) {
         setUserSignupData({
           email: session.user.email,
-          phone: session.user.user_metadata.phone
+          phone: session.user.user_metadata.phone,
+          location: session.user.user_metadata.location
         });
       }
     });
@@ -385,6 +387,7 @@ export default function Dashboard() {
         onComplete={handleOnboardingComplete}
         userEmail={userSignupData.email}
         userPhone={userSignupData.phone}
+        userLocation={userSignupData.location}
       />
     );
   }

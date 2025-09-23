@@ -15,6 +15,7 @@ interface OnboardingWizardProps {
   onComplete: (profile: any) => void;
   userEmail?: string;
   userPhone?: string;
+  userLocation?: string;
 }
 
 const STEPS = [
@@ -23,7 +24,7 @@ const STEPS = [
   { id: 3, title: "Your Sound", subtitle: "What genres define your music?" },
 ];
 
-export default function OnboardingWizard({ user, onComplete, userEmail, userPhone }: OnboardingWizardProps) {
+export default function OnboardingWizard({ user, onComplete, userEmail, userPhone, userLocation }: OnboardingWizardProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [artistName, setArtistName] = useState("");
   const [performanceType, setPerformanceType] = useState<"Solo" | "Duo" | "Full Band" | "">("");
@@ -143,12 +144,13 @@ export default function OnboardingWizard({ user, onComplete, userEmail, userPhon
   const handleComplete = async () => {
     setIsLoading(true);
     try {
-      // Final save with all data
+      // Final save with all data including location from signup
       const finalData = {
         user_id: user.id,
         artist_name: artistName || "New Artist",
         performance_type: performanceType || "Solo",
         genre: JSON.stringify(genres),
+        location: userLocation || "",
         contact_info: {
           email: userEmail,
           phone: userPhone

@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import CountryCodeSelector from "@/components/CountryCodeSelector";
@@ -18,6 +18,7 @@ export default function Auth() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [countryCode, setCountryCode] = useState("+1");
   const [birthday, setBirthday] = useState("");
+  const [location, setLocation] = useState("");
   const [loading, setLoading] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -64,9 +65,19 @@ export default function Auth() {
     };
   };
 
+  // Location validation
+  const validateLocation = (location: string) => {
+    const trimmedLocation = location.trim();
+    return {
+      isValid: trimmedLocation.length >= 2,
+      message: trimmedLocation.length < 2 ? "Please enter your city and state/country" : ""
+    };
+  };
+
   const passwordValidation = validatePassword(password);
   const passwordsMatch = password === confirmPassword && confirmPassword !== "";
   const birthdayValidation = validateBirthday(birthday);
+  const locationValidation = validateLocation(location);
 
   useEffect(() => {
     // Redirect to dashboard if already logged in
@@ -145,6 +156,17 @@ export default function Auth() {
       return;
     }
 
+    // Validate location requirement
+    if (!locationValidation.isValid) {
+      toast({
+        title: "Location Required",
+        description: locationValidation.message || "Please enter your location.",
+        variant: "destructive",
+      });
+      setLoading(false);
+      return;
+    }
+
     try {
       const redirectUrl = `${window.location.origin}/`;
       
@@ -155,6 +177,7 @@ export default function Auth() {
           emailRedirectTo: redirectUrl,
           data: {
             birthday,
+            location,
             ...(phoneNumber && { phone: `${countryCode}${phoneNumber}` })
           }
         }
@@ -168,6 +191,15 @@ export default function Auth() {
         title: "Success!",
         description: "Please check your email to confirm your account.",
       });
+      
+      // Reset form
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
+      setPhoneNumber("");
+      setBirthday("");
+      setLocation("");
+      setActiveTab("signin");
     } catch (error: any) {
       toast({
         title: "Error",
@@ -382,6 +414,31 @@ export default function Auth() {
                   </div>
                   
                   <div className="space-y-2">
+                    <Label htmlFor="location">Location</Label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id="location"
+                        type="text"
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                        placeholder="e.g., Nashville, TN or London, UK"
+                        className={`pl-10 transition-all duration-200 focus:ring-2 focus:ring-primary/50 ${
+                          location && !locationValidation.isValid ? "border-destructive" : ""
+                        }`}
+                        required
+                        autoComplete="address-level2"
+                      />
+                    </div>
+                    {location && !locationValidation.isValid && (
+                      <p className="text-xs text-destructive animate-slide-in-up">{locationValidation.message}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      Your location helps with local booking opportunities
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
                     <Label htmlFor="signup-password">Password</Label>
                     <div className="relative">
                       <Input
@@ -480,13 +537,13 @@ export default function Auth() {
                     )}
                   </div>
                   
-                  <Button 
-                    type="submit" 
-                    className="w-full transition-all duration-300 hover:shadow-glow" 
-                    disabled={loading || !passwordValidation.isValid || !passwordsMatch || !birthdayValidation.isValid}
-                  >
-                    {loading ? "Creating Account..." : "Create Account"}
-                  </Button>
+                   <Button 
+                     type="submit" 
+                     className="w-full transition-all duration-300 hover:shadow-glow" 
+                     disabled={loading || !passwordValidation.isValid || !passwordsMatch || !birthdayValidation.isValid || !locationValidation.isValid}
+                   >
+                     {loading ? "Creating Account..." : "Create Account"}
+                   </Button>
                 </form>
               </TabsContent>
             </Tabs>
