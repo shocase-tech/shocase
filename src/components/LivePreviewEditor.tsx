@@ -57,6 +57,9 @@ export default function LivePreviewEditor({
   const editingSection = externalEditingSection !== undefined ? externalEditingSection : internalEditingSection;
   const setEditingSection = onEditingSectionChange || setInternalEditingSection;
   
+  // Add editor switch tracking state
+  const [isSwitchingEditor, setIsSwitchingEditor] = useState(false);
+  
   // Mobile detection
   const isMobile = useIsMobile();
   
@@ -69,13 +72,6 @@ export default function LivePreviewEditor({
       formDataRef.current = { ...formDataRef.current, ...initialFormData };
     }
   }, [initialFormData]);
-  
-  // Temporary debug logging - remove after testing
-  useEffect(() => {
-    if (profile?.streaming_links) {
-      console.log("Streaming links debug:", profile.streaming_links);
-    }
-  }, [profile?.streaming_links]);
   
   // Notify parent of form data changes
   const handleFormDataChange = (newData: Record<string, any>) => {
@@ -119,8 +115,58 @@ export default function LivePreviewEditor({
     enabled: !!user && !!profile
   });
 
-  const handleSectionClick = (sectionId: string) => {
-    setEditingSection(editingSection === sectionId ? null : sectionId);
+  // Enhanced section click handler for seamless editor switching
+  const handleSectionClick = async (sectionId: string) => {
+    console.log("🔍 LivePreviewEditor: Section clicked:", sectionId, "Current editing:", editingSection);
+    
+    // Prevent multiple rapid clicks during switching
+    if (isSwitchingEditor) {
+      console.log("🔍 LivePreviewEditor: Editor switch in progress, ignoring click");
+      return;
+    }
+    
+    // Same section clicked - toggle close
+    if (editingSection === sectionId) {
+      console.log("🔍 LivePreviewEditor: Toggling current section closed");
+      setEditingSection(null);
+      return;
+    }
+    
+    // No current editor - open new one
+    if (!editingSection) {
+      console.log("🔍 LivePreviewEditor: Opening new section:", sectionId);
+      setEditingSection(sectionId);
+      return;
+    }
+    
+    // Different section clicked - seamless switch
+    if (editingSection !== sectionId) {
+      console.log("🔍 LivePreviewEditor: Switching from", editingSection, "to", sectionId);
+      setIsSwitchingEditor(true);
+      
+      try {
+        // Get current editor's form data
+        const currentSectionData = formDataRef.current[editingSection];
+        
+        if (currentSectionData && Object.keys(currentSectionData).length > 0) {
+          // Auto-save current editor
+          console.log("🔍 Auto-saving before switch:", editingSection, "→", sectionId);
+          await new Promise<void>((resolve) => {
+            handleSectionSave(currentSectionData, resolve);
+          });
+        }
+        
+        // Switch to new editor immediately
+        setEditingSection(sectionId);
+        
+      } catch (error) {
+        console.error("🔍 Error during editor switch:", error);
+        // Switch anyway to prevent UI lock-up
+        setEditingSection(sectionId);
+      } finally {
+        setIsSwitchingEditor(false);
+      }
+    }
   };
 
   const handleSectionSave = (updatedData?: any, callback?: () => void) => {
@@ -358,6 +404,7 @@ export default function LivePreviewEditor({
             onCancel={() => setEditingSection(null)}
             initialFormData={formDataRef.current[sectionId]}
             onFormDataChange={(data) => handleFormDataChange({ [sectionId]: data })}
+            isSwitchingEditor={isSwitchingEditor}
           />
         </div>
       );
@@ -421,6 +468,7 @@ export default function LivePreviewEditor({
                 isInitialSetup={true}
                 initialFormData={formDataRef.current['basic']}
                 onFormDataChange={(data) => handleFormDataChange({ basic: data })}
+                isSwitchingEditor={isSwitchingEditor}
               />
             </div>
           )}

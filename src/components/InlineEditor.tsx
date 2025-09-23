@@ -36,6 +36,7 @@ interface InlineEditorProps {
   initialFormData?: Record<string, any>;
   onFormDataChange?: (data: Record<string, any>) => void;
   isInMobileModal?: boolean;
+  isSwitchingEditor?: boolean; // Add this new prop
 }
 
 export default function InlineEditor({ 
@@ -47,7 +48,8 @@ export default function InlineEditor({
   isInitialSetup = false, 
   initialFormData,
   onFormDataChange,
-  isInMobileModal = false
+  isInMobileModal = false,
+  isSwitchingEditor = false
 }: InlineEditorProps) {
   const [formData, setFormData] = useState<any>({});
   const [loading, setLoading] = useState(false);
@@ -298,7 +300,12 @@ export default function InlineEditor({
   // Auto-save and close handler
   const handleAutoSaveAndClose = useCallback(async () => {
     console.log("🔍 InlineEditor: Click-outside detected, handleAutoSaveAndClose called");
-    if (isSaving) return; // Prevent multiple saves
+    
+    // Don't auto-close if we're in the middle of switching editors
+    if (isSwitchingEditor || isSaving) {
+      console.log("🔍 InlineEditor: Ignoring click-outside during editor switch or save");
+      return;
+    }
     
     console.log("🔍 InlineEditor: Current form data before save:", formData);
     console.log("🔍 InlineEditor: Section ID:", sectionId);
@@ -321,7 +328,7 @@ export default function InlineEditor({
     } finally {
       setIsSaving(false);
     }
-  }, [isSaving, onCancel, formData, sectionId]);
+  }, [isSaving, onCancel, formData, sectionId, isSwitchingEditor]);
   
   // Click outside detection
   const editorRef = useClickOutside<HTMLDivElement>(handleAutoSaveAndClose);
