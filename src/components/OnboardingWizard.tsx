@@ -321,16 +321,12 @@ export default function OnboardingWizard({ user, onComplete, userEmail, userPhon
                 <h2 className="text-3xl font-bold mb-2 text-center">{STEPS[2].title}</h2>
                 <p className="text-muted-foreground text-center mb-8">{STEPS[2].subtitle}</p>
                 <div className="w-full max-w-md">
-                  {genres.length < 5 && (
-                    <GenreInput
-                      genres={genres}
-                      onChange={(newGenres) => setGenres(newGenres.slice(0, 5))}
-                      placeholder="Type genre and press Enter"
-                    />
-                  )}
-                  <p className="text-xs text-muted-foreground mt-2 text-center">
-                    Press Enter to add genre • {genres.length}/5 genres
-                  </p>
+                  <GenreInput
+                    genres={genres}
+                    onChange={(newGenres) => setGenres(newGenres.slice(0, 5))}
+                    placeholder="Type genre and press Enter"
+                    maxGenres={5}
+                  />
                 </div>
               </div>
             </div>

@@ -7,9 +7,10 @@ interface GenreInputProps {
   genres: string[];
   onChange: (genres: string[]) => void;
   placeholder?: string;
+  maxGenres?: number;
 }
 
-export default function GenreInput({ genres, onChange, placeholder = "Type genre and press Enter to add" }: GenreInputProps) {
+export default function GenreInput({ genres, onChange, placeholder = "Type genre and press Enter to add", maxGenres = 10 }: GenreInputProps) {
   const [inputValue, setInputValue] = useState("");
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -23,7 +24,7 @@ export default function GenreInput({ genres, onChange, placeholder = "Type genre
 
   const addGenre = () => {
     const newGenre = inputValue.trim();
-    if (newGenre && !genres.includes(newGenre) && genres.length < 10) {
+    if (newGenre && !genres.includes(newGenre) && genres.length < maxGenres) {
       onChange([...genres, newGenre]);
       setInputValue("");
     }
@@ -56,12 +57,12 @@ export default function GenreInput({ genres, onChange, placeholder = "Type genre
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder={genres.length >= 10 ? "Maximum 10 genres reached" : placeholder}
-        disabled={genres.length >= 10}
+        placeholder={genres.length >= maxGenres ? `Maximum ${maxGenres} genres reached` : placeholder}
+        disabled={genres.length >= maxGenres}
         className="w-full"
       />
       <p className="text-xs text-muted-foreground">
-        Press Enter to add genre • {genres.length}/10 genres
+        Press Enter to add genre • {genres.length}/{maxGenres} genres
       </p>
     </div>
   );
