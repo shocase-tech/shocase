@@ -179,8 +179,8 @@ export function PublishModal({
               </div>
             )}
 
-            {/* SUCCESS STATE */}
-            {modalState === 'success' && !isPublished && (
+            {/* PUBLISH SUCCESS STATE */}
+            {modalState === 'success' && isPublished && (
               <div className="text-center space-y-6">
                 <div className="flex justify-center">
                   <div className="w-16 h-16 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center">
@@ -211,7 +211,7 @@ export function PublishModal({
             )}
 
             {/* UNPUBLISH SUCCESS STATE */}
-            {modalState === 'success' && isPublished && (
+            {modalState === 'success' && !isPublished && (
               <div className="text-center space-y-6">
                 <div className="flex justify-center">
                   <div className="w-16 h-16 rounded-full bg-gray-500/10 border border-gray-500/20 flex items-center justify-center">
