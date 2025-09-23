@@ -19,14 +19,20 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
   const animationFrameRef = useRef<number>();
   const isMobile = useRef(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
   
-  // Total scroll distance for the entire experience (much larger for scroll resistance)
-  const totalScrollDistance = 12000;
+  // Total scroll distance for the entire experience - optimized for mobile vs desktop
+  const totalScrollDistance = isMobile.current ? 5000 : 12000;
+  
+  // Scroll resistance multiplier - much more responsive on mobile
+  const scrollMultiplier = isMobile.current ? 0.7 : 0.2;
+  
+  // Touch sensitivity multiplier for mobile devices
+  const touchSensitivity = isMobile.current ? 5 : 2;
   
   // Shared scroll logic for both wheel and touch events
   const updateScrollDelta = useCallback((delta: number) => {
     if (!isLockedRef.current) return;
     
-    const scrollDelta = delta * 0.2; // Add scroll resistance - much slower progression
+    const scrollDelta = delta * scrollMultiplier; // Device-optimized scroll resistance
     const newAccumulated = Math.max(0, Math.min(totalScrollDistance, accumulatedScrollRef.current + scrollDelta));
     accumulatedScrollRef.current = newAccumulated;
     
@@ -73,7 +79,7 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
       // Allow scroll to previous section
       window.scrollBy(0, -1);
     }
-  }, [totalScrollDistance]);
+  }, [totalScrollDistance, scrollMultiplier]);
   
   // Throttled scroll handler for better performance
   const updateScrollProgress = useCallback(() => {
@@ -127,11 +133,11 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
     e.preventDefault();
     
     const touchCurrent = e.touches[0].clientY;
-    const delta = (touchStart - touchCurrent) * 2; // Simulate wheel deltaY with increased sensitivity
+    const delta = (touchStart - touchCurrent) * touchSensitivity; // Device-optimized touch sensitivity
     
     updateScrollDelta(delta);
     setTouchStart(touchCurrent);
-  }, [touchStart, updateScrollDelta]);
+  }, [touchStart, updateScrollDelta, touchSensitivity]);
 
   const handleTouchEnd = useCallback(() => {
     setTouchStart(null);
