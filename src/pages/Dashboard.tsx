@@ -509,18 +509,27 @@ export default function Dashboard() {
           {profile && (
             <Card ref={progressCardRef} className="glass-card border-white/10 animate-slide-in-up">
               <CardContent className="pt-4 md:pt-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
+                 <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-2">
                     <h2 className="text-base md:text-lg font-semibold">Your kit is {completionPercentage}% complete</h2>
-                    <p className="text-xs md:text-sm text-muted-foreground">
-                      {completedMilestones} of {milestones.length} milestones completed
-                    </p>
+                    {!profile.is_published && (
+                      <Button
+                        onClick={() => setShowPreviewModal(true)}
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-2 text-xs transition-all duration-200"
+                      >
+                        <Eye className="w-3 h-3" />
+                        Preview
+                      </Button>
+                    )}
                   </div>
                   <div className="text-xl md:text-2xl font-bold text-primary">{completionPercentage}%</div>
                 </div>
+                <p className="text-xs md:text-sm text-muted-foreground mb-4">
+                  {completedMilestones} of {milestones.length} milestones completed
+                </p>
                 <Progress value={completionPercentage} className="mb-4" />
-                
-                {/* Hide checklist on mobile, show on desktop */}
                 <div className="hidden md:grid md:grid-cols-2 gap-2 mb-6">
                   {milestones.map((milestone, index) => (
                     <div key={index} className="flex items-center gap-2 text-sm">

@@ -20,6 +20,7 @@ import PrivateImage from "@/components/PrivateImage";
 import { ImageStorageService } from "@/lib/imageStorage";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { BioPreviewModal } from "./BioPreviewModal";
+import { VinylProgressIndicator } from "./VinylProgressIndicator";
 
 interface InlineEditorProps {
   sectionId: string;
@@ -698,7 +699,7 @@ export default function InlineEditor({
                   className="w-full"
                   size="lg"
                 >
-                  <Lightbulb className="w-4 h-4 mr-2" />
+                  <VinylProgressIndicator isLoading={generatingBio} size={16} className="mr-2" />
                   {generatingBio ? "Remixing Your Bio..." : "Remix Existing Bio"}
                 </Button>
               ) : (
@@ -708,7 +709,7 @@ export default function InlineEditor({
                   className="w-full"
                   size="lg"
                 >
-                  <Lightbulb className="w-4 h-4 mr-2" />
+                  <VinylProgressIndicator isLoading={generatingBio} size={16} className="mr-2" />
                   {generatingBio ? "Generating Bio..." : "Generate New Bio"}
                 </Button>
               )}
@@ -747,20 +748,7 @@ export default function InlineEditor({
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">Social Links</h3>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="website">Website</Label>
-          <Input
-            id="website"
-            value={formData.social_links?.website || ''}
-            onChange={(e) => setFormData({
-              ...formData,
-              social_links: { ...formData.social_links, website: e.target.value }
-            })}
-            placeholder="https://yourwebsite.com"
-          />
-        </div>
-        
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">        
         <div>
           <Label htmlFor="instagram">Instagram</Label>
           <Input
@@ -845,7 +833,7 @@ export default function InlineEditor({
 
   const renderVideosSection = () => (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Videos</h3>
+      <h3 className="text-lg font-semibold">Videos (Max 3)</h3>
       
       <div className="space-y-2">
         {(formData.show_videos || []).map((video: string, index: number) => (
@@ -862,28 +850,33 @@ export default function InlineEditor({
         ))}
       </div>
 
-      <div className="flex gap-2">
-        <Input
-          placeholder="YouTube URL"
-          onKeyPress={(e) => {
-            if (e.key === 'Enter') {
-              const input = e.target as HTMLInputElement;
-              addVideo(input.value);
-              input.value = '';
-            }
-          }}
-        />
-        <Button
-          variant="outline"
-          onClick={(e) => {
-            const input = (e.target as HTMLElement).previousElementSibling as HTMLInputElement;
-            addVideo(input.value);
-            input.value = '';
-          }}
-        >
-          Add
-        </Button>
-      </div>
+      {(formData.show_videos || []).length < 3 && (
+        <div>
+          <Input
+            placeholder="Paste YouTube or Vimeo URL here..."
+            onBlur={(e) => {
+              const url = e.target.value.trim();
+              if (url && !(formData.show_videos || []).includes(url)) {
+                addVideo(url);
+                e.target.value = '';
+              }
+            }}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                const input = e.target as HTMLInputElement;
+                const url = input.value.trim();
+                if (url && !(formData.show_videos || []).includes(url)) {
+                  addVideo(url);
+                  input.value = '';
+                }
+              }
+            }}
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            Video will be saved automatically when you paste the URL
+          </p>
+        </div>
+      )}
     </div>
   );
 

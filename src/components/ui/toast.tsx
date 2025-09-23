@@ -42,13 +42,35 @@ const Toast = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Root>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> &
     VariantProps<typeof toastVariants>
->(({ className, variant, ...props }, ref) => {
+>(({ className, variant, children, ...props }, ref) => {
+  const [progress, setProgress] = React.useState(100);
+
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setProgress((prev) => {
+        if (prev <= 0) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - (100 / 30); // 30 steps for 3 seconds
+      });
+    }, 100);
+
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <ToastPrimitives.Root
       ref={ref}
-      className={cn(toastVariants({ variant }), className)}
+      className={cn(toastVariants({ variant }), "relative", className)}
       {...props}
-    />
+    >
+      {children}
+      <div 
+        className="absolute bottom-0 left-0 h-1 bg-primary/60 transition-all duration-100 ease-linear"
+        style={{ width: `${progress}%` }}
+      />
+    </ToastPrimitives.Root>
   )
 })
 Toast.displayName = ToastPrimitives.Root.displayName

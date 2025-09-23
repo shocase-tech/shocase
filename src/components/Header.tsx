@@ -148,7 +148,16 @@ const Header = () => {
 
       {/* Main Header */}
       <header className="absolute top-0 left-0 right-0 z-40 p-6">
-        <div className="max-w-7xl mx-auto flex justify-end items-center">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          {/* Left: SHOCASE Brand */}
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/')}
+            className="text-lg font-bold text-foreground hover:text-primary transition-colors"
+          >
+            SHOCASE
+          </Button>
+          
           {/* Auth Section */}
           <div className="flex items-center">
             {user ? (
