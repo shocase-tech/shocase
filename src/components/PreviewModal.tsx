@@ -204,22 +204,6 @@ export function PreviewModal({ open, onOpenChange, profile, onPublish }: Preview
                         <Star className="w-5 h-5 ml-2 group-hover:animate-spin" />
                       </a>
                     </Button>
-                  ) : profile.featured_track_url ? (
-                    <Button 
-                      variant="hero" 
-                      size="lg" 
-                      className="group" 
-                      onClick={() => {
-                        const featuredTrackSection = document.getElementById('featured-track-player');
-                        if (featuredTrackSection) {
-                          const heroHeight = window.innerHeight * 0.7; // 70vh hero section
-                          featuredTrackSection.scrollIntoView({ behavior: 'smooth' });
-                        }
-                      }}
-                    >
-                      <Play className="w-5 h-5 mr-2" />
-                      Listen Now
-                    </Button>
                   ) : null}
                 </div>
                 
@@ -232,24 +216,6 @@ export function PreviewModal({ open, onOpenChange, profile, onPublish }: Preview
                         Book Now
                         <Star className="w-5 h-5 ml-2 group-hover:animate-spin" />
                       </a>
-                    </Button>
-                  )}
-                  
-                  {profile.featured_track_url && (
-                    <Button 
-                      variant="glass" 
-                      size="lg" 
-                      className="group" 
-                      onClick={() => {
-                        const featuredTrackSection = document.getElementById('featured-track-player');
-                        if (featuredTrackSection) {
-                          const heroHeight = window.innerHeight * 0.7; // 70vh hero section
-                          featuredTrackSection.scrollIntoView({ behavior: 'smooth' });
-                        }
-                      }}
-                    >
-                      <Play className="w-5 h-5 mr-2" />
-                      Listen Now
                     </Button>
                   )}
                 </div>
@@ -324,6 +290,14 @@ export function PreviewModal({ open, onOpenChange, profile, onPublish }: Preview
 
             {/* Key Stats Section - Desktop Only */}
             <section className="hidden md:grid grid-cols-2 md:grid-cols-4 gap-6 mb-8 md:mb-16">
+              <Card className="glass-card border-glass text-center p-6">
+                <CardContent className="p-0">
+                  <Users className="w-8 h-8 text-primary mx-auto mb-2" />
+                  <h3 className="text-2xl font-bold text-foreground">Live</h3>
+                  <p className="text-sm text-muted-foreground">Performance Ready</p>
+                </CardContent>
+              </Card>
+              
               <Card className="glass-card border-glass text-center p-6">
                 <CardContent className="p-0">
                   <MapPin className="w-8 h-8 text-primary mx-auto mb-2" />

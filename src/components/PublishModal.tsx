@@ -120,11 +120,11 @@ export function PublishModal({
               <div className="text-center space-y-6">
                 <div className="space-y-2">
                   <h2 className="text-2xl font-bold text-foreground">
-                    {isPublished ? "Unpublish Your EPK?" : "Publish Your EPK?"}
+                    {isPublished ? "Unpublish EPK?" : "Publish Your EPK?"}
                   </h2>
                   <p className="text-muted-foreground">
                     {isPublished 
-                      ? "Your EPK will no longer be accessible to the public."
+                      ? "Your EPK will no longer be publically accessible."
                       : "Your EPK will be accessible to anyone with the link."
                     }
                   </p>
@@ -170,7 +170,7 @@ export function PublishModal({
 
                 <div className="space-y-2">
                   <h2 className="text-xl font-semibold text-foreground">
-                    Publishing your EPK...
+                    {isPublished ? "Unpublishing your EPK..." : "Publishing your EPK..."}
                   </h2>
                   <p className="text-sm text-muted-foreground">
                     {Math.round(loadingProgress)}%
@@ -190,22 +190,36 @@ export function PublishModal({
 
                 <div className="space-y-2">
                   <h2 className="text-2xl font-bold text-foreground">
-                    Congratulations on Publishing your EPK!
+                    {isPublished 
+                      ? "Your EPK has been unpublished" 
+                      : "Congratulations on Publishing your EPK!"
+                    }
                   </h2>
                   <p className="text-muted-foreground">
-                    Get ready to start booking more shows.
+                    {isPublished 
+                      ? "Your EPK is no longer publicly accessible." 
+                      : "Get ready to start booking more shows."
+                    }
                   </p>
                 </div>
 
                 <div className="flex gap-3 justify-center">
-                  <Button variant="outline" onClick={handleCopyLink}>
-                    <Copy className="w-4 h-4 mr-2" />
-                    Copy Link
-                  </Button>
-                  <Button onClick={onViewEPK} className="bg-green-600 hover:bg-green-700 text-white">
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    View EPK
-                  </Button>
+                  {isPublished ? (
+                    <Button onClick={onClose} className="bg-primary hover:bg-primary/90 text-white">
+                      Return to Dashboard
+                    </Button>
+                  ) : (
+                    <>
+                      <Button variant="outline" onClick={handleCopyLink}>
+                        <Copy className="w-4 h-4 mr-2" />
+                        Copy Link
+                      </Button>
+                      <Button onClick={onViewEPK} className="bg-green-600 hover:bg-green-700 text-white">
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        View EPK
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             )}
