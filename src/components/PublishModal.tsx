@@ -180,7 +180,7 @@ export function PublishModal({
             )}
 
             {/* SUCCESS STATE */}
-            {modalState === 'success' && (
+            {modalState === 'success' && !isPublished && (
               <div className="text-center space-y-6">
                 <div className="flex justify-center">
                   <div className="w-16 h-16 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center">
@@ -190,36 +190,45 @@ export function PublishModal({
 
                 <div className="space-y-2">
                   <h2 className="text-2xl font-bold text-foreground">
-                    {isPublished 
-                      ? "Your EPK has been unpublished" 
-                      : "Congratulations on Publishing your EPK!"
-                    }
+                    Congratulations on Publishing your EPK!
                   </h2>
                   <p className="text-muted-foreground">
-                    {isPublished 
-                      ? "Your EPK is no longer publicly accessible." 
-                      : "Get ready to start booking more shows."
-                    }
+                    Get ready to start booking more shows.
                   </p>
                 </div>
 
                 <div className="flex gap-3 justify-center">
-                  {isPublished ? (
-                    <Button onClick={onClose} className="bg-primary hover:bg-primary/90 text-white">
-                      Return to Dashboard
-                    </Button>
-                  ) : (
-                    <>
-                      <Button variant="outline" onClick={handleCopyLink}>
-                        <Copy className="w-4 h-4 mr-2" />
-                        Copy Link
-                      </Button>
-                      <Button onClick={onViewEPK} className="bg-green-600 hover:bg-green-700 text-white">
-                        <ExternalLink className="w-4 h-4 mr-2" />
-                        View EPK
-                      </Button>
-                    </>
-                  )}
+                  <Button variant="outline" onClick={handleCopyLink}>
+                    <Copy className="w-4 h-4 mr-2" />
+                    Copy Link
+                  </Button>
+                  <Button onClick={onViewEPK} className="bg-green-600 hover:bg-green-700 text-white">
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    View EPK
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* UNPUBLISH SUCCESS STATE */}
+            {modalState === 'success' && isPublished && (
+              <div className="text-center space-y-6">
+                <div className="flex justify-center">
+                  <div className="w-16 h-16 rounded-full bg-gray-500/10 border border-gray-500/20 flex items-center justify-center">
+                    <CheckCircle className="w-8 h-8 text-gray-500" />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <h2 className="text-2xl font-bold text-foreground">
+                    Your EPK has been unpublished
+                  </h2>
+                </div>
+
+                <div className="flex gap-3 justify-center">
+                  <Button onClick={onClose} className="bg-primary hover:bg-primary/90 text-white">
+                    Return to Dashboard
+                  </Button>
                 </div>
               </div>
             )}
