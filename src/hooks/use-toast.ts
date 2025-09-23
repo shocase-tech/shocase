@@ -140,6 +140,17 @@ function dispatch(action: Action) {
 type Toast = Omit<ToasterToast, "id">
 
 function toast({ ...props }: Toast) {
+  // Detect mobile devices - disable toasts on mobile
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if (isMobile) {
+    // Return a no-op object for mobile devices
+    return {
+      id: "mobile-noop",
+      dismiss: () => {},
+      update: () => {}
+    };
+  }
+
   const id = genId()
 
   const update = (props: ToasterToast) =>
@@ -175,6 +186,9 @@ function toast({ ...props }: Toast) {
 
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState)
+  
+  // Detect mobile devices
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
   React.useEffect(() => {
     listeners.push(setState)
@@ -188,7 +202,11 @@ function useToast() {
 
   return {
     ...state,
-    toast,
+    toast: isMobile ? ({ ...props }: Toast) => ({
+      id: "mobile-noop",
+      dismiss: () => {},
+      update: () => {}
+    }) : toast,
     dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
   }
 }
