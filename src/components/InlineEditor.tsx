@@ -16,6 +16,9 @@ import { X, Save, Lightbulb, Upload, Camera, Loader2 } from "lucide-react";
 import GenreInput from "@/components/GenreInput";
 import StreamingLinksInput from "@/components/StreamingLinksInput";
 import PhotoUpload from "@/components/PhotoUpload";
+import PressQuotesEditor from "@/components/PressQuotesEditor";
+import MentionsEditor from "@/components/MentionsEditor";
+import ShowsEditor from "@/components/ShowsEditor";
 import PrivateImage from "@/components/PrivateImage";
 import { ImageStorageService } from "@/lib/imageStorage";
 import { useClickOutside } from "@/hooks/useClickOutside";
@@ -933,6 +936,40 @@ export default function InlineEditor({
     </div>
   );
 
+  const renderQuotesSection = () => (
+    <div className="space-y-4">
+      <PressQuotesEditor
+        quotes={profile?.press_quotes || []}
+        onUpdate={(quotes) => {
+          const updatedProfile = { ...profile, press_quotes: quotes };
+          onSave(updatedProfile);
+        }}
+      />
+    </div>
+  );
+
+  const renderMentionsSection = () => (
+    <div className="space-y-4">
+      <MentionsEditor
+        profile={profile}
+        user={user}
+        onSave={onSave}
+        onCancel={() => {}}
+      />
+    </div>
+  );
+
+  const renderShowsSection = () => (
+    <div className="space-y-4">
+      <ShowsEditor
+        profile={profile}
+        user={user}
+        onSave={onSave}
+        onCancel={() => {}}
+      />
+    </div>
+  );
+
   const renderSection = () => {
     switch (sectionId) {
       case 'basic':
@@ -949,6 +986,12 @@ export default function InlineEditor({
         return renderVideosSection();
       case 'gallery':
         return renderGallerySection();
+      case 'quotes':
+        return renderQuotesSection();
+      case 'mentions':
+        return renderMentionsSection();
+      case 'shows':
+        return renderShowsSection();
       default:
         return <div>Section not found</div>;
     }

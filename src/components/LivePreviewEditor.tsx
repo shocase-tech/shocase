@@ -647,59 +647,33 @@ export default function LivePreviewEditor({
           )}
 
           {/* Gallery Section */}
-          {editingSection === 'gallery' ? (
-            <div className="space-y-4">
-              <GalleryEditor
-                profile={profile}
-                user={user}
-                onSave={(updatedData) => handleSectionSave(updatedData)}
-                onCancel={() => setEditingSection(null)}
-              />
-            </div>
-          ) : (
-            <div className="group relative">
-              <div 
-                className="cursor-pointer transition-all duration-200 hover:bg-white/5 rounded-lg p-2"
-                onClick={() => handleSectionClick('gallery')}
-              >
-                {profile.gallery_photos && profile.gallery_photos.length > 0 ? (
-                  <div>
-                    <h3 className="font-semibold mb-3">Gallery</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                      {profile.gallery_photos.slice(0, 12).map((photo: any, index: number) => (
-                        <div key={index} className="relative">
-                          <PrivateImage
-                            storagePath={typeof photo === 'string' ? photo : photo.url}
-                            alt={typeof photo === 'string' ? `Gallery ${index + 1}` : photo.label || `Gallery ${index + 1}`}
-                            className="w-full h-24 object-cover rounded-md border border-white/20"
-                          />
-                          {(typeof photo !== 'string' && photo.label) && (
-                            <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-1 rounded-b-md">
-                              <p className="text-xs truncate">{photo.label}</p>
-                            </div>
-                          )}
+          {renderEditableSection(
+            'gallery',
+            profile.gallery_photos && profile.gallery_photos.length > 0 ? (
+              <div>
+                <h3 className="font-semibold mb-3">Gallery</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {profile.gallery_photos.slice(0, 12).map((photo: any, index: number) => (
+                    <div key={index} className="relative">
+                      <PrivateImage
+                        storagePath={typeof photo === 'string' ? photo : photo.url}
+                        alt={typeof photo === 'string' ? `Gallery ${index + 1}` : photo.label || `Gallery ${index + 1}`}
+                        className="w-full h-24 object-cover rounded-md border border-white/20"
+                      />
+                      {(typeof photo !== 'string' && photo.label) && (
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-1 rounded-b-md">
+                          <p className="text-xs truncate">{photo.label}</p>
                         </div>
-                      ))}
+                      )}
                     </div>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      {profile.gallery_photos.length} of 12 photos
-                    </p>
-                  </div>
-                ) : (
-                  <div className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-8 text-center">
-                    <Plus className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
-                    <p className="text-muted-foreground">Click to add gallery photos</p>
-                  </div>
-                )}
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm"
-                >
-                  <Edit3 className="w-3 h-3" />
-                </Button>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {profile.gallery_photos.length} of 12 photos
+                </p>
               </div>
-            </div>
+            ) : null,
+            !!(profile.gallery_photos && profile.gallery_photos.length > 0)
           )}
 
           {/* Videos Section */}
@@ -729,149 +703,79 @@ export default function LivePreviewEditor({
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
             {/* Left Column: Press Quotes */}
             <div>
-              {editingSection === 'quotes' ? (
-                <div className="space-y-4">
-                  <Card className="border-primary/20 bg-primary/5 animate-slide-in-up">
-                    <CardContent className="pt-6">
-                      <PressQuotesEditor
-                        quotes={profile?.press_quotes || []}
-                        onUpdate={(quotes) => {
-                          const updatedProfile = { ...profile, press_quotes: quotes };
-                          handleSectionSave(updatedProfile);
-                        }}
-                      />
-                      <div className="flex justify-end gap-2 mt-4 pt-4 border-t">
-                        <Button variant="outline" onClick={() => setEditingSection(null)}>
-                          Cancel
-                        </Button>
-                        <Button onClick={() => setEditingSection(null)}>
-                          Done
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              ) : (
-                renderEditableSection(
-                  'quotes',
-                  profile.press_quotes && profile.press_quotes.length > 0 ? (
-                    <div>
-                      <h3 className="font-semibold mb-3">Press Quotes</h3>
-                      <div className="space-y-4">
-                        {profile.press_quotes.map((quote: any, index: number) => (
-                          <Card key={index} className="border-l-4 border-l-primary bg-muted/30 animate-slide-in-up">
-                            <CardContent className="pt-4">
-                              <div className="flex items-start gap-3">
-                                <Quote className="w-5 h-5 text-primary flex-shrink-0 mt-1" />
-                                <div className="flex-1">
-                                  <blockquote className="text-sm italic leading-relaxed mb-2">
-                                    "{quote.text}"
-                                  </blockquote>
-                                  <cite className="text-sm font-medium text-muted-foreground">
-                                    — {quote.source}
-                                  </cite>
-                                </div>
+              {renderEditableSection(
+                'quotes',
+                profile.press_quotes && profile.press_quotes.length > 0 ? (
+                  <div>
+                    <h3 className="font-semibold mb-3">Press Quotes</h3>
+                    <div className="space-y-4">
+                      {profile.press_quotes.map((quote: any, index: number) => (
+                        <Card key={index} className="border-l-4 border-l-primary bg-muted/30 animate-slide-in-up">
+                          <CardContent className="pt-4">
+                            <div className="flex items-start gap-3">
+                              <Quote className="w-5 h-5 text-primary flex-shrink-0 mt-1" />
+                              <div className="flex-1">
+                                <blockquote className="text-sm italic leading-relaxed mb-2">
+                                  "{quote.text}"
+                                </blockquote>
+                                <cite className="text-sm font-medium text-muted-foreground">
+                                  — {quote.source}
+                                </cite>
                               </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
                     </div>
-                  ) : null,
-                  !!(profile.press_quotes && profile.press_quotes.length > 0)
-                )
+                  </div>
+                ) : null,
+                !!(profile.press_quotes && profile.press_quotes.length > 0)
               )}
             </div>
             
             {/* Right Column: Press Mentions */}
             <div>
-              {editingSection === 'mentions' ? (
-                <div className="space-y-4">
-                  <MentionsEditor
-                    profile={profile}
-                    user={user}
-                    onSave={(updatedData) => handleSectionSave(updatedData)}
-                    onCancel={() => setEditingSection(null)}
-                  />
-                </div>
-              ) : (
-                <div className="group relative">
-                  <div 
-                    className="cursor-pointer transition-all duration-200 hover:bg-white/5 rounded-lg p-2"
-                    onClick={() => handleSectionClick('mentions')}
-                  >
-                    {profile.press_mentions && profile.press_mentions.length > 0 ? (
-                      <div>
-                        <h3 className="font-semibold mb-3">Press Mentions</h3>
-                        <div className="space-y-3">
-                          {profile.press_mentions.map((mention: any, index: number) => (
-                            <a
-                              key={index}
-                              href={mention.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
-                            >
-                              {mention.favicon && (
-                                <img src={mention.favicon} alt="" className="w-4 h-4" />
-                              )}
-                              <div className="flex-1 min-w-0">
-                                <p className="font-medium truncate">{mention.title || mention.publication}</p>
-                                <p className="text-xs text-muted-foreground truncate">{mention.description}</p>
-                              </div>
-                              <ExternalLink className="w-3 h-3 opacity-50" />
-                            </a>
-                          ))}
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-8 text-center">
-                        <Plus className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
-                        <p className="text-muted-foreground">Click to add press mentions</p>
-                      </div>
-                    )}
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm"
-                    >
-                      <Edit3 className="w-3 h-3" />
-                    </Button>
+              {renderEditableSection(
+                'mentions',
+                profile.press_mentions && profile.press_mentions.length > 0 ? (
+                  <div>
+                    <h3 className="font-semibold mb-3">Press Mentions</h3>
+                    <div className="space-y-3">
+                      {profile.press_mentions.map((mention: any, index: number) => (
+                        <a
+                          key={index}
+                          href={mention.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+                        >
+                          {mention.favicon && (
+                            <img src={mention.favicon} alt="" className="w-4 h-4" />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium truncate">{mention.title || mention.publication}</p>
+                            <p className="text-xs text-muted-foreground truncate">{mention.description}</p>
+                          </div>
+                          <ExternalLink className="w-3 h-3 opacity-50" />
+                        </a>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                ) : null,
+                !!(profile.press_mentions && profile.press_mentions.length > 0)
               )}
             </div>
           </div>
 
           {/* Shows Section */}
-          <div>
-            {editingSection === 'shows' ? (
-              <div className="space-y-4">
-                <ShowsEditor
-                  profile={profile}
-                  user={user}
-                  onSave={(updatedData) => handleSectionSave(updatedData)}
-                  onCancel={() => setEditingSection(null)}
-                />
-              </div>
-            ) : (
-              <div className="group relative">
-                <div 
-                  className="cursor-pointer transition-all duration-200 hover:bg-white/5 rounded-lg p-2"
-                  onClick={() => handleSectionClick('shows')}
-                >
-                  {renderShowsSection()}
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm"
-                  >
-                    <Edit3 className="w-3 h-3" />
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
+          {renderEditableSection(
+            'shows',
+            renderShowsSection(),
+            !!(
+              (profile.upcoming_shows && profile.upcoming_shows.length > 0) ||
+              (profile.past_shows && profile.past_shows.length > 0)
+            )
+          )}
 
         </CardContent>
       </Card>
