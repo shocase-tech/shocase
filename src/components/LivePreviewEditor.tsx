@@ -72,8 +72,20 @@ export default function LivePreviewEditor({
   
   // Notify parent of form data changes
   const handleFormDataChange = (newData: Record<string, any>) => {
+    // Merge with existing form data instead of replacing
     formDataRef.current = { ...formDataRef.current, ...newData };
+    
+    // Notify parent immediately
     onFormDataChange?.(formDataRef.current);
+    
+    // Also trigger a save to sessionStorage for persistence
+    if (typeof window !== 'undefined') {
+      try {
+        sessionStorage.setItem('editor_form_data', JSON.stringify(formDataRef.current));
+      } catch (error) {
+        console.warn('Failed to save form data to session storage:', error);
+      }
+    }
   };
 
   // Auto-save functionality for live editing

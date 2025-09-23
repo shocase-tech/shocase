@@ -28,13 +28,14 @@ interface PressMessage {
   image?: string;
 }
 
-export default function MentionsEditor({ profile, user, onSave, onCancel }: MentionsEditorProps) {
+export default function MentionsEditor({ profile, user, onSave, onCancel, onFormDataChange, sectionId }: MentionsEditorProps & { onFormDataChange?: (data: Record<string, any>) => void; sectionId?: string }) {
   const [mentions, setMentions] = useState<PressMessage[]>([]);
   const [quotes, setQuotes] = useState<{text: string; source: string}[]>([]);
   const [newUrl, setNewUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [fetchingMetadata, setFetchingMetadata] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [localFormData, setLocalFormData] = useState({});
   const { toast } = useToast();
 
   useEffect(() => {
@@ -45,6 +46,23 @@ export default function MentionsEditor({ profile, user, onSave, onCancel }: Ment
       setQuotes(profile.press_quotes);
     }
   }, [profile]);
+
+  // Notify parent of form data changes when mentions/quotes change
+  useEffect(() => {
+    if (onFormDataChange && sectionId) {
+      const formData = { mentions: mentions, quotes: quotes };
+      setLocalFormData(formData);
+      onFormDataChange({ [sectionId]: formData });
+    }
+  }, [mentions, quotes, onFormDataChange, sectionId]);
+
+  // Update form data whenever mentions/quotes change
+  useEffect(() => {
+    setLocalFormData({ 
+      mentions: mentions,
+      quotes: quotes,
+    });
+  }, [mentions, quotes]);
 
   const fetchUrlMetadata = async (url: string): Promise<Partial<PressMessage>> => {
     try {

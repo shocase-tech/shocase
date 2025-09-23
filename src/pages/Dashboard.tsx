@@ -615,8 +615,16 @@ export default function Dashboard() {
             editingSection={editingSection}
             onEditingSectionChange={setEditingSection}
             onFormDataChange={(data) => {
-              if (editingSection) {
-                formDataRef.current = { ...formDataRef.current, [editingSection]: data };
+              // Capture form data for ALL sections, not just the current editing section
+              Object.keys(data).forEach(sectionId => {
+                if (data[sectionId] && Object.keys(data[sectionId]).length > 0) {
+                  formDataRef.current[sectionId] = { ...formDataRef.current[sectionId], ...data[sectionId] };
+                }
+              });
+              
+              // Also ensure current editing section is captured
+              if (editingSection && data[editingSection]) {
+                formDataRef.current[editingSection] = data[editingSection];
               }
             }}
             initialFormData={editingSection ? formDataRef.current[editingSection] : undefined}

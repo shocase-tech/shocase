@@ -268,13 +268,14 @@ function SortableShow({ show, index, onDelete, onEdit, onToggleHighlight, initia
   );
 }
 
-export default function ShowsEditor({ profile, user, onSave, onCancel }: ShowsEditorProps) {
+export default function ShowsEditor({ profile, user, onSave, onCancel, onFormDataChange, sectionId }: ShowsEditorProps & { onFormDataChange?: (data: Record<string, any>) => void; sectionId?: string }) {
   const [shows, setShows] = useState<Show[]>([]);
   const [loading, setLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showValidationModal, setShowValidationModal] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Array<{ showIndex: number; missingFields: string[] }>>([]);
   const [newlyAddedShowIndex, setNewlyAddedShowIndex] = useState<number | null>(null);
+  const [localFormData, setLocalFormData] = useState({});
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
@@ -295,6 +296,22 @@ export default function ShowsEditor({ profile, user, onSave, onCancel }: ShowsEd
     const sortedShows = allShows.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     setShows(sortedShows);
   }, [profile]);
+
+  // Notify parent of form data changes when shows change
+  useEffect(() => {
+    if (onFormDataChange && sectionId) {
+      const formData = { shows: shows };
+      setLocalFormData(formData);
+      onFormDataChange({ [sectionId]: formData });
+    }
+  }, [shows, onFormDataChange, sectionId]);
+
+  // Update form data whenever shows change
+  useEffect(() => {
+    setLocalFormData({ 
+      shows: shows,
+    });
+  }, [shows]);
 
   const handleDragEnd = (event: any) => {
     // Skip drag handling on mobile

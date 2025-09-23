@@ -37,12 +37,31 @@ export function useDashboardStatePersistence({
   const intervalRef = useRef<NodeJS.Timeout>();
   const restoredFromSavedStateRef = useRef(false);
   
+  // Capture form data from all active editors
+  const captureAllFormData = useCallback(() => {
+    // Capture form data from all active editors
+    const allFormData = getFormData ? getFormData() : {};
+    
+    // Also try to capture from sessionStorage as fallback
+    try {
+      const sessionFormData = sessionStorage.getItem('editor_form_data');
+      if (sessionFormData) {
+        const parsedSessionData = JSON.parse(sessionFormData);
+        return { ...parsedSessionData, ...allFormData };
+      }
+    } catch (error) {
+      console.warn('Failed to read session form data:', error);
+    }
+    
+    return allFormData;
+  }, [getFormData]);
+
   // Save current state to sessionStorage
   const saveState = useCallback(() => {
     if (!user) return;
     
     try {
-      const formData = getFormData ? getFormData() : {};
+      const formData = captureAllFormData();
       const state: PersistedDashboardState = {
         profile,
         editingSection,
@@ -57,7 +76,7 @@ export function useDashboardStatePersistence({
     } catch (error) {
       console.warn('Failed to save dashboard state:', error);
     }
-  }, [profile, editingSection, showPreviewModal, user, getFormData]);
+  }, [profile, editingSection, showPreviewModal, user, captureAllFormData]);
 
   // Restore state from sessionStorage
   const restoreState = useCallback(() => {

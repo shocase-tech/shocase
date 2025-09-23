@@ -55,8 +55,8 @@ export default function InlineEditor({
   const { toast } = useToast();
 
   useEffect(() => {
-    // Start with initial data from persistence or profile
-    const initialData = initialFormData || (profile ? {
+    // Prioritize initialFormData over profile data for better persistence
+    const baseData = profile ? {
       artist_name: profile.artist_name || '',
       bio: profile.bio || '',
       genre: profile.genre || [],
@@ -86,10 +86,20 @@ export default function InlineEditor({
       performance_type: '',
       location: '',
       featured_track_url: '',
-    });
+    };
     
-    setFormData(initialData);
-  }, [profile, initialFormData]);
+    const restoredData = initialFormData || {};
+    
+    // Merge profile data with restored form data, giving priority to restored data
+    const mergedData = { ...baseData, ...restoredData };
+    
+    setFormData(mergedData);
+    
+    // Notify parent of current form data immediately
+    if (onFormDataChange && Object.keys(restoredData).length > 0) {
+      onFormDataChange({ [sectionId]: restoredData });
+    }
+  }, [profile, initialFormData, sectionId]);
 
   // Notify parent of form data changes
   useEffect(() => {
@@ -957,6 +967,8 @@ export default function InlineEditor({
         user={user}
         onSave={onSave}
         onCancel={() => {}}
+        onFormDataChange={onFormDataChange}
+        sectionId={sectionId}
       />
     </div>
   );
@@ -968,6 +980,8 @@ export default function InlineEditor({
         user={user}
         onSave={onSave}
         onCancel={() => {}}
+        onFormDataChange={onFormDataChange}
+        sectionId={sectionId}
       />
     </div>
   );
