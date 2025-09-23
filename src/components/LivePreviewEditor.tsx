@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket, Edit3, Plus, Quote, Star, User as UserIcon, Users, Sparkles, FileText } from "lucide-react";
 import PrivateImage from "@/components/PrivateImage";
 import InlineEditor from "@/components/InlineEditor";
+import MobileEditorModal from "@/components/MobileEditorModal";
 import PressQuotesEditor from "@/components/PressQuotesEditor";
 import GalleryEditor from "@/components/GalleryEditor";
 import MentionsEditor from "@/components/MentionsEditor";
@@ -12,6 +13,7 @@ import ShowsEditor from "@/components/ShowsEditor";
 import SaveIndicator from "@/components/SaveIndicator";
 import { FeaturedTrackEmbed } from "@/components/FeaturedTrackEmbed";
 import { useAutoSave } from "@/hooks/useAutoSave";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 
@@ -54,6 +56,9 @@ export default function LivePreviewEditor({
   const [internalEditingSection, setInternalEditingSection] = useState<string | null>(null);
   const editingSection = externalEditingSection !== undefined ? externalEditingSection : internalEditingSection;
   const setEditingSection = onEditingSectionChange || setInternalEditingSection;
+  
+  // Mobile detection
+  const isMobile = useIsMobile();
   
   const scrollPositionRef = useRef<number>(0);
   const formDataRef = useRef<Record<string, any>>(initialFormData || {});
@@ -289,8 +294,41 @@ export default function LivePreviewEditor({
   const renderEditableSection = (sectionId: string, content: React.ReactNode, hasContent: boolean = true) => {
     const isEditing = editingSection === sectionId;
     
+    // On mobile, show modal instead of inline editing
+    if (isMobile && isEditing) {
+      return (
+        <>
+          <div className="group relative">
+            <div 
+              className={`cursor-pointer transition-all duration-200 hover:bg-white/5 rounded-lg p-2 ${
+                !hasContent ? 'border-2 border-dashed border-muted-foreground/30 rounded-lg p-8' : ''
+              }`}
+            >
+              {hasContent ? content : (
+                <div className="text-center py-8">
+                  <Plus className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-muted-foreground">Click to add {sectionId}</p>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <MobileEditorModal
+            isOpen={true}
+            onClose={() => setEditingSection(null)}
+            sectionId={sectionId}
+            profile={profile}
+            user={user}
+            onSave={(updatedData) => handleSectionSave(updatedData)}
+            initialFormData={formDataRef.current[sectionId]}
+            onFormDataChange={(data) => handleFormDataChange({ [sectionId]: data })}
+          />
+        </>
+      );
+    }
+    
+    // Desktop: show inline editing
     if (isEditing) {
-      // Render inline editing directly within the content area
       return (
         <div className="space-y-4">
           <InlineEditor
@@ -320,7 +358,7 @@ export default function LivePreviewEditor({
               <p className="text-muted-foreground">Click to add {sectionId}</p>
             </div>
           )}
-          {hasContent && (
+          {hasContent && !isMobile && (
             <div className="absolute top-2 right-2 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
               <SaveIndicator 
                 isSaving={isSaving}

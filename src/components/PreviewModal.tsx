@@ -91,11 +91,22 @@ export function PreviewModal({ open, onOpenChange, profile, onPublish }: Preview
                 </Badge>
               )}
             </div>
-            {!profile.is_published && onPublish && (
-              <Button onClick={onPublish} className="bg-green-600 hover:bg-green-700">
-                Publish EPK
+            <div className="flex items-center gap-3">
+              {!profile.is_published && onPublish && (
+                <Button onClick={onPublish} className="bg-green-600 hover:bg-green-700">
+                  Publish EPK
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onOpenChange(false)}
+                className="h-8 w-8 p-0 hover:bg-white/10"
+              >
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close</span>
               </Button>
-            )}
+            </div>
           </div>
         </DialogHeader>
 
