@@ -113,7 +113,7 @@ const NewExperienceSection = () => {
           </div>
 
           {/* Vinyl Record Progress Indicator */}
-          <div className="fixed top-6 right-16 z-50">
+          <div className="fixed top-6 right-20 z-50">
             <div 
               className="w-12 h-12 rounded-full border-2 border-muted-foreground/30 transition-all duration-150 ease-out"
               style={{
@@ -130,7 +130,7 @@ const NewExperienceSection = () => {
 
           {/* Percentage indicator - positioned to the right of vinyl record */}
           <div className="fixed top-6 right-4 z-50">
-            <span className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+            <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent" style={{ fontSize: '1.9rem' }}>
               {Math.round(scrollProgress * 100)}%
             </span>
           </div>
@@ -330,7 +330,7 @@ const NewExperienceSection = () => {
               className="flex-1 flex items-center justify-center px-6"
               style={{
                 opacity: ctaAnim.opacity,
-                transform: `translateY(${ctaAnim.transform}px)`,
+                transform: `translateY(${ctaAnim.transform + (ctaAnim.parallaxTransform || 0)}px)`,
               }}
             >
               <div className="max-w-2xl mx-auto text-center">
@@ -365,7 +365,7 @@ const NewExperienceSection = () => {
               className="border-t border-glass bg-background/50 backdrop-blur-sm"
               style={{
                 opacity: ctaAnim.opacity,
-                transform: `translateY(${ctaAnim.transform}px)`,
+                transform: `translateY(${ctaAnim.transform + (ctaAnim.parallaxTransform || 0)}px)`,
               }}
             >
               <div className="max-w-7xl mx-auto px-6 py-8">
