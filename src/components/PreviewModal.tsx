@@ -184,9 +184,9 @@ export function PreviewModal({ open, onOpenChange, profile, onPublish }: Preview
                       <img src={bandcampColorIcon} alt="Bandcamp" className="w-8 h-8" />
                     </a>
                   )}
-                  {profile.streaming_links.appleMusic && (
+                  {profile.streaming_links.apple_music && (
                     <a 
-                      href={profile.streaming_links.appleMusic} 
+                      href={profile.streaming_links.apple_music} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="hover:scale-110 transition-transform duration-300"
@@ -554,10 +554,10 @@ export function PreviewModal({ open, onOpenChange, profile, onPublish }: Preview
                           </a>
                         </Button>
                       )}
-                      {profile.streaming_links.appleMusic && (
+                      {profile.streaming_links.apple_music && (
                         <Button asChild variant="outline" className="w-full">
                           <a 
-                            href={profile.streaming_links.appleMusic} 
+                            href={profile.streaming_links.apple_music} 
                             target="_blank" 
                             rel="noopener noreferrer"
                           >

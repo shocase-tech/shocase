@@ -70,6 +70,13 @@ export default function LivePreviewEditor({
     }
   }, [initialFormData]);
   
+  // Temporary debug logging - remove after testing
+  useEffect(() => {
+    if (profile?.streaming_links) {
+      console.log("Streaming links debug:", profile.streaming_links);
+    }
+  }, [profile?.streaming_links]);
+  
   // Notify parent of form data changes
   const handleFormDataChange = (newData: Record<string, any>) => {
     // Merge with existing form data instead of replacing

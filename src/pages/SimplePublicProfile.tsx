@@ -330,9 +330,9 @@ export default function SimplePublicProfile() {
                   <img src={bandcampColorIcon} alt="Bandcamp" className="w-8 h-8" />
                 </a>
               )}
-              {profile.streaming_links.appleMusic && (
+              {profile.streaming_links.apple_music && (
                 <a 
-                  href={profile.streaming_links.appleMusic} 
+                  href={profile.streaming_links.apple_music} 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="hover:scale-110 transition-transform duration-300"
@@ -499,9 +499,9 @@ export default function SimplePublicProfile() {
                       <img src={soundcloudColorIcon} alt="SoundCloud" className="w-8 h-8" />
                     </a>
                   )}
-                  {profile.streaming_links.appleMusic && (
+                  {profile.streaming_links.apple_music && (
                     <a 
-                      href={profile.streaming_links.appleMusic} 
+                      href={profile.streaming_links.apple_music} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="hover:scale-110 transition-transform duration-300"

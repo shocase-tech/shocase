@@ -12,6 +12,7 @@ import { FeaturedTrackEmbed } from "@/components/FeaturedTrackEmbed";
 import { Skeleton } from "@/components/ui/skeleton";
 import tiktokIcon from "@/assets/social/tiktok-white.png";
 import instagramIcon from "@/assets/social/instagram-gradient.png";
+import appleMusicLightIcon from "@/assets/streaming/apple-music-light.svg";
 
 import { AllShowsModal } from "@/components/AllShowsModal";
 
@@ -349,7 +350,7 @@ export default function PublicArtistProfile() {
                     rel="noopener noreferrer"
                     className="transition-transform hover:scale-110"
                   >
-                    <img src="/src/assets/streaming/apple-music-light.svg" alt="Apple Music" className="w-6 md:w-8 h-6 md:h-8" />
+                    <img src={appleMusicLightIcon} alt="Apple Music" className="w-6 md:w-8 h-6 md:h-8" />
                   </a>
                 )}
                 {(profile.streaming_links as any).soundcloud && window.innerWidth >= 768 && (
