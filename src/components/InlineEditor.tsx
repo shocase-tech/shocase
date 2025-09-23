@@ -101,6 +101,13 @@ export default function InlineEditor({
     }
   }, [profile, initialFormData, sectionId]);
 
+  // Refresh schema cache for bio section to prevent cache conflicts
+  useEffect(() => {
+    if (sectionId === 'bio') {
+      refreshSchemaCache();
+    }
+  }, [sectionId]);
+
   // Notify parent of form data changes
   useEffect(() => {
     if (onFormDataChange) {
@@ -137,30 +144,133 @@ export default function InlineEditor({
     setFormData({ ...formData, gallery_photos: photos });
   };
 
+  // Helper function to handle schema errors
+  const handleSchemaError = (error: any) => {
+    if (error.message && error.message.includes('schema cache')) {
+      return {
+        title: "Database Schema Error",
+        description: "There was a temporary database issue. Please try again in a moment.",
+        variant: "destructive" as const
+      };
+    }
+    return {
+      title: "Error",
+      description: error.message || "Failed to save changes",
+      variant: "destructive" as const
+    };
+  };
+
+  // Schema cache refresh function
+  const refreshSchemaCache = async () => {
+    try {
+      // Force refresh Supabase schema cache by making a simple query
+      const { error } = await supabase
+        .from('artist_profiles')
+        .select('id')
+        .limit(1);
+      
+      if (error) {
+        console.warn('Schema refresh warning:', error);
+      }
+    } catch (error) {
+      console.warn('Failed to refresh schema cache:', error);
+    }
+  };
+
   const handleSave = async (isDoneAction = false) => {
     if (!user) return;
 
     try {
       setLoading(true);
 
+      // Create section-specific data to avoid schema conflicts
+      let updateData: any = {};
+      
+      switch (sectionId) {
+        case 'bio':
+          updateData = {
+            bio: formData.bio,
+            blurb: formData.blurb,
+            artist_name: formData.artist_name,
+            genre: formData.genre,
+          };
+          break;
+        case 'basic':
+          updateData = {
+            artist_name: formData.artist_name,
+            genre: formData.genre,
+            blurb: formData.blurb,
+            performance_type: formData.performance_type,
+            location: formData.location,
+            featured_track_url: formData.featured_track_url,
+            contact_info: formData.contact_info,
+            profile_photo_url: formData.profile_photo_url,
+          };
+          break;
+        case 'streaming':
+          updateData = {
+            streaming_links: formData.streaming_links,
+            featured_track_url: formData.featured_track_url,
+          };
+          break;
+        case 'social':
+          updateData = {
+            social_links: formData.social_links,
+          };
+          break;
+        case 'videos':
+          updateData = {
+            show_videos: formData.show_videos,
+          };
+          break;
+        case 'background':
+          updateData = {
+            hero_photo_url: formData.hero_photo_url,
+          };
+          break;
+        case 'gallery':
+          updateData = {
+            gallery_photos: formData.gallery_photos,
+          };
+          break;
+        default:
+          // For unknown sections, use the original approach but filter out problematic fields
+          updateData = { ...formData };
+          // Remove any fields that might cause schema conflicts
+          delete updateData.featured_track_url;
+          break;
+      }
+
       if (profile) {
-        // Update existing profile
+        // Update existing profile with section-specific data only
         const { error } = await supabase
           .from('artist_profiles')
-          .update(formData)
+          .update(updateData)
           .eq('user_id', user.id);
 
-        if (error) throw error;
+        if (error) {
+          console.error('Save error details:', error);
+          throw error;
+        }
       } else {
-        // Create new profile
+        // Create new profile - use full formData but ensure no conflicts
+        const createData = { ...formData };
+        // Ensure featured_track_url is properly set
+        if (!createData.featured_track_url) {
+          createData.featured_track_url = null;
+        }
+        
         const { error } = await supabase
           .from('artist_profiles')
           .insert({
-            ...formData,
+            ...createData,
             user_id: user.id,
           });
 
-        if (error) throw error;
+        if (error) {
+          console.error('Create error details:', error);
+          throw error;
+        }
       }
 
       toast({
@@ -169,18 +279,16 @@ export default function InlineEditor({
       });
 
       // Update parent with new data instead of triggering refetch
-      onSave(formData);
+      onSave(updateData);
       
       // For initial setup completion, reload the page to show full dashboard
       if (isDoneAction) {
         window.location.reload();
       }
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      console.error('Save error:', error);
+      const errorMessage = handleSchemaError(error);
+      toast(errorMessage);
       throw error; // Re-throw for handleAutoSaveAndClose error handling
     } finally {
       setLoading(false);
@@ -193,20 +301,27 @@ export default function InlineEditor({
     if (isSaving) return; // Prevent multiple saves
     
     console.log("🔍 InlineEditor: Current form data before save:", formData);
+    console.log("🔍 InlineEditor: Section ID:", sectionId);
     
     try {
       setIsSaving(true);
       console.log("🔍 InlineEditor: Calling handleSave()");
       await handleSave(false);
-      console.log("🔍 InlineEditor: handleSave() completed, closing editor");
-      onCancel(); // Close the editor
+      console.log("🔍 InlineEditor: handleSave() completed successfully");
+      
+      // Force close the editor after successful save
+      setTimeout(() => {
+        console.log("🔍 InlineEditor: Force closing editor");
+        onCancel(); // Close the editor
+      }, 100);
+      
     } catch (error) {
       console.error("🔍 InlineEditor: handleSave() failed:", error);
-      // Error already handled in handleSave
+      // Don't close editor on error so user can retry
     } finally {
       setIsSaving(false);
     }
-  }, [isSaving, onCancel, formData]);
+  }, [isSaving, onCancel, formData, sectionId]);
   
   // Click outside detection
   const editorRef = useClickOutside<HTMLDivElement>(handleAutoSaveAndClose);
