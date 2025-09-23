@@ -818,37 +818,6 @@ export default function SimplePublicProfile() {
 
           {/* Sidebar - Hidden on mobile since Connect moved above */}
           <div className="hidden md:block space-y-6">
-            {/* Press Coverage Section - Sidebar on Desktop */}
-            {profile.press_mentions && Array.isArray(profile.press_mentions) && profile.press_mentions.length > 0 && (
-              <Card className="glass-card border-glass">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-3 text-lg">
-                    <ExternalLink className="w-5 h-5 text-accent" />
-                    Press Coverage
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {profile.press_mentions.map((mention: any, index: number) => (
-                    <div key={index} className="bg-white/5 p-3 rounded-lg hover:bg-white/10 transition-all duration-300">
-                      <h3 className="text-sm font-bold text-foreground mb-1 leading-tight">{mention.title}</h3>
-                      <p className="text-muted-foreground mb-2 text-xs leading-relaxed line-clamp-2">{mention.description}</p>
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-primary font-medium text-xs truncate">{mention.source}</span>
-                        {mention.url && (
-                          <Button variant="outline" size="sm" asChild className="h-7 px-2 text-xs">
-                            <a href={mention.url} target="_blank" rel="noopener noreferrer">
-                              <ExternalLink className="w-3 h-3 mr-1" />
-                              Read
-                            </a>
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
-
             {/* Connect Section */}
             <Card className="glass-card border-glass">
               <CardHeader>
@@ -1052,6 +1021,37 @@ export default function SimplePublicProfile() {
                       </a>
                     </Button>
                   )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Press Coverage Section - Sidebar on Desktop */}
+            {profile.press_mentions && Array.isArray(profile.press_mentions) && profile.press_mentions.length > 0 && (
+              <Card className="glass-card border-glass">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3 text-lg">
+                    <ExternalLink className="w-5 h-5 text-accent" />
+                    Press Coverage
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {profile.press_mentions.map((mention: any, index: number) => (
+                    <div key={index} className="bg-white/5 p-3 rounded-lg hover:bg-white/10 transition-all duration-300">
+                      <h3 className="text-sm font-bold text-foreground mb-1 leading-tight">{mention.title}</h3>
+                      <p className="text-muted-foreground mb-2 text-xs leading-relaxed line-clamp-2">{mention.description}</p>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-primary font-medium text-xs truncate">{mention.source}</span>
+                        {mention.url && (
+                          <Button variant="outline" size="sm" asChild className="h-7 px-2 text-xs">
+                            <a href={mention.url} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink className="w-3 h-3 mr-1" />
+                              Read
+                            </a>
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </CardContent>
               </Card>
             )}
