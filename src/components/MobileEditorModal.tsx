@@ -112,6 +112,7 @@ export default function MobileEditorModal({
             isInitialSetup={isInitialSetup}
             initialFormData={initialFormData}
             onFormDataChange={handleFormDataChange}
+            isInMobileModal={true}
           />
         </div>
 

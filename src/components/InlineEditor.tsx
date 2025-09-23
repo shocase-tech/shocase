@@ -35,6 +35,7 @@ interface InlineEditorProps {
   isInitialSetup?: boolean;
   initialFormData?: Record<string, any>;
   onFormDataChange?: (data: Record<string, any>) => void;
+  isInMobileModal?: boolean;
 }
 
 export default function InlineEditor({ 
@@ -45,7 +46,8 @@ export default function InlineEditor({
   onCancel, 
   isInitialSetup = false, 
   initialFormData,
-  onFormDataChange 
+  onFormDataChange,
+  isInMobileModal = false
 }: InlineEditorProps) {
   const [formData, setFormData] = useState<any>({});
   const [loading, setLoading] = useState(false);
@@ -1007,56 +1009,58 @@ export default function InlineEditor({
       )}
       {renderSection()}
       
-      {/* Action Buttons */}
-      <div className="flex items-center justify-center pt-6 border-t border-white/10">
-        {isInitialSetup ? (
-          <Button
-            onClick={() => handleSave(true)}
-            disabled={loading || !formData.artist_name}
-            className="bg-gradient-primary hover:shadow-glow transition-all duration-300 px-8 py-3 text-lg"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                Creating...
-              </>
-            ) : (
-              <>
-                Done & Enter Dashboard
-              </>
-            )}
-          </Button>
-        ) : (
-          <>
+      {/* Action Buttons - Hidden in mobile modal mode since modal has its own buttons */}
+      {!isInMobileModal && (
+        <div className="flex items-center justify-center pt-6 border-t border-white/10">
+          {isInitialSetup ? (
             <Button
-              variant="outline"
-              onClick={onCancel}
-              disabled={loading}
+              onClick={() => handleSave(true)}
+              disabled={loading || !formData.artist_name}
+              className="bg-gradient-primary hover:shadow-glow transition-all duration-300 px-8 py-3 text-lg"
             >
-              Cancel
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  Done & Enter Dashboard
+                </>
+              )}
             </Button>
-            <div className="flex items-center gap-3">
+          ) : (
+            <>
               <Button
-                onClick={() => handleSave(false)}
-                disabled={loading}
                 variant="outline"
+                onClick={onCancel}
+                disabled={loading}
               >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-4 h-4 mr-2" />
-                    Save
-                  </>
-                )}
+                Cancel
               </Button>
-            </div>
-          </>
-        )}
-      </div>
+              <div className="flex items-center gap-3">
+                <Button
+                  onClick={() => handleSave(false)}
+                  disabled={loading}
+                  variant="outline"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4 mr-2" />
+                      Save
+                    </>
+                  )}
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }
