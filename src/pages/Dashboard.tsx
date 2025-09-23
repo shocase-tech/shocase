@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import LivePreviewEditor from "@/components/LivePreviewEditor";
 import FloatingProgressIndicator from "@/components/FloatingProgressIndicator";
 import { PreviewModal } from "@/components/PreviewModal";
+import { PublishModal } from "@/components/PublishModal";
 import OnboardingWizard from "@/components/OnboardingWizard";
 import { useScrollVisibility } from "@/hooks/useScrollVisibility";
 import { useScrollPosition } from "@/hooks/useScrollPosition";
@@ -49,6 +50,7 @@ export default function Dashboard() {
   const [profile, setProfile] = useState<DashboardArtistProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [showPublishModal, setShowPublishModal] = useState(false);
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [userSignupData, setUserSignupData] = useState<{email?: string, phone?: string}>({});
@@ -300,15 +302,11 @@ export default function Dashboard() {
 
   const togglePublishStatus = async () => {
     if (!profile || !user) return;
+    setShowPublishModal(true);
+  };
 
-    // Show confirmation dialog
-    const confirmed = window.confirm(
-      profile.is_published 
-        ? "Are you sure you want to unpublish your EPK? It will no longer be accessible to the public."
-        : "Are you sure you want to publish your EPK? It will be accessible to anyone with the link."
-    );
-
-    if (!confirmed) return;
+  const handlePublishConfirm = async () => {
+    if (!profile || !user) return;
 
     try {
       const newStatus = !profile.is_published;
@@ -346,6 +344,7 @@ export default function Dashboard() {
         description: "Failed to update publish status: " + error.message,
         variant: "destructive",
       });
+      throw error; // Re-throw to trigger modal error handling
     }
   };
 
@@ -643,6 +642,17 @@ export default function Dashboard() {
           onOpenChange={setShowPreviewModal}
           profile={profile}
           onPublish={togglePublishStatus}
+        />
+
+        {/* Publish Modal */}
+        <PublishModal
+          isOpen={showPublishModal}
+          onClose={() => setShowPublishModal(false)}
+          onConfirm={handlePublishConfirm}
+          isPublished={profile?.is_published || false}
+          publicUrl={profile?.url_slug ? `${window.location.origin}/${profile.url_slug}` : undefined}
+          onCopyLink={copyPublicLink}
+          onViewEPK={previewProfile}
         />
       </main>
     </div>
