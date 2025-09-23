@@ -109,6 +109,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      extract_user_id_from_folder_path: {
+        Args: { folder_path: string }
+        Returns: string
+      }
       generate_url_slug: {
         Args: { artist_name: string }
         Returns: string
