@@ -19,14 +19,14 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
   const animationFrameRef = useRef<number>();
   const isMobile = useRef(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
   
-  // Total scroll distance for the entire experience - optimized for mobile vs desktop
-  const totalScrollDistance = isMobile.current ? 5000 : 12000;
+  // Total scroll distance for the entire experience - conservative mobile optimization
+  const totalScrollDistance = isMobile.current ? 8000 : 12000;
   
-  // Scroll resistance multiplier - much more responsive on mobile
-  const scrollMultiplier = isMobile.current ? 0.7 : 0.2;
+  // Scroll resistance multiplier - balanced mobile experience
+  const scrollMultiplier = isMobile.current ? 0.4 : 0.2;
   
-  // Touch sensitivity multiplier for mobile devices
-  const touchSensitivity = isMobile.current ? 5 : 2;
+  // Touch sensitivity multiplier for mobile devices - more conservative
+  const touchSensitivity = isMobile.current ? 3.5 : 2;
   
   // Shared scroll logic for both wheel and touch events
   const updateScrollDelta = useCallback((delta: number) => {
