@@ -509,23 +509,12 @@ export default function Dashboard() {
           {profile && (
             <Card ref={progressCardRef} className="glass-card border-white/10 animate-slide-in-up">
               <CardContent className="pt-4 md:pt-6">
-                 <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-base md:text-lg font-semibold">Your kit is {completionPercentage}% complete</h2>
-                    {!profile.is_published && (
-                      <Button
-                        onClick={() => setShowPreviewModal(true)}
-                        variant="outline"
-                        size="sm"
-                        className="flex items-center gap-2 text-xs transition-all duration-200"
-                      >
-                        <Eye className="w-3 h-3" />
-                        Preview
-                      </Button>
-                    )}
-                  </div>
-                  <div className="text-xl md:text-2xl font-bold text-primary">{completionPercentage}%</div>
-                </div>
+                  <div className="flex items-center justify-between mb-6">
+                   <div className="flex items-center gap-2">
+                     <h2 className="text-base md:text-lg font-semibold">Your kit is {completionPercentage}% complete</h2>
+                   </div>
+                   <div className="text-xl md:text-2xl font-bold text-primary">{completionPercentage}%</div>
+                 </div>
                 <p className="text-xs md:text-sm text-muted-foreground mb-4">
                   {completedMilestones} of {milestones.length} milestones completed
                 </p>
@@ -584,20 +573,33 @@ export default function Dashboard() {
                         </div>
                       )}
                       
-                      {/* Publish button - full width on mobile */}
-                      <Button
-                        onClick={togglePublishStatus}
-                        variant={profile.is_published ? "outline" : "default"}
-                        className={cn(
-                          "flex items-center justify-center gap-2 font-medium px-4 md:px-6 w-full md:w-auto min-h-[44px]",
-                          profile.is_published 
-                            ? "border-orange-500/50 text-orange-600 hover:bg-orange-500/10" 
-                            : "bg-green-600 hover:bg-green-700 text-white"
-                        )}
-                      >
-                        {profile.is_published ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        {profile.is_published ? "Unpublish EPK" : "Publish EPK"}
-                      </Button>
+                      {/* Preview button for unpublished EPKs */}
+                       {!profile.is_published && (
+                         <Button
+                           onClick={() => setShowPreviewModal(true)}
+                           variant="outline"
+                           size="sm"
+                           className="flex items-center gap-2 transition-all duration-200"
+                         >
+                           <Eye className="w-4 h-4" />
+                           Preview
+                         </Button>
+                       )}
+                       
+                       {/* Publish button - full width on mobile */}
+                       <Button
+                         onClick={togglePublishStatus}
+                         variant={profile.is_published ? "outline" : "default"}
+                         className={cn(
+                           "flex items-center justify-center gap-2 font-medium px-4 md:px-6 w-full md:w-auto min-h-[44px]",
+                           profile.is_published 
+                             ? "border-orange-500/50 text-orange-600 hover:bg-orange-500/10" 
+                             : "bg-green-600 hover:bg-green-700 text-white"
+                         )}
+                       >
+                         {profile.is_published ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                         {profile.is_published ? "Unpublish EPK" : "Publish EPK"}
+                       </Button>
                     </div>
                   </div>
                 </div>
