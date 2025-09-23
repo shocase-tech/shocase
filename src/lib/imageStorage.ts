@@ -9,11 +9,47 @@ export class ImageStorageService {
   private static readonly BUCKET_NAME = 'artist-uploads';
   
   /**
+   * Sanitize artist name for filesystem use
+   */
+  private static sanitizeArtistName(artistName: string): string {
+    return artistName
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, '') // Remove special characters
+      .replace(/\s+/g, '_') // Replace spaces with underscores
+      .trim();
+  }
+
+  /**
+   * Get artist folder name for storage path
+   */
+  private static async getArtistFolderName(userId: string): Promise<string> {
+    const shortUserId = userId.substring(0, 8);
+    
+    try {
+      const { data: profile } = await supabase
+        .from('artist_profiles')
+        .select('artist_name')
+        .eq('user_id', userId)
+        .single();
+
+      if (profile?.artist_name) {
+        const sanitizedName = this.sanitizeArtistName(profile.artist_name);
+        return `${sanitizedName}_${shortUserId}`;
+      }
+    } catch (error) {
+      console.warn('Could not fetch artist name:', error);
+    }
+
+    return `unnamed_artist_${shortUserId}`;
+  }
+  
+  /**
    * Uploads a file to Supabase Storage and returns the storage path
    */
   static async uploadFile(file: File, type: string, userId: string): Promise<string> {
     const fileExt = file.name.split('.').pop();
-    const fileName = `${userId}/${type}/${Date.now()}.${fileExt}`;
+    const artistFolder = await this.getArtistFolderName(userId);
+    const fileName = `${artistFolder}/${type}/${Date.now()}.${fileExt}`;
 
     const { error: uploadError } = await supabase.storage
       .from(this.BUCKET_NAME)
@@ -113,5 +149,62 @@ export class ImageStorageService {
     // If it's a signed URL, we can't easily extract the path
     // This method is mainly for migration purposes
     return url;
+  }
+
+  /**
+   * Display folder name for UI - handles both new artist-based and legacy UUID folders
+   */
+  static async displayFolderName(folderPath: string): Promise<string> {
+    if (!folderPath) return '';
+
+    // Extract the first part of the path (folder name)
+    const pathParts = folderPath.split('/');
+    const folderName = pathParts[0];
+
+    // Check if it's already in the new format (contains underscore and shorter ID)
+    if (folderName.includes('_') && folderName.split('_').pop()?.length === 8) {
+      const parts = folderName.split('_');
+      const shortUserId = parts.pop();
+      const artistName = parts.join(' ').replace(/_/g, ' ');
+      
+      if (artistName === 'unnamed artist') {
+        return `Unnamed Artist (${shortUserId})`;
+      }
+      
+      // Capitalize first letter of each word
+      const displayName = artistName
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+      
+      return `${displayName} (${shortUserId})`;
+    }
+
+    // Check if it's a UUID pattern (legacy format)
+    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (uuidPattern.test(folderName)) {
+      const shortUserId = folderName.substring(0, 8);
+      
+      try {
+        // Try to find artist by user_id
+        const { data: profile } = await supabase
+          .from('artist_profiles')
+          .select('artist_name')
+          .eq('user_id', folderName)
+          .single();
+
+        if (profile?.artist_name) {
+          return `${profile.artist_name} (${shortUserId})`;
+        }
+      } catch (error) {
+        console.warn('Could not fetch artist for legacy folder:', error);
+      }
+      
+      // If no artist found, it might be a deleted account
+      return `[DELETED] (${shortUserId})`;
+    }
+
+    // If it doesn't match any pattern, return as-is
+    return folderName;
   }
 }
