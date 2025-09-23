@@ -11,8 +11,6 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
   const [isLocked, setIsLocked] = useState(false);
   const [currentPhase, setCurrentPhase] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [currentCheckpoint, setCurrentCheckpoint] = useState(0);
   
   const elementRef = useRef<HTMLElement>(null);
   const isLockedRef = useRef(false);
@@ -20,10 +18,6 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
   const lastScrollTimeRef = useRef(0);
   const animationFrameRef = useRef<number>();
   const isMobile = useRef(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
-  const touchStartTime = useRef(0);
-  
-  // Mobile scroll snapping checkpoints
-  const checkpoints = [0, 0.12, 0.21, 0.27, 0.34, 0.50, 0.59, 0.67, 0.70, 1.0];
   
   // Total scroll distance for the entire experience - conservative mobile optimization
   const totalScrollDistance = isMobile.current ? 8000 : 12000;
@@ -34,74 +28,9 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
   // Touch sensitivity multiplier for mobile devices - more conservative
   const touchSensitivity = isMobile.current ? 3.5 : 2;
   
-  // Animate to a specific checkpoint (mobile only)
-  const animateToCheckpoint = useCallback((targetCheckpoint: number) => {
-    if (!isMobile.current || isAnimating || targetCheckpoint < 0 || targetCheckpoint >= checkpoints.length) return;
-    
-    setIsAnimating(true);
-    const startProgress = scrollProgress;
-    const endProgress = checkpoints[targetCheckpoint];
-    const duration = 400; // 400ms animation
-    const startTime = performance.now();
-    
-    const animate = (currentTime: number) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      
-      // Smooth easing function
-      const easeOutCubic = 1 - Math.pow(1 - progress, 3);
-      const newProgress = startProgress + (endProgress - startProgress) * easeOutCubic;
-      
-      setScrollProgress(newProgress);
-      accumulatedScrollRef.current = newProgress * totalScrollDistance;
-      
-      // Update current phase
-      if (newProgress <= 0.34) setCurrentPhase(0);
-      else if (newProgress <= 0.59) setCurrentPhase(1);
-      else if (newProgress <= 0.84) setCurrentPhase(2);
-      else setCurrentPhase(3);
-      
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      } else {
-        setCurrentCheckpoint(targetCheckpoint);
-        setIsAnimating(false);
-        
-        // Handle end states
-        if (targetCheckpoint === checkpoints.length - 1) {
-          // At 100% - allow exit
-          if (newProgress >= 1) {
-            accumulatedScrollRef.current = totalScrollDistance;
-            setScrollProgress(1);
-            setCurrentPhase(3);
-          }
-        } else if (targetCheckpoint === 0) {
-          // At 0% - allow exit
-          if (newProgress <= 0) {
-            isLockedRef.current = false;
-            setIsLocked(false);
-            document.body.style.overflow = 'unset';
-            if (elementRef.current) {
-              elementRef.current.style.position = 'relative';
-              elementRef.current.style.top = 'unset';
-              elementRef.current.style.left = 'unset';
-              elementRef.current.style.right = 'unset';
-              elementRef.current.style.zIndex = 'unset';
-              elementRef.current.style.width = 'unset';
-              elementRef.current.style.height = 'unset';
-            }
-            window.scrollBy(0, -1);
-          }
-        }
-      }
-    };
-    
-    requestAnimationFrame(animate);
-  }, [scrollProgress, isAnimating, checkpoints, totalScrollDistance]);
-  
-  // Shared scroll logic for desktop wheel events only
+  // Shared scroll logic for both wheel and touch events
   const updateScrollDelta = useCallback((delta: number) => {
-    if (!isLockedRef.current || isMobile.current) return; // Skip on mobile
+    if (!isLockedRef.current) return;
     
     const scrollDelta = delta * scrollMultiplier; // Device-optimized scroll resistance
     const newAccumulated = Math.max(0, Math.min(totalScrollDistance, accumulatedScrollRef.current + scrollDelta));
@@ -186,49 +115,33 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
   }, [threshold]);
   
   const handleWheelEvent = useCallback((e: WheelEvent) => {
-    if (!isLockedRef.current || isMobile.current) return; // Skip on mobile
+    if (!isLockedRef.current) return;
     
     e.preventDefault();
     updateScrollDelta(e.deltaY);
   }, [updateScrollDelta]);
 
-  // Mobile swipe detection handlers
+  // Touch event handlers for mobile support
   const handleTouchStart = useCallback((e: TouchEvent) => {
-    if (!isLockedRef.current || !isMobile.current || isAnimating) return;
+    if (!isLockedRef.current) return;
     setTouchStart(e.touches[0].clientY);
-    touchStartTime.current = performance.now();
-  }, [isAnimating]);
+  }, []);
 
   const handleTouchMove = useCallback((e: TouchEvent) => {
-    if (!isLockedRef.current || !isMobile.current || touchStart === null || isAnimating) return;
-    e.preventDefault(); // Prevent default scroll behavior
-  }, [touchStart, isAnimating]);
+    if (!isLockedRef.current || touchStart === null) return;
+    
+    e.preventDefault();
+    
+    const touchCurrent = e.touches[0].clientY;
+    const delta = (touchStart - touchCurrent) * touchSensitivity; // Device-optimized touch sensitivity
+    
+    updateScrollDelta(delta);
+    setTouchStart(touchCurrent);
+  }, [touchStart, updateScrollDelta, touchSensitivity]);
 
-  const handleTouchEnd = useCallback((e: TouchEvent) => {
-    if (!isLockedRef.current || !isMobile.current || touchStart === null || isAnimating) return;
-    
-    const touchEnd = e.changedTouches[0].clientY;
-    const touchDistance = touchStart - touchEnd;
-    const touchDuration = performance.now() - touchStartTime.current;
-    
-    // Minimum swipe distance (50px) and maximum duration (300ms) for a valid swipe
-    const minSwipeDistance = 50;
-    const maxSwipeDuration = 300;
-    
-    if (Math.abs(touchDistance) >= minSwipeDistance && touchDuration <= maxSwipeDuration) {
-      if (touchDistance > 0) {
-        // Swipe up - advance to next checkpoint
-        const nextCheckpoint = Math.min(currentCheckpoint + 1, checkpoints.length - 1);
-        animateToCheckpoint(nextCheckpoint);
-      } else {
-        // Swipe down - go back to previous checkpoint
-        const prevCheckpoint = Math.max(currentCheckpoint - 1, 0);
-        animateToCheckpoint(prevCheckpoint);
-      }
-    }
-    
+  const handleTouchEnd = useCallback(() => {
     setTouchStart(null);
-  }, [touchStart, currentCheckpoint, checkpoints.length, animateToCheckpoint, isAnimating]);
+  }, []);
   
   // Phase 0: Actions animation (0-34%)
   const getActionsAnimation = useCallback(() => {
