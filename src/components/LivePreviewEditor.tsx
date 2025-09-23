@@ -416,7 +416,11 @@ export default function LivePreviewEditor({
           className={`cursor-pointer transition-all duration-200 hover:bg-white/5 rounded-lg p-2 ${
             !hasContent ? 'border-2 border-dashed border-muted-foreground/30 rounded-lg p-8' : ''
           }`}
-          onClick={() => handleSectionClick(sectionId)}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleSectionClick(sectionId);
+          }}
+          onMouseDown={(e) => e.stopPropagation()}
         >
           {hasContent ? content : (
             <div className="text-center py-8">
@@ -454,7 +458,10 @@ export default function LivePreviewEditor({
           <p className="text-muted-foreground mb-6">
             Create your professional press kit by filling out each section below.
           </p>
-          <Button onClick={() => setEditingSection('basic')}>
+          <Button onClick={(e) => {
+            e.stopPropagation();
+            setEditingSection('basic');
+          }}>
             Get Started
           </Button>
           {editingSection === 'basic' && (
