@@ -21,6 +21,7 @@ import { ImageStorageService } from "@/lib/imageStorage";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { BioPreviewModal } from "./BioPreviewModal";
 import { VinylProgressIndicator } from "./VinylProgressIndicator";
+import { formatUserUrl } from "@/lib/urlUtils";
 
 interface InlineEditorProps {
   sectionId: string;
@@ -855,7 +856,7 @@ export default function InlineEditor({
           <Input
             placeholder="Paste YouTube or Vimeo URL here..."
             onBlur={(e) => {
-              const url = e.target.value.trim();
+              const url = formatUserUrl(e.target.value.trim());
               if (url && !(formData.show_videos || []).includes(url)) {
                 addVideo(url);
                 e.target.value = '';
@@ -864,7 +865,7 @@ export default function InlineEditor({
             onKeyPress={(e) => {
               if (e.key === 'Enter') {
                 const input = e.target as HTMLInputElement;
-                const url = input.value.trim();
+                const url = formatUserUrl(input.value.trim());
                 if (url && !(formData.show_videos || []).includes(url)) {
                   addVideo(url);
                   input.value = '';
@@ -901,6 +902,12 @@ export default function InlineEditor({
               id="featured_track_url"
               value={formData.featured_track_url || ''}
               onChange={(e) => setFormData({ ...formData, featured_track_url: e.target.value })}
+              onBlur={(e) => {
+                const formattedUrl = formatUserUrl(e.target.value);
+                if (formattedUrl !== e.target.value) {
+                  setFormData({ ...formData, featured_track_url: formattedUrl });
+                }
+              }}
               placeholder="Paste Spotify, Apple Music, or SoundCloud URL..."
             />
             <p className="text-xs text-muted-foreground mt-1">

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { AutoSaveInput } from "@/components/ui/auto-save-input";
 import { Input } from "@/components/ui/input";
+import { formatUserUrl } from "@/lib/urlUtils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
@@ -88,15 +89,18 @@ export default function MentionsEditor({ profile, user, onSave, onCancel }: Ment
     try {
       setFetchingMetadata(true);
       
-      // Validate URL
-      new URL(newUrl);
+      // Format URL first
+      const formattedUrl = formatUserUrl(newUrl.trim());
       
-      const metadata = await fetchUrlMetadata(newUrl);
+      // Validate URL
+      new URL(formattedUrl);
+      
+      const metadata = await fetchUrlMetadata(formattedUrl);
       const newMention: PressMessage = {
-        url: newUrl,
+        url: formattedUrl,
         title: metadata.title || 'Press Mention',
         description: metadata.description || '',
-        publication: metadata.publication || new URL(newUrl).hostname,
+        publication: metadata.publication || new URL(formattedUrl).hostname,
         favicon: metadata.favicon,
         image: metadata.image
       };
@@ -225,11 +229,18 @@ export default function MentionsEditor({ profile, user, onSave, onCancel }: Ment
                 onChange={(e) => setNewUrl(e.target.value)}
                 onAutoSave={async (url) => {
                   if (url.trim()) {
+                    setNewUrl(formatUserUrl(url.trim()));
                     await handleAddMention();
                   }
                 }}
                 placeholder="https://example.com/article"
                 disabled={fetchingMetadata}
+                onBlur={(e) => {
+                  const formattedUrl = formatUserUrl(e.target.value);
+                  if (formattedUrl !== e.target.value) {
+                    setNewUrl(formattedUrl);
+                  }
+                }}
               />
               <Button
                 onClick={handleAddMention}

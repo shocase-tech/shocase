@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { formatUserUrl } from "@/lib/urlUtils";
 
 // Import streaming service icons
 import appleLight from "@/assets/streaming/apple-music-light.svg";
@@ -64,9 +65,10 @@ export default function StreamingLinksInput({ streamingLinks, onChange }: Stream
 
   const handleInputSubmit = () => {
     if (activeInput && inputValue.trim()) {
+      const formattedUrl = formatUserUrl(inputValue.trim());
       onChange({
         ...streamingLinks,
-        [activeInput]: inputValue.trim()
+        [activeInput]: formattedUrl
       });
     }
     setActiveInput(null);
