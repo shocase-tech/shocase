@@ -34,7 +34,7 @@ const HeroSection = () => {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden" style={{ backgroundColor: '#000000' }}>
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 md:pt-0" style={{ backgroundColor: '#000000' }}>
       {/* Stage Lighting Background */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"

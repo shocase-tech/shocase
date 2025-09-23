@@ -88,7 +88,7 @@ const NewExperienceSection = () => {
   return (
     <section 
       ref={elementRef}
-      className="relative min-h-screen bg-gradient-dark"
+      className="relative min-h-screen bg-gradient-dark pt-20 md:pt-0"
     >
       {/* Ambient floating elements for visual continuity */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
