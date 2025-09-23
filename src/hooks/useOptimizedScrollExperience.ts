@@ -179,13 +179,30 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
     };
   }, [scrollProgress]);
   
-  // Phase 1: Message animation (34-59%) - much slower movement with extended center pause
+  // Phase 1: Message animation (34-59%) - much slower movement with extended center pause and parallax exit
   const getMessageAnimation = useCallback(() => {
-    if (scrollProgress < 0.34) return { horizontalPosition: -100, opacity: 0 };
-    if (scrollProgress > 0.59) return { horizontalPosition: 100, opacity: 0 };
+    if (scrollProgress < 0.34) return { horizontalPosition: -100, opacity: 0, panUpTransform: 0 };
+    if (scrollProgress > 0.59) return { horizontalPosition: 100, opacity: 0, panUpTransform: -200 };
     
     const phaseProgress = (scrollProgress - 0.34) / 0.25;
     let horizontalPosition = -100;
+    let panUpTransform = 0;
+    
+    // Parallax scroll effect from 54-59% (last 5% of message phase)
+    if (scrollProgress > 0.54) {
+      const panProgress = (scrollProgress - 0.54) / 0.05; // 0 to 1 over 5% scroll
+      const easeOutQuart = 1 - Math.pow(1 - panProgress, 4); // Smooth easing
+      panUpTransform = easeOutQuart * -200; // Move up and off screen
+      
+      // Fade out during parallax
+      const fadeProgress = Math.max(0, 1 - panProgress * 1.5);
+      
+      return {
+        horizontalPosition: 0, // Stay centered during exit
+        opacity: fadeProgress,
+        panUpTransform
+      };
+    }
     
     if (phaseProgress < 0.3) {
       // Move from left to center (much slower with easing)
@@ -205,6 +222,7 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
     return {
       horizontalPosition,
       opacity: 1,
+      panUpTransform,
     };
   }, [scrollProgress]);
   
