@@ -18,6 +18,7 @@ import tiktokIcon from "@/assets/social/tiktok-white.png";
 import instagramIcon from "@/assets/social/instagram-gradient.png";
 import PublicImage from "@/components/PublicImage";
 import { FeaturedTrackEmbed } from "@/components/FeaturedTrackEmbed";
+import { VideoCarousel } from "@/components/VideoCarousel";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { AllShowsModal } from "@/components/AllShowsModal";
@@ -588,19 +589,7 @@ export default function SimplePublicProfile() {
                   <Play className="w-6 md:w-8 h-6 md:h-8 text-primary" />
                   Live Performance Videos
                 </h2>
-                <div className="grid grid-cols-1 gap-4 md:gap-6">
-                  {profile.show_videos.map((video, index) => (
-                    <div key={index} className="aspect-video rounded-lg overflow-hidden bg-black/20 shadow-lg hover:shadow-xl transition-all duration-300">
-                      <iframe
-                        src={video.replace('watch?v=', 'embed/')}
-                        className="w-full h-full"
-                        frameBorder="0"
-                        allowFullScreen
-                        title={`${profile.artist_name} performance ${index + 1}`}
-                      />
-                    </div>
-                  ))}
-                </div>
+                <VideoCarousel videos={profile.show_videos} artistName={profile.artist_name} />
               </section>
             )}
 
