@@ -9,6 +9,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { User } from "@supabase/supabase-js";
 import { Save, X, Plus, Calendar as CalendarIcon, MapPin, Ticket, GripVertical, ArrowUpDown, Loader2, Star } from "lucide-react";
 import { format } from "date-fns";
@@ -43,7 +44,7 @@ interface SortableShowProps {
   onToggleHighlight: (index: number) => void;
 }
 
-function SortableShow({ show, index, onDelete, onEdit, onToggleHighlight, initiallyEditing = false }: SortableShowProps & { initiallyEditing?: boolean }) {
+function SortableShow({ show, index, onDelete, onEdit, onToggleHighlight, initiallyEditing = false, isMobile = false }: SortableShowProps & { initiallyEditing?: boolean; isMobile?: boolean }) {
   const [isEditing, setIsEditing] = useState(initiallyEditing);
   const [editData, setEditData] = useState(show);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
@@ -57,7 +58,10 @@ function SortableShow({ show, index, onDelete, onEdit, onToggleHighlight, initia
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: `show-${index}` });
+  } = useSortable({ 
+    id: `show-${index}`,
+    disabled: isMobile // Disable sorting on mobile
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -76,39 +80,42 @@ function SortableShow({ show, index, onDelete, onEdit, onToggleHighlight, initia
   if (isEditing) {
     return (
       <Card className="border-primary/20" style={style} ref={setNodeRef}>
-        <CardContent className="p-4 space-y-3">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <CardContent className={cn("space-y-4", isMobile ? "p-4" : "p-4")}>
+          <div className={cn("grid gap-4", isMobile ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2")}>
             <div>
-              <Label htmlFor={`venue-${index}`}>Venue</Label>
+              <Label htmlFor={`venue-${index}`} className="text-sm font-medium">Venue</Label>
               <Input
                 id={`venue-${index}`}
                 value={editData.venue}
                 onChange={(e) => setEditData({ ...editData, venue: e.target.value })}
                 placeholder="Venue name"
+                className={cn(isMobile && "h-12 text-base")}
               />
             </div>
             
             <div>
-              <Label htmlFor={`city-${index}`}>City</Label>
+              <Label htmlFor={`city-${index}`} className="text-sm font-medium">City</Label>
               <Input
                 id={`city-${index}`}
                 value={editData.city}
                 onChange={(e) => setEditData({ ...editData, city: e.target.value })}
                 placeholder="City, State"
+                className={cn(isMobile && "h-12 text-base")}
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className={cn("grid gap-4", isMobile ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2")}>
             <div>
-              <Label>Date</Label>
+              <Label className="text-sm font-medium">Date</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     className={cn(
                       "w-full justify-start text-left font-normal",
-                      !selectedDate && "text-muted-foreground"
+                      !selectedDate && "text-muted-foreground",
+                      isMobile && "h-12 text-base"
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
@@ -128,21 +135,31 @@ function SortableShow({ show, index, onDelete, onEdit, onToggleHighlight, initia
             </div>
 
             <div>
-              <Label htmlFor={`ticket-${index}`}>Ticket Link (Optional)</Label>
+              <Label htmlFor={`ticket-${index}`} className="text-sm font-medium">Ticket Link (Optional)</Label>
               <Input
                 id={`ticket-${index}`}
                 value={editData.ticket_link || ''}
                 onChange={(e) => setEditData({ ...editData, ticket_link: e.target.value })}
                 placeholder="https://tickets.com/..."
+                className={cn(isMobile && "h-12 text-base")}
               />
             </div>
           </div>
 
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" size="sm" onClick={() => setIsEditing(false)}>
+          <div className={cn("flex gap-3", isMobile ? "flex-col" : "justify-end")}>
+            <Button 
+              variant="outline" 
+              size={isMobile ? "lg" : "sm"} 
+              onClick={() => setIsEditing(false)}
+              className={cn(isMobile && "h-12")}
+            >
               Cancel
             </Button>
-            <Button size="sm" onClick={handleSave}>
+            <Button 
+              size={isMobile ? "lg" : "sm"} 
+              onClick={handleSave}
+              className={cn(isMobile && "h-12")}
+            >
               Save
             </Button>
           </div>
@@ -156,79 +173,92 @@ function SortableShow({ show, index, onDelete, onEdit, onToggleHighlight, initia
       ref={setNodeRef}
       style={style}
       className={cn(
-        "group flex items-center justify-between p-3 rounded-md border transition-all",
+        "group flex items-center justify-between rounded-md border transition-all",
         show.is_highlighted 
           ? "bg-primary/10 border-primary/50 shadow-lg" 
-          : "bg-white/5 border-white/10"
+          : "bg-white/5 border-white/10",
+        isMobile ? "p-4 flex-col items-start gap-3" : "p-3"
       )}
     >
-      <div className="flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing"
-          {...attributes}
-          {...listeners}
-        >
-          <GripVertical className="w-4 h-4" />
-        </Button>
+      <div className={cn("flex items-center gap-3", isMobile && "w-full")}>
+        {/* Hide drag handle on mobile */}
+        {!isMobile && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing"
+            {...attributes}
+            {...listeners}
+          >
+            <GripVertical className="w-4 h-4" />
+          </Button>
+        )}
         
         {show.is_highlighted && (
-          <Star className="w-4 h-4 text-yellow-500 fill-current" />
+          <Star className="w-4 h-4 text-yellow-500 fill-current flex-shrink-0" />
         )}
-        <CalendarIcon className="w-5 h-5 text-primary" />
-        <div>
-          <p className="font-medium flex items-center gap-2">
-            {show.venue}
+        <CalendarIcon className={cn("text-primary flex-shrink-0", isMobile ? "w-6 h-6" : "w-5 h-5")} />
+        <div className="min-w-0 flex-1">
+          <p className={cn("font-medium flex items-center gap-2", isMobile ? "text-base" : "text-sm")}>
+            <span className="truncate">{show.venue}</span>
             {show.is_highlighted && (
-              <Badge variant="secondary" className="text-xs">Featured</Badge>
+              <Badge variant="secondary" className="text-xs flex-shrink-0">Featured</Badge>
             )}
           </p>
-          <p className="text-sm text-muted-foreground flex items-center gap-1">
-            <MapPin className="w-3 h-3" />
-            {show.city} • {format(new Date(show.date), 'MMM d, yyyy')}
+          <p className={cn("text-muted-foreground flex items-center gap-1", isMobile ? "text-sm" : "text-xs")}>
+            <MapPin className="w-3 h-3 flex-shrink-0" />
+            <span className="truncate">{show.city} • {format(new Date(show.date), 'MMM d, yyyy')}</span>
           </p>
         </div>
       </div>
       
-      <div className="flex items-center gap-2">
+      <div className={cn("flex items-center gap-2", isMobile && "w-full justify-between")}>
         {show.ticket_link && (
           <a
             href={show.ticket_link}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+            className={cn(
+              "flex items-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors",
+              isMobile ? "text-sm h-10 flex-1 justify-center" : "text-xs"
+            )}
             onClick={(e) => e.stopPropagation()}
           >
             <Ticket className="w-4 h-4" />
-            Tickets
+            <span>Tickets</span>
           </a>
         )}
         
-        <div className="opacity-0 group-hover:opacity-100 flex gap-1">
+        <div className={cn(
+          "flex gap-2",
+          isMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+        )}>
           <Button
             variant="outline"
-            size="sm"
+            size={isMobile ? "default" : "sm"}
             onClick={() => onToggleHighlight(index)}
             className={cn(
               show.is_highlighted 
                 ? "bg-yellow-500/20 text-yellow-600 border-yellow-500/50" 
-                : "hover:bg-yellow-500/10"
+                : "hover:bg-yellow-500/10",
+              isMobile && "h-10 px-3"
             )}
           >
             <Star className={cn("w-3 h-3", show.is_highlighted && "fill-current")} />
           </Button>
           <Button
             variant="outline"
-            size="sm"
+            size={isMobile ? "default" : "sm"}
             onClick={() => setIsEditing(true)}
+            className={cn(isMobile && "h-10")}
           >
             Edit
           </Button>
           <Button
             variant="outline"
-            size="sm"
+            size={isMobile ? "default" : "sm"}
             onClick={() => onDelete(index)}
+            className={cn(isMobile && "h-10 px-3")}
           >
             <X className="w-3 h-3" />
           </Button>
@@ -246,6 +276,7 @@ export default function ShowsEditor({ profile, user, onSave, onCancel }: ShowsEd
   const [validationErrors, setValidationErrors] = useState<Array<{ showIndex: number; missingFields: string[] }>>([]);
   const [newlyAddedShowIndex, setNewlyAddedShowIndex] = useState<number | null>(null);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -259,10 +290,16 @@ export default function ShowsEditor({ profile, user, onSave, onCancel }: ShowsEd
       ...(profile?.upcoming_shows || []),
       ...(profile?.past_shows || [])
     ];
-    setShows(allShows);
+    
+    // Auto-sort by date (latest first) - no manual sorting needed on mobile
+    const sortedShows = allShows.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    setShows(sortedShows);
   }, [profile]);
 
   const handleDragEnd = (event: any) => {
+    // Skip drag handling on mobile
+    if (isMobile) return;
+    
     const { active, over } = event;
 
     if (active.id !== over.id) {
@@ -450,53 +487,81 @@ export default function ShowsEditor({ profile, user, onSave, onCancel }: ShowsEd
           </div>
         )}
         
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Shows Management</h3>
-          <div className="flex gap-2">
-            {shows.length > 1 && (
+        <div className={cn("flex items-center justify-between", isMobile && "flex-col gap-4")}>
+          <h3 className={cn("font-semibold", isMobile ? "text-xl w-full text-center" : "text-lg")}>Shows Management</h3>
+          <div className={cn("flex gap-2", isMobile && "w-full justify-center")}>
+            {/* Hide sort button on mobile since we auto-sort */}
+            {!isMobile && shows.length > 1 && (
               <Button variant="outline" size="sm" onClick={handleSortByDate}>
                 <ArrowUpDown className="w-4 h-4 mr-2" />
                 Sort by Date
               </Button>
             )}
-            <Button onClick={handleAddShow} size="sm">
-              <Plus className="w-4 h-4 mr-2" />
+            <Button 
+              onClick={handleAddShow} 
+              size={isMobile ? "lg" : "sm"}
+              className={cn(isMobile && "h-12 px-6 text-base")}
+            >
+              <Plus className={cn("mr-2", isMobile ? "w-5 h-5" : "w-4 h-4")} />
               Add Show
             </Button>
           </div>
         </div>
 
         {shows.length > 0 && (
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
-            <SortableContext
-              items={shows.map((_, index) => `show-${index}`)}
-              strategy={verticalListSortingStrategy}
+          isMobile ? (
+            // Mobile: Simple list without drag and drop
+            <div className="space-y-4">
+              {shows.map((show, index) => (
+                <div key={`show-${index}`} data-show-index={index}>
+                  <SortableShow
+                    show={show}
+                    index={index}
+                    onDelete={handleDeleteShow}
+                    onEdit={handleEditShow}
+                    onToggleHighlight={handleToggleHighlight}
+                    initiallyEditing={newlyAddedShowIndex === index}
+                    isMobile={true}
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (
+            // Desktop: Full drag and drop functionality
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
             >
-              <div className="space-y-3">
-                {shows.map((show, index) => (
-                  <div key={`show-${index}`} data-show-index={index}>
-                    <SortableShow
-                      show={show}
-                      index={index}
-                      onDelete={handleDeleteShow}
-                      onEdit={handleEditShow}
-                      onToggleHighlight={handleToggleHighlight}
-                      initiallyEditing={newlyAddedShowIndex === index}
-                    />
-                  </div>
-                ))}
-              </div>
-            </SortableContext>
-          </DndContext>
+              <SortableContext
+                items={shows.map((_, index) => `show-${index}`)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="space-y-3">
+                  {shows.map((show, index) => (
+                    <div key={`show-${index}`} data-show-index={index}>
+                      <SortableShow
+                        show={show}
+                        index={index}
+                        onDelete={handleDeleteShow}
+                        onEdit={handleEditShow}
+                        onToggleHighlight={handleToggleHighlight}
+                        initiallyEditing={newlyAddedShowIndex === index}
+                        isMobile={false}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+          )
         )}
 
         {shows.length === 0 && (
-          <div className="text-center py-8 text-muted-foreground">
-            No shows added yet. Click "Add Show" to get started.
+          <div className={cn("text-center text-muted-foreground", isMobile ? "py-12" : "py-8")}>
+            <p className={cn(isMobile ? "text-base" : "text-sm")}>
+              No shows added yet. Click "Add Show" to get started.
+            </p>
           </div>
         )}
       </CardContent>
