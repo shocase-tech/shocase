@@ -5,8 +5,7 @@ import { Camera, Video, Music, Calendar, Users, Globe, Phone, Sparkles, Zap, Arr
 import { useOptimizedScrollExperience } from "@/hooks/useOptimizedScrollExperience";
 import { useNavigate } from "react-router-dom";
 import microphoneImage from "@/assets/microphone.png";
-import showcaseLogo from "@/assets/newlogo.svg";
-import stageLightingBg from "@/assets/stage-lighting-background.svg";
+import showcaseLogo from "@/assets/shocase-logo-new.png";
 
 const features = [
   {
@@ -91,16 +90,6 @@ const NewExperienceSection = () => {
       ref={elementRef}
       className="relative min-h-screen bg-gradient-dark"
     >
-      {/* Stage Lighting Background Layer */}
-      <div className="absolute inset-0 pointer-events-none">
-        <img 
-          src={stageLightingBg}
-          alt=""
-          className="w-full h-full object-cover opacity-20"
-          style={{ mixBlendMode: 'screen' }}
-        />
-      </div>
-
       {/* Ambient floating elements for visual continuity */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Floating orbs */}
@@ -165,7 +154,7 @@ const NewExperienceSection = () => {
               <img 
                 src={microphoneImage} 
                 alt="Professional microphone"
-                className="w-full h-auto object-cover opacity-40"
+                className="w-full h-auto object-cover opacity-70"
                 draggable={false}
               />
             </div>
@@ -218,16 +207,16 @@ const NewExperienceSection = () => {
           </div>
         )}
 
-         {/* PHASE 1: Message Section */}
-         {currentPhase === 1 && (
-           <div className="absolute inset-0 flex items-center justify-center">
-             <div 
-               className="text-center transition-all duration-500 ease-out"
-               style={{
-                 transform: `translateX(${messageAnim.horizontalPosition}%) translateY(${messageAnim.panUpTransform || 0}px)`,
-                 opacity: messageAnim.opacity,
-               }}
-             >
+        {/* PHASE 1: Message Section */}
+        {currentPhase === 1 && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div 
+              className="text-center transition-all duration-500 ease-out"
+              style={{
+                transform: `translateX(${messageAnim.horizontalPosition}%)`,
+                opacity: messageAnim.opacity,
+              }}
+            >
               {/* Desktop: Single line */}
               <h2 className="hidden md:block text-7xl lg:text-8xl xl:text-9xl font-bold bg-gradient-primary bg-clip-text text-transparent whitespace-nowrap">
                 shocase your music
