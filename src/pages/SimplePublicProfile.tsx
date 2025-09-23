@@ -767,68 +767,88 @@ export default function SimplePublicProfile() {
               ) : null}
             </div>
 
-            {/* Press Sections - Desktop Only */}
-            {((profile.press_quotes && Array.isArray(profile.press_quotes) && profile.press_quotes.length > 0) || 
-              (profile.press_mentions && Array.isArray(profile.press_mentions) && profile.press_mentions.length > 0)) && (
-              <div className={`hidden md:grid gap-8 ${
-                (profile.press_quotes && Array.isArray(profile.press_quotes) && profile.press_quotes.length > 0) && 
-                (profile.press_mentions && Array.isArray(profile.press_mentions) && profile.press_mentions.length > 0)
-                  ? 'grid-cols-1 lg:grid-cols-2' 
-                  : 'grid-cols-1'
-              }`}>
-                {/* Press Quotes */}
-                {profile.press_quotes && Array.isArray(profile.press_quotes) && profile.press_quotes.length > 0 && (
-                  <section className="glass-card border-glass p-4 md:p-8 rounded-xl">
-                    <h2 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 flex items-center gap-3">
-                      <Quote className="w-6 md:w-8 h-6 md:h-8 text-accent" />
-                      Press & Reviews
-                    </h2>
-                    <div className="space-y-4 md:space-y-6">
-                      {profile.press_quotes.map((quote: any, index: number) => (
-                        <blockquote key={index} className="border-l-4 border-primary pl-4 md:pl-6 bg-white/5 p-4 md:p-6 rounded-r-lg hover:shadow-glow transition-all duration-300">
-                          <p className="italic text-lg md:text-xl mb-3 md:mb-4 leading-relaxed">"{quote.text}"</p>
-                          <cite className="text-base md:text-lg font-bold text-primary">— {quote.source}</cite>
-                        </blockquote>
-                      ))}
-                    </div>
-                  </section>
-                )}
+            {/* Press & Reviews Section - Full Width on Desktop */}
+            {profile.press_quotes && Array.isArray(profile.press_quotes) && profile.press_quotes.length > 0 && (
+              <section className="glass-card border-glass p-4 md:p-8 rounded-xl">
+                <h2 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 flex items-center gap-3">
+                  <Quote className="w-6 md:w-8 h-6 md:h-8 text-accent" />
+                  Press & Reviews
+                </h2>
+                <div className="space-y-4 md:space-y-6">
+                  {profile.press_quotes.map((quote: any, index: number) => (
+                    <blockquote key={index} className="border-l-4 border-primary pl-4 md:pl-6 bg-white/5 p-4 md:p-6 rounded-r-lg hover:shadow-glow transition-all duration-300">
+                      <p className="italic text-lg md:text-xl mb-3 md:mb-4 leading-relaxed">"{quote.text}"</p>
+                      <cite className="text-base md:text-lg font-bold text-primary">— {quote.source}</cite>
+                    </blockquote>
+                  ))}
+                </div>
+              </section>
+            )}
 
-                {/* Press Mentions */}
-                {profile.press_mentions && Array.isArray(profile.press_mentions) && profile.press_mentions.length > 0 && (
-                  <section className="glass-card border-glass p-4 md:p-8 rounded-xl">
-                    <h2 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 flex items-center gap-3">
-                      <ExternalLink className="w-6 md:w-8 h-6 md:h-8 text-accent" />
-                      Press Coverage
-                    </h2>
-                    <div className="space-y-3 md:space-y-4">
-                      {profile.press_mentions.map((mention: any, index: number) => (
-                        <div key={index} className="bg-white/5 p-4 md:p-6 rounded-lg hover:bg-white/10 transition-all duration-300">
-                          <h3 className="text-lg md:text-xl font-bold text-foreground mb-2">{mention.title}</h3>
-                          <p className="text-muted-foreground mb-3 text-sm md:text-base">{mention.description}</p>
-                          <div className="flex items-center gap-3">
-                            <span className="text-primary font-medium text-sm md:text-base">{mention.source}</span>
-                            {mention.url && (
-                              <Button variant="outline" size="sm" asChild>
-                                <a href={mention.url} target="_blank" rel="noopener noreferrer">
-                                  <ExternalLink className="w-4 h-4 mr-2" />
-                                  Read More
-                                </a>
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      ))}
+            {/* Press Coverage Section - Mobile Only (moved to sidebar on desktop) */}
+            {profile.press_mentions && Array.isArray(profile.press_mentions) && profile.press_mentions.length > 0 && (
+              <section className="md:hidden glass-card border-glass p-4 rounded-xl">
+                <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+                  <ExternalLink className="w-6 h-6 text-accent" />
+                  Press Coverage
+                </h2>
+                <div className="space-y-3">
+                  {profile.press_mentions.map((mention: any, index: number) => (
+                    <div key={index} className="bg-white/5 p-4 rounded-lg hover:bg-white/10 transition-all duration-300">
+                      <h3 className="text-lg font-bold text-foreground mb-2">{mention.title}</h3>
+                      <p className="text-muted-foreground mb-3 text-sm">{mention.description}</p>
+                      <div className="flex items-center gap-3">
+                        <span className="text-primary font-medium text-sm">{mention.source}</span>
+                        {mention.url && (
+                          <Button variant="outline" size="sm" asChild>
+                            <a href={mention.url} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink className="w-4 h-4 mr-2" />
+                              Read More
+                            </a>
+                          </Button>
+                        )}
+                      </div>
                     </div>
-                  </section>
-                )}
-              </div>
+                  ))}
+                </div>
+              </section>
             )}
 
           </div>
 
           {/* Sidebar - Hidden on mobile since Connect moved above */}
-          <div className="hidden md:block space-y-8">
+          <div className="hidden md:block space-y-6">
+            {/* Press Coverage Section - Sidebar on Desktop */}
+            {profile.press_mentions && Array.isArray(profile.press_mentions) && profile.press_mentions.length > 0 && (
+              <Card className="glass-card border-glass">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3 text-lg">
+                    <ExternalLink className="w-5 h-5 text-accent" />
+                    Press Coverage
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {profile.press_mentions.map((mention: any, index: number) => (
+                    <div key={index} className="bg-white/5 p-3 rounded-lg hover:bg-white/10 transition-all duration-300">
+                      <h3 className="text-sm font-bold text-foreground mb-1 leading-tight">{mention.title}</h3>
+                      <p className="text-muted-foreground mb-2 text-xs leading-relaxed line-clamp-2">{mention.description}</p>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-primary font-medium text-xs truncate">{mention.source}</span>
+                        {mention.url && (
+                          <Button variant="outline" size="sm" asChild className="h-7 px-2 text-xs">
+                            <a href={mention.url} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink className="w-3 h-3 mr-1" />
+                              Read
+                            </a>
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
             {/* Connect Section */}
             <Card className="glass-card border-glass">
               <CardHeader>
