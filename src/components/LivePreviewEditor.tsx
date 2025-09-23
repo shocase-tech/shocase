@@ -103,8 +103,24 @@ export default function LivePreviewEditor({
     // Save current scroll position
     const currentScrollY = window.scrollY;
     
+    // Merge updated data with current profile to preserve all existing fields
+    const mergedData = profile ? { ...profile, ...updatedData } : updatedData;
+    
+    // Deep merge nested objects to preserve existing keys
+    if (updatedData && profile) {
+      if (updatedData.social_links && profile.social_links) {
+        mergedData.social_links = { ...profile.social_links, ...updatedData.social_links };
+      }
+      if (updatedData.streaming_links && profile.streaming_links) {
+        mergedData.streaming_links = { ...profile.streaming_links, ...updatedData.streaming_links };
+      }
+      if (updatedData.contact_info && profile.contact_info) {
+        mergedData.contact_info = { ...profile.contact_info, ...updatedData.contact_info };
+      }
+    }
+    
     // Update the profile data and trigger auto-save
-    onProfileUpdated(updatedData);
+    onProfileUpdated(mergedData);
     setUnsavedChanges(true);
     
     // Close the editor when auto-saving from click-outside

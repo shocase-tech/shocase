@@ -259,7 +259,23 @@ export default function Dashboard() {
   const handleProfileUpdated = useCallback((updatedData?: Partial<DashboardArtistProfile>) => {
     // Update local state instead of refetching from database to prevent reloads
     if (updatedData && profile) {
-      setProfile({ ...profile, ...updatedData });
+      const mergedProfile = { ...profile, ...updatedData };
+      
+      // Deep merge nested objects to preserve existing keys
+      if (updatedData.social_links && profile.social_links) {
+        mergedProfile.social_links = { ...profile.social_links, ...updatedData.social_links };
+      }
+      if (updatedData.streaming_links && profile.streaming_links) {
+        mergedProfile.streaming_links = { ...profile.streaming_links, ...updatedData.streaming_links };
+      }
+      if (updatedData.contact_info && profile.contact_info) {
+        mergedProfile.contact_info = { ...profile.contact_info, ...updatedData.contact_info };
+      }
+      
+      setProfile(mergedProfile);
+    } else if (updatedData && !profile) {
+      // Handle case where profile doesn't exist yet
+      setProfile(updatedData as DashboardArtistProfile);
     }
   }, [profile]);
 
