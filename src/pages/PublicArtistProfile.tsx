@@ -503,9 +503,33 @@ export default function PublicArtistProfile() {
             
             <Card className="glass-card border-glass text-center p-6">
               <CardContent className="p-0">
-                <TrendingUp className="w-8 h-8 text-primary mx-auto mb-2" />
-                <h3 className="text-2xl font-bold text-foreground">{profile.past_shows && Array.isArray(profile.past_shows) ? profile.past_shows.length : '0'}</h3>
-                <p className="text-sm text-muted-foreground">Past Shows</p>
+                <Calendar className="w-8 h-8 text-accent mx-auto mb-2" />
+                <h3 className="text-2xl font-bold text-foreground">
+                  {(() => {
+                    const upcomingCount = (profile.upcoming_shows && Array.isArray(profile.upcoming_shows)) ? 
+                      profile.upcoming_shows.length : 0;
+                    const pastCount = (profile.past_shows && Array.isArray(profile.past_shows)) ? 
+                      profile.past_shows.length : 0;
+                    
+                    if (upcomingCount > 0) return upcomingCount;
+                    if (pastCount > 0) return 'Open';
+                    return 'Booking';
+                  })()}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {(() => {
+                    const upcomingCount = (profile.upcoming_shows && Array.isArray(profile.upcoming_shows)) ? 
+                      profile.upcoming_shows.length : 0;
+                    const pastCount = (profile.past_shows && Array.isArray(profile.past_shows)) ? 
+                      profile.past_shows.length : 0;
+                    
+                    if (upcomingCount > 0) {
+                      return upcomingCount === 1 ? 'Upcoming show' : 'Upcoming shows';
+                    }
+                    if (pastCount > 0) return 'For new dates';
+                    return 'Inquiries open';
+                  })()}
+                </p>
               </CardContent>
             </Card>
             

@@ -326,10 +326,44 @@ export function PreviewModal({ open, onOpenChange, profile, onPublish }: Preview
                     {(() => {
                       const upcomingCount = (profile.upcoming_shows && Array.isArray(profile.upcoming_shows)) ? 
                         profile.upcoming_shows.length : 0;
-                      return upcomingCount > 0 ? upcomingCount : 'Open';
+                      const pastCount = (profile.past_shows && Array.isArray(profile.past_shows)) ? 
+                        profile.past_shows.length : 0;
+                      
+                      // Has upcoming shows - show count
+                      if (upcomingCount > 0) {
+                        return upcomingCount;
+                      }
+                      
+                      // No upcoming shows, but has past shows - show "Open"
+                      if (pastCount > 0) {
+                        return 'Open';
+                      }
+                      
+                      // No shows at all - show "Booking"
+                      return 'Booking';
                     })()}
                   </h3>
-                  <p className="text-sm text-muted-foreground">Upcoming shows</p>
+                  <p className="text-sm text-muted-foreground">
+                    {(() => {
+                      const upcomingCount = (profile.upcoming_shows && Array.isArray(profile.upcoming_shows)) ? 
+                        profile.upcoming_shows.length : 0;
+                      const pastCount = (profile.past_shows && Array.isArray(profile.past_shows)) ? 
+                        profile.past_shows.length : 0;
+                      
+                      // Has upcoming shows
+                      if (upcomingCount > 0) {
+                        return upcomingCount === 1 ? 'Upcoming show' : 'Upcoming shows';
+                      }
+                      
+                      // No upcoming shows, but has past shows
+                      if (pastCount > 0) {
+                        return 'For new dates';
+                      }
+                      
+                      // No shows at all
+                      return 'Inquiries open';
+                    })()}
+                  </p>
                 </CardContent>
               </Card>
               
