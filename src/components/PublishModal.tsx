@@ -170,7 +170,7 @@ export function PublishModal({
 
                 <div className="space-y-2">
                   <h2 className="text-xl font-semibold text-foreground">
-                    {isPublished ? "Unpublishing your EPK..." : "Publishing your EPK..."}
+                    {isPublished ? "Publishing your EPK..." : "Unpublishing your EPK..."}
                   </h2>
                   <p className="text-sm text-muted-foreground">
                     {Math.round(loadingProgress)}%
