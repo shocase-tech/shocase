@@ -52,11 +52,7 @@ export const FeaturedTrackEmbed: React.FC<FeaturedTrackEmbedProps> = ({ trackUrl
   const embedUrl = getEmbedUrl(trackUrl);
 
   return (
-    <div className={`bg-white/5 rounded-lg p-2 md:p-3 border border-white/10 w-full ${className}`}>
-      <div className="flex items-center gap-2 mb-2">
-        <Music className={`w-4 h-4 ${service.color}`} />
-        <span className="text-sm font-medium">{service.name}</span>
-      </div>
+    <div className={`w-full ${className}`}>
       <iframe
         src={embedUrl}
         width="100%"

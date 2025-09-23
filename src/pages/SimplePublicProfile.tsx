@@ -366,9 +366,13 @@ export default function SimplePublicProfile() {
                   size="lg" 
                   className="group" 
                   onClick={() => {
-                    const spotifySection = document.getElementById('spotify-player');
-                    if (spotifySection) {
-                      spotifySection.scrollIntoView({ behavior: 'smooth' });
+                    const featuredTrackSection = document.getElementById('featured-track-player');
+                    if (featuredTrackSection) {
+                      const heroHeight = window.innerHeight * 0.7; // 70vh hero section
+                      window.scrollTo({
+                        top: heroHeight,
+                        behavior: 'smooth'
+                      });
                     }
                   }}
                 >
@@ -396,9 +400,13 @@ export default function SimplePublicProfile() {
                   size="lg" 
                   className="group" 
                   onClick={() => {
-                    const spotifySection = document.getElementById('spotify-player');
-                    if (spotifySection) {
-                      spotifySection.scrollIntoView({ behavior: 'smooth' });
+                    const featuredTrackSection = document.getElementById('featured-track-player');
+                    if (featuredTrackSection) {
+                      const heroHeight = window.innerHeight * 0.7; // 70vh hero section
+                      window.scrollTo({
+                        top: heroHeight,
+                        behavior: 'smooth'
+                      });
                     }
                   }}
                 >
