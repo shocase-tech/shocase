@@ -212,14 +212,14 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
   const getFeatureAnimation = useCallback((cardIndex: number) => {
     if (scrollProgress < 0.59) return { opacity: 0, transform: 40, panUpTransform: 0 };
     
-    // Full parallax scroll transition from 75-90%
+    // Full parallax scroll transition from 75-90% - ALL elements move together
     if (scrollProgress > 0.75) {
       const panProgress = (scrollProgress - 0.75) / 0.15; // Extended transition over 15% scroll
       const easeOutQuint = 1 - Math.pow(1 - panProgress, 5); // Stronger easing for smoother parallax
       return { 
         opacity: Math.max(0, 1 - panProgress * 1.2), // Gradual fade out
         transform: 0, 
-        panUpTransform: easeOutQuint * -200 // Stronger upward movement
+        panUpTransform: easeOutQuint * -220 // Unified movement with header for cohesive parallax
       };
     }
     
@@ -241,14 +241,14 @@ export const useOptimizedScrollExperience = (options: UseOptimizedScrollExperien
   const getHeaderFadeAnimation = useCallback(() => {
     if (scrollProgress < 0.59) return { opacity: 0, transform: 20, panUpTransform: 0 };
     
-    // Full parallax scroll effect from 75-90%
+    // Full parallax scroll effect from 75-90% - moves with all other elements
     if (scrollProgress > 0.75) {
       const panProgress = (scrollProgress - 0.75) / 0.15; // Extended transition over 15% scroll
       const easeOutQuint = 1 - Math.pow(1 - panProgress, 5); // Stronger easing for smoother parallax
       return { 
         opacity: Math.max(0, 1 - panProgress * 1.2), // Gradual fade out
         transform: 0, 
-        panUpTransform: easeOutQuint * -250 // Header moves up even faster for stronger parallax
+        panUpTransform: easeOutQuint * -220 // Same movement as cards for unified parallax effect
       };
     }
     
