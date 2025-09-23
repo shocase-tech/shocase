@@ -43,8 +43,8 @@ interface SortableShowProps {
   onToggleHighlight: (index: number) => void;
 }
 
-function SortableShow({ show, index, onDelete, onEdit, onToggleHighlight }: SortableShowProps) {
-  const [isEditing, setIsEditing] = useState(false);
+function SortableShow({ show, index, onDelete, onEdit, onToggleHighlight, initiallyEditing = false }: SortableShowProps & { initiallyEditing?: boolean }) {
+  const [isEditing, setIsEditing] = useState(initiallyEditing);
   const [editData, setEditData] = useState(show);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
     show.date ? new Date(show.date) : undefined
@@ -244,6 +244,7 @@ export default function ShowsEditor({ profile, user, onSave, onCancel }: ShowsEd
   const [isSaving, setIsSaving] = useState(false);
   const [showValidationModal, setShowValidationModal] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Array<{ showIndex: number; missingFields: string[] }>>([]);
+  const [newlyAddedShowIndex, setNewlyAddedShowIndex] = useState<number | null>(null);
   const { toast } = useToast();
 
   const sensors = useSensors(
@@ -282,26 +283,36 @@ export default function ShowsEditor({ profile, user, onSave, onCancel }: ShowsEd
       ticket_link: '',
       is_highlighted: false
     };
-    setShows([...shows, newShow]);
+    setShows([newShow, ...shows]); // Add to top of list
+    setNewlyAddedShowIndex(0); // Mark the first show as newly added
     
     // Scroll to the new show for immediate editing
     setTimeout(() => {
-      const lastShowIndex = shows.length;
-      const lastShowElement = document.querySelector(`[data-show-index="${lastShowIndex}"]`);
-      if (lastShowElement) {
-        lastShowElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const newShowElement = document.querySelector(`[data-show-index="0"]`);
+      if (newShowElement) {
+        newShowElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }, 100);
   };
 
   const handleDeleteShow = (index: number) => {
     setShows(shows.filter((_, i) => i !== index));
+    // Reset newly added show index if it was deleted
+    if (newlyAddedShowIndex === index) {
+      setNewlyAddedShowIndex(null);
+    } else if (newlyAddedShowIndex !== null && index < newlyAddedShowIndex) {
+      setNewlyAddedShowIndex(newlyAddedShowIndex - 1);
+    }
   };
 
   const handleEditShow = (index: number, updatedShow: Show) => {
     const updatedShows = [...shows];
     updatedShows[index] = updatedShow;
     setShows(updatedShows);
+    // Clear newly added flag once edited
+    if (newlyAddedShowIndex === index) {
+      setNewlyAddedShowIndex(null);
+    }
   };
 
   const handleToggleHighlight = (index: number) => {
@@ -314,11 +325,12 @@ export default function ShowsEditor({ profile, user, onSave, onCancel }: ShowsEd
   };
 
   const handleSortByDate = () => {
-    const sortedShows = [...shows].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    const sortedShows = [...shows].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // Latest date first
     setShows(sortedShows);
+    setNewlyAddedShowIndex(null); // Clear newly added flag after sorting
     toast({
       title: "Shows sorted",
-      description: "Shows have been sorted by date.",
+      description: "Shows have been sorted by date (latest first).",
     });
   };
 
@@ -473,6 +485,7 @@ export default function ShowsEditor({ profile, user, onSave, onCancel }: ShowsEd
                       onDelete={handleDeleteShow}
                       onEdit={handleEditShow}
                       onToggleHighlight={handleToggleHighlight}
+                      initiallyEditing={newlyAddedShowIndex === index}
                     />
                   </div>
                 ))}
