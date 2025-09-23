@@ -48,7 +48,7 @@ function SortableShow({ show, index, onDelete, onEdit, onToggleHighlight, initia
   const [isEditing, setIsEditing] = useState(initiallyEditing);
   const [editData, setEditData] = useState(show);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
-    show.date ? new Date(show.date) : undefined
+    show.date ? new Date(show.date + 'T00:00:00') : undefined
   );
 
   const {
@@ -72,6 +72,7 @@ function SortableShow({ show, index, onDelete, onEdit, onToggleHighlight, initia
   const handleSave = () => {
     onEdit(index, {
       ...editData,
+      // Ensure date is stored as YYYY-MM-DD without timezone conversion
       date: selectedDate ? format(selectedDate, 'yyyy-MM-dd') : editData.date
     });
     setIsEditing(false);
@@ -330,10 +331,11 @@ export default function ShowsEditor({ profile, user, onSave, onCancel, onFormDat
   };
 
   const handleAddShow = () => {
+    const today = new Date();
     const newShow: Show = {
       venue: '',
       city: '',
-      date: format(new Date(), 'yyyy-MM-dd'),
+      date: format(today, 'yyyy-MM-dd'), // This ensures consistent format
       ticket_link: '',
       is_highlighted: false
     };
@@ -379,7 +381,11 @@ export default function ShowsEditor({ profile, user, onSave, onCancel, onFormDat
   };
 
   const handleSortByDate = () => {
-    const sortedShows = [...shows].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // Latest date first
+    const sortedShows = [...shows].sort((a, b) => {
+      const dateA = new Date(a.date + 'T00:00:00');
+      const dateB = new Date(b.date + 'T00:00:00');
+      return dateB.getTime() - dateA.getTime(); // Latest date first
+    });
     setShows(sortedShows);
     setNewlyAddedShowIndex(null); // Clear newly added flag after sorting
     toast({
@@ -423,11 +429,27 @@ export default function ShowsEditor({ profile, user, onSave, onCancel, onFormDat
       
       console.log("💾 ShowsEditor: Saving shows:", shows);
 
+      // Fix date comparisons to avoid timezone issues
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Set to start of today in local timezone
+
+      const upcomingShows = shows.filter(show => {
+        const showDate = new Date(show.date + 'T00:00:00'); // Force local timezone
+        showDate.setHours(0, 0, 0, 0);
+        return showDate >= today;
+      });
+
+      const pastShows = shows.filter(show => {
+        const showDate = new Date(show.date + 'T00:00:00'); // Force local timezone
+        showDate.setHours(0, 0, 0, 0);
+        return showDate < today;
+      });
+
       const { error } = await supabase
         .from('artist_profiles')
         .update({
-          upcoming_shows: shows.filter(show => new Date(show.date) >= new Date()) as any,
-          past_shows: shows.filter(show => new Date(show.date) < new Date()) as any,
+          upcoming_shows: upcomingShows as any,
+          past_shows: pastShows as any,
           updated_at: new Date().toISOString()
         })
         .eq('user_id', user.id);
@@ -442,8 +464,8 @@ export default function ShowsEditor({ profile, user, onSave, onCancel, onFormDat
       // Update parent component with new data
       const updatedProfile = {
         ...profile,
-        upcoming_shows: shows.filter(show => new Date(show.date) >= new Date()),
-        past_shows: shows.filter(show => new Date(show.date) < new Date())
+        upcoming_shows: upcomingShows,
+        past_shows: pastShows
       };
       
       console.log("📤 ShowsEditor: Calling onSave with updated profile:", updatedProfile);
