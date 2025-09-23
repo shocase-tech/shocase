@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import showcaseLogo from "@/assets/shocase-logo-new.png";
+import showcaseLogo from "@/assets/newlogo.svg";
 
 const CTASection = () => {
   const navigate = useNavigate();
