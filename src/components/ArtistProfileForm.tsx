@@ -305,7 +305,7 @@ export default function ArtistProfileForm({ profile, onSaved, userEmail, userPho
       const { error } = await supabase
         .from("artist_profiles")
         .update(sectionData)
-        .eq("id", profile.id);
+        .eq("user_id", user.id);
 
       if (error) throw error;
       
