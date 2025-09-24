@@ -10,6 +10,9 @@ interface CachedUrl {
 const urlCache = new Map<string, CachedUrl>();
 const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
 
+// Clear cache on component load to fix URL issues
+urlCache.clear();
+
 interface PrivateImageProps {
   storagePath: string | any; // Allow objects for nested path format
   alt: string;

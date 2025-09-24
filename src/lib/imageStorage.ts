@@ -76,7 +76,15 @@ export class ImageStorageService {
       return '';
     }
 
-    return data?.signedUrl || '';
+    let signedUrl = data?.signedUrl || '';
+    
+    // If the URL is relative, make it absolute
+    if (signedUrl && signedUrl.startsWith('/')) {
+      const SUPABASE_URL = "https://kaetsegwzfvkermjokmh.supabase.co";
+      signedUrl = `${SUPABASE_URL}/storage/v1${signedUrl}`;
+    }
+
+    return signedUrl;
   }
 
   /**
