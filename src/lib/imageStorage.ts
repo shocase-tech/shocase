@@ -85,6 +85,29 @@ export class ImageStorageService {
   }
 
   /**
+   * Generate public URL for published content (uses long-lived signed URLs)
+   */
+  static async getPublicUrl(storagePath: string): Promise<string> {
+    if (!storagePath) return '';
+    
+    // For "public" access, we'll use 24-hour signed URLs
+    return this.getSignedUrl(storagePath, 86400); // 24 hours
+  }
+
+  /**
+   * Generate multiple public URLs at once
+   */
+  static async getPublicUrls(storagePaths: string[]): Promise<string[]> {
+    if (!storagePaths || storagePaths.length === 0) return [];
+    
+    const urls = await Promise.all(
+      storagePaths.map(path => this.getPublicUrl(path))
+    );
+    
+    return urls.filter(url => url !== '');
+  }
+
+  /**
    * Delete a file from storage
    */
   static async deleteFile(storagePath: string): Promise<void> {
