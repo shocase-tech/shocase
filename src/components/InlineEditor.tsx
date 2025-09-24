@@ -119,23 +119,57 @@ export default function InlineEditor({
 
   // File upload handlers
   const handleProfilePhotoUpload = async (file: File) => {
-    if (!user) throw new Error('User not authenticated');
-    const storagePath = await ImageStorageService.uploadFile(file, 'profile', user.id);
-    setFormData({ ...formData, profile_photo_url: storagePath });
-    return storagePath;
+  console.log("🔥 handleProfilePhotoUpload called");
+  
+  if (!user) throw new Error('User not authenticated');
+  const storagePath = await ImageStorageService.uploadFile(file, 'profile', user.id);
+  console.log("🔥 Upload successful, path:", storagePath);
+  
+  // Update local state
+  setFormData({ ...formData, profile_photo_url: storagePath });
+  
+  // SAVE TO DATABASE - This was missing!
+  console.log("🔥 Saving to database...");
+  await handleSave(); // This triggers the actual database save
+  console.log("🔥 Database save completed");
+  
+  return storagePath;
   };
 
   const handleBackgroundImageUpload = async (file: File) => {
-    if (!user) throw new Error('User not authenticated');
-    const storagePath = await ImageStorageService.uploadFile(file, 'hero', user.id);
-    setFormData({ ...formData, hero_photo_url: storagePath });
-    return storagePath;
+  if (!user) throw new Error('User not authenticated');
+  const storagePath = await ImageStorageService.uploadFile(file, 'hero', user.id);
+  
+  // Update local state
+  setFormData({ ...formData, hero_photo_url: storagePath });
+  
+  // SAVE TO DATABASE - This was missing!
+  await handleSave();
+  
+  return storagePath;
   };
 
   const handleGalleryUpload = async (file: File) => {
-    if (!user) throw new Error('User not authenticated');
-    const storagePath = await ImageStorageService.uploadFile(file, 'gallery', user.id);
-    return storagePath;
+  console.log("🔥 handleGalleryUpload called");
+  
+  if (!user) throw new Error('User not authenticated');
+  const storagePath = await ImageStorageService.uploadFile(file, 'gallery', user.id);
+  console.log("🔥 Gallery upload successful, path:", storagePath);
+  
+  // Add to current gallery photos array
+  const currentPhotos = formData.gallery_photos || [];
+  const updatedPhotos = [...currentPhotos, { url: storagePath, label: '' }];
+  
+  // Update local state
+  setFormData({ ...formData, gallery_photos: updatedPhotos });
+  console.log("🔥 Updated local gallery photos:", updatedPhotos);
+  
+  // SAVE TO DATABASE - This was missing!
+  console.log("🔥 Saving gallery to database...");
+  await handleSave();
+  console.log("🔥 Gallery database save completed");
+  
+  return storagePath;
   };
 
   const updateGalleryPhotos = (photos: any[]) => {
