@@ -297,33 +297,49 @@ export default function ArtistProfileForm({ profile, onSaved, userEmail, userPho
     return signedUrl;
   };
 
-  const saveSection = async (sectionData: any) => {
-    if (!profile) return;
+const saveSection = async (sectionData: any) => {
+  console.log("🐛 saveSection called with:", sectionData);
+  console.log("🐛 profile exists:", !!profile);
+  console.log("🐛 profile.id:", profile?.id);
+  
+  if (!profile) {
+    console.log("🐛 No profile found, returning early");
+    return;
+  }
+  
+  try {
+    setLoading(true);
+    console.log("🐛 About to update database with:", {
+      table: "artist_profiles",
+      data: sectionData,
+      whereClause: `id = ${profile.id}`
+    });
     
-    try {
-      setLoading(true);
-      const { error } = await supabase
-        .from("artist_profiles")
-        .update(sectionData)
-        .eq("user_id", user.id);
+    const { error } = await supabase
+      .from("artist_profiles")
+      .update(sectionData)
+      .eq("id", profile.id);
 
-      if (error) throw error;
-      
-      onSaved();
-      toast({
-        title: "Success!",
-        description: "Section updated successfully.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+    console.log("🐛 Database update result:", { error });
+
+    if (error) {
+      console.error("🐛 Database update failed:", error);
+      throw error;
     }
-  };
+    
+    console.log("🐛 Database update succeeded");
+    
+    onSaved();
+    toast({
+      title: "Success!",
+      description: "Section updated successfully."
+    });
+  } catch (error) {
+    console.error("🐛 saveSection error:", error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const addItem = (field: string, item: any) => {
     setFormData({
