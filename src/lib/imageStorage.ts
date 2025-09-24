@@ -7,66 +7,50 @@ export interface ImageUrlOptions {
 
 export class ImageStorageService {
   private static readonly BUCKET_NAME = 'artist-uploads';
+  private static readonly SUPABASE_URL = "https://kaetsegwzfvkermjokmh.supabase.co";
   
   /**
-   * Sanitize artist name for filesystem use
-   */
-  private static sanitizeArtistName(artistName: string): string {
-    return artistName
-      .toLowerCase()
-      .replace(/[^a-z0-9\s]/g, '') // Remove special characters
-      .replace(/\s+/g, '_') // Replace spaces with underscores
-      .trim();
-  }
-
-  /**
-   * Get artist folder name for storage path
-   */
-  private static async getArtistFolderName(userId: string): Promise<string> {
-    const shortUserId = userId.substring(0, 8);
-    
-    try {
-      const { data: profile } = await supabase
-        .from('artist_profiles')
-        .select('artist_name')
-        .eq('user_id', userId)
-        .single();
-
-      if (profile?.artist_name) {
-        const sanitizedName = this.sanitizeArtistName(profile.artist_name);
-        return `${sanitizedName}_${shortUserId}`;
-      }
-    } catch (error) {
-      console.warn('Could not fetch artist name:', error);
-    }
-
-    return `unnamed_artist_${shortUserId}`;
-  }
-  
-  /**
-   * Uploads a file to Supabase Storage and returns the storage path
+   * Uploads a file using simple UUID folder structure
    */
   static async uploadFile(file: File, type: string, userId: string): Promise<string> {
+    if (!file || !type || !userId) {
+      throw new Error('Missing required parameters for file upload');
+    }
+
     const fileExt = file.name.split('.').pop();
-    const artistFolder = await this.getArtistFolderName(userId);
-    const fileName = `${artistFolder}/${type}/${Date.now()}.${fileExt}`;
+    if (!fileExt) {
+      throw new Error('File must have an extension');
+    }
+
+    // Simple: userId/type/timestamp.ext
+    const fileName = `${userId}/${type}/${Date.now()}.${fileExt}`;
 
     const { error: uploadError } = await supabase.storage
       .from(this.BUCKET_NAME)
-      .upload(fileName, file);
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
 
-    if (uploadError) throw uploadError;
+    if (uploadError) {
+      console.error('Upload error:', uploadError);
+      throw new Error(`Upload failed: ${uploadError.message}`);
+    }
 
-    // Return the storage path, not a URL
+    // Return storage path
     return fileName;
   }
 
   /**
-   * Generate a signed URL for private viewing (dashboard)
+   * Generate signed URL for viewing
    */
   static async getSignedUrl(storagePath: string, expiresIn: number = 3600): Promise<string> {
     if (!storagePath) return '';
     
+    if (storagePath.startsWith('http')) {
+      return storagePath;
+    }
+
     const { data, error } = await supabase.storage
       .from(this.BUCKET_NAME)
       .createSignedUrl(storagePath, expiresIn);
@@ -78,51 +62,26 @@ export class ImageStorageService {
 
     let signedUrl = data?.signedUrl || '';
     
-    // If the URL is relative, make it absolute
     if (signedUrl && signedUrl.startsWith('/')) {
-      const SUPABASE_URL = "https://kaetsegwzfvkermjokmh.supabase.co";
-      signedUrl = `${SUPABASE_URL}/storage/v1${signedUrl}`;
+      signedUrl = `${this.SUPABASE_URL}/storage/v1${signedUrl}`;
     }
 
     return signedUrl;
   }
 
   /**
-   * Generate multiple signed URLs at once
+   * Generate multiple signed URLs
    */
   static async getSignedUrls(storagePaths: string[], expiresIn: number = 3600): Promise<string[]> {
     if (!storagePaths || storagePaths.length === 0) return [];
     
-    const urls = await Promise.all(
+    const results = await Promise.allSettled(
       storagePaths.map(path => this.getSignedUrl(path, expiresIn))
     );
     
-    return urls.filter(url => url !== '');
-  }
-
-  /**
-   * Generate public URL for published content
-   * For published press kits, we'll create long-lived signed URLs (24 hours)
-   */
-  static async getPublicUrl(storagePath: string): Promise<string> {
-    if (!storagePath) return '';
-    
-    // For "public" access on published press kits, we'll use 24-hour signed URLs
-    // This gives us control while appearing public to end users
-    return this.getSignedUrl(storagePath, 86400); // 24 hours
-  }
-
-  /**
-   * Generate multiple public URLs at once
-   */
-  static async getPublicUrls(storagePaths: string[]): Promise<string[]> {
-    if (!storagePaths || storagePaths.length === 0) return [];
-    
-    const urls = await Promise.all(
-      storagePaths.map(path => this.getPublicUrl(path))
-    );
-    
-    return urls.filter(url => url !== '');
+    return results
+      .map(result => result.status === 'fulfilled' ? result.value : '')
+      .filter(url => url !== '');
   }
 
   /**
@@ -142,77 +101,34 @@ export class ImageStorageService {
   }
 
   /**
-   * Check if a path is a storage path or already a URL
+   * Check if a path is a storage path (not a URL)
    */
   static isStoragePath(pathOrUrl: string): boolean {
     return !pathOrUrl.startsWith('http') && !pathOrUrl.startsWith('blob:');
   }
 
   /**
-   * Extract storage path from a signed URL (if needed)
+   * Extract storage path from URL if needed
    */
-  static extractStoragePath(url: string): string {
-    if (this.isStoragePath(url)) return url;
+  static extractStoragePath(urlOrPath: string): string {
+    if (!urlOrPath) return '';
     
-    // If it's a signed URL, we can't easily extract the path
-    // This method is mainly for migration purposes
-    return url;
-  }
-
-  /**
-   * Display folder name for UI - handles both new artist-based and legacy UUID folders
-   */
-  static async displayFolderName(folderPath: string): Promise<string> {
-    if (!folderPath) return '';
-
-    // Extract the first part of the path (folder name)
-    const pathParts = folderPath.split('/');
-    const folderName = pathParts[0];
-
-    // Check if it's already in the new format (contains underscore and shorter ID)
-    if (folderName.includes('_') && folderName.split('_').pop()?.length === 8) {
-      const parts = folderName.split('_');
-      const shortUserId = parts.pop();
-      const artistName = parts.join(' ').replace(/_/g, ' ');
-      
-      if (artistName === 'unnamed artist') {
-        return `Unnamed Artist (${shortUserId})`;
-      }
-      
-      // Capitalize first letter of each word
-      const displayName = artistName
-        .split(' ')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
-      
-      return `${displayName} (${shortUserId})`;
+    if (!urlOrPath.startsWith('http')) {
+      return urlOrPath;
     }
 
-    // Check if it's a UUID pattern (legacy format)
-    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    if (uuidPattern.test(folderName)) {
-      const shortUserId = folderName.substring(0, 8);
+    try {
+      const url = new URL(urlOrPath);
+      const pathParts = url.pathname.split('/');
       
-      try {
-        // Try to find artist by user_id
-        const { data: profile } = await supabase
-          .from('artist_profiles')
-          .select('artist_name')
-          .eq('user_id', folderName)
-          .single();
-
-        if (profile?.artist_name) {
-          return `${profile.artist_name} (${shortUserId})`;
-        }
-      } catch (error) {
-        console.warn('Could not fetch artist for legacy folder:', error);
+      const signIndex = pathParts.indexOf('sign');
+      if (signIndex > -1 && pathParts[signIndex + 1]) {
+        return decodeURIComponent(pathParts[signIndex + 1]);
       }
-      
-      // If no artist found, it might be a deleted account
-      return `[DELETED] (${shortUserId})`;
+    } catch (error) {
+      console.warn('Could not extract storage path from URL:', urlOrPath);
     }
 
-    // If it doesn't match any pattern, return as-is
-    return folderName;
+    return urlOrPath;
   }
 }
