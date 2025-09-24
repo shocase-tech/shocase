@@ -278,64 +278,69 @@ export default function ArtistProfileForm({ profile, onSaved, userEmail, userPho
   };
 
   const handleFileUpload = async (file: File, type: 'profile' | 'press' | 'pdf' | 'hero' | 'gallery'): Promise<string> => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error("Not authenticated");
+  console.log("🔥 handleFileUpload called with type:", type);
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  console.log("🔥 Got user:", user?.id);
+  
+  if (!user) throw new Error("Not authenticated");
 
-    // Upload file and get storage path (not URL)
-    const storagePath = await ImageStorageService.uploadFile(file, type, user.id);
+  // Upload file and get storage path (not URL)
+  const storagePath = await ImageStorageService.uploadFile(file, type, user.id);
+  console.log("🔥 Upload successful, storage path:", storagePath);
 
-    // For immediate display in the form, generate a signed URL
-    const signedUrl = await ImageStorageService.getSignedUrl(storagePath);
-    
-    // Save the storage path to the database, but return the signed URL for immediate display
-    if (type === 'profile') {
-      await saveSection({ profile_photo_url: storagePath });
-    } else if (type === 'hero') {
-      await saveSection({ hero_photo_url: storagePath });
-    }
-    
-    return signedUrl;
-  };
+  // For immediate display in the form, generate a signed URL
+  const signedUrl = await ImageStorageService.getSignedUrl(storagePath);
+  console.log("🔥 Generated signed URL for display:", signedUrl);
+  
+  // Save the storage path to the database, but return the signed URL for immediate display
+  if (type === 'profile') {
+    console.log("🔥 About to call saveSection for profile photo");
+    await saveSection({ profile_photo_url: storagePath });
+    console.log("🔥 saveSection completed for profile photo");
+  } else if (type === 'hero') {
+    console.log("🔥 About to call saveSection for hero photo");
+    await saveSection({ hero_photo_url: storagePath });
+    console.log("🔥 saveSection completed for hero photo");
+  }
+  
+  console.log("🔥 handleFileUpload completing, returning signed URL");
+  return signedUrl;
+};
 
 const saveSection = async (sectionData: any) => {
-  console.log("🐛 saveSection called with:", sectionData);
-  console.log("🐛 profile exists:", !!profile);
-  console.log("🐛 profile.id:", profile?.id);
+  console.log("🔥 saveSection called with data:", sectionData);
+  console.log("🔥 profile exists:", !!profile);
+  console.log("🔥 profile.id:", profile?.id);
   
   if (!profile) {
-    console.log("🐛 No profile found, returning early");
+    console.log("🔥 ERROR: No profile found!");
     return;
   }
   
   try {
     setLoading(true);
-    console.log("🐛 About to update database with:", {
-      table: "artist_profiles",
-      data: sectionData,
-      whereClause: `id = ${profile.id}`
-    });
+    console.log("🔥 Calling supabase update...");
     
-    const { error } = await supabase
+    const { error, data } = await supabase
       .from("artist_profiles")
       .update(sectionData)
-      .eq("id", profile.id);
+      .eq("id", profile.id)
+      .select(); // Add .select() to see what was actually updated
 
-    console.log("🐛 Database update result:", { error });
+    console.log("🔥 Supabase update result:", { error, data });
 
     if (error) {
-      console.error("🐛 Database update failed:", error);
+      console.error("🔥 Database error:", error);
       throw error;
     }
     
-    console.log("🐛 Database update succeeded");
-    
+    console.log("🔥 Update successful!");
     onSaved();
-    toast({
-      title: "Success!",
-      description: "Section updated successfully."
-    });
+    
   } catch (error) {
-    console.error("🐛 saveSection error:", error);
+    console.error("🔥 saveSection failed:", error);
+    throw error;
   } finally {
     setLoading(false);
   }
