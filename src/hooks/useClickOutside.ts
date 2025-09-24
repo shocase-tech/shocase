@@ -7,11 +7,15 @@ export function useClickOutside<T extends HTMLElement>(
   const ref = useRef<T>(null);
 
   useEffect(() => {
+    console.log("🔍 useClickOutside: Hook initialized, enabled:", enabled);
     if (!enabled) return;
 
 function handleClickOutside(event: MouseEvent) {
+      console.log("🔍 useClickOutside: Click detected, event type:", event.type, "target:", event.target);
+      
       // Check for active drag operations
       if ((window as any).isDragOperationActive) {
+        console.log("🔍 useClickOutside: Ignoring click - drag operation active");
         return;
       }
       
@@ -20,6 +24,7 @@ function handleClickOutside(event: MouseEvent) {
       const timeSinceLastDrag = now - ((window as any).lastDragEndTime || 0);
       
       if (timeSinceLastDrag < 1000) {
+        console.log("🔍 useClickOutside: Ignoring click - recent drag operation:", timeSinceLastDrag + "ms ago");
         return;
       }
       
@@ -50,20 +55,26 @@ function handleClickOutside(event: MouseEvent) {
           target?.closest('.calendar') ||
           target?.closest('[data-state="open"]') ||
           target?.closest('[aria-expanded="true"]')) {
+        console.log("🔍 useClickOutside: Ignoring drag/calendar-related event, isDragRelated:", isDragRelated);
         return;
       }
       
       if (ref.current && !ref.current.contains(event.target as Node)) {
+        console.log("🔍 useClickOutside: Click is outside element, calling callback");
         callback();
+      } else {
+        console.log("🔍 useClickOutside: Click is inside element, ignoring");
       }
     }
 
     // Add a small delay to avoid immediate triggering when opening editor
     const timeoutId = setTimeout(() => {
+      console.log("🔍 useClickOutside: Adding mousedown event listener");
       document.addEventListener('mousedown', handleClickOutside);
     }, 100);
 
     return () => {
+      console.log("🔍 useClickOutside: Cleaning up event listener");
       clearTimeout(timeoutId);
       document.removeEventListener('mousedown', handleClickOutside);
     };
