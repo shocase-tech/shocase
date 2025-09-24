@@ -668,7 +668,7 @@ export default function SimplePublicProfile() {
                             </div>
                             <div className="flex items-center gap-2 text-muted-foreground mb-3 text-sm">
                               <Calendar className="w-3 h-3" />
-                              <span>{new Date(show.date).toLocaleDateString('en-US', { 
+                               <span>{new Date(show.date + 'T00:00:00').toLocaleDateString('en-US', {
                                 year: 'numeric', 
                                 month: 'long', 
                                 day: 'numeric' 
@@ -700,7 +700,7 @@ export default function SimplePublicProfile() {
                         </div>
                         {profile.upcoming_shows
                           .filter((show: any) => !show.featured)
-                          .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                          .sort((a: any, b: any) => new Date(a.date + 'T00:00:00').getTime() - new Date(b.date + 'T00:00:00').getTime())
                           .slice(0, 1)
                           .map((show: any, index: number) => (
                           <div key={index}>
@@ -711,7 +711,7 @@ export default function SimplePublicProfile() {
                             </div>
                             <div className="flex items-center gap-2 text-muted-foreground mb-3 text-sm">
                               <Calendar className="w-3 h-3" />
-                              <span>{new Date(show.date).toLocaleDateString('en-US', { 
+                               <span>{new Date(show.date + 'T00:00:00').toLocaleDateString('en-US', {
                                 year: 'numeric', 
                                 month: 'short', 
                                 day: 'numeric' 
@@ -742,7 +742,7 @@ export default function SimplePublicProfile() {
                           )}
                         </div>
                         {profile.past_shows
-                          .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                          .sort((a: any, b: any) => new Date(b.date + 'T00:00:00').getTime() - new Date(a.date + 'T00:00:00').getTime())
                           .slice(0, 1)
                           .map((show: any, index: number) => (
                           <div key={index}>
@@ -753,7 +753,7 @@ export default function SimplePublicProfile() {
                             </div>
                             <div className="flex items-center gap-2 text-muted-foreground text-sm">
                               <Calendar className="w-3 h-3" />
-                              <span>{new Date(show.date).toLocaleDateString('en-US', { 
+                               <span>{new Date(show.date + 'T00:00:00').toLocaleDateString('en-US', {
                                 year: 'numeric', 
                                 month: 'short', 
                                 day: 'numeric' 
@@ -893,7 +893,7 @@ export default function SimplePublicProfile() {
                       </div>
                       <div className="flex items-center gap-2 text-muted-foreground mb-3 text-sm">
                         <Calendar className="w-3 md:w-4 h-3 md:h-4" />
-                        <span>{new Date(show.date).toLocaleDateString('en-US', { 
+                         <span>{new Date(show.date + 'T00:00:00').toLocaleDateString('en-US', {
                           year: 'numeric', 
                           month: 'long', 
                           day: 'numeric' 
@@ -934,7 +934,7 @@ export default function SimplePublicProfile() {
                 <CardContent className="space-y-3 md:space-y-4">
                   {profile.upcoming_shows
                     .filter((show: any) => !show.featured)
-                    .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                    .sort((a: any, b: any) => new Date(a.date + 'T00:00:00').getTime() - new Date(b.date + 'T00:00:00').getTime())
                     .slice(0, 2)
                     .map((show: any, index: number) => (
                     <div key={index} className="bg-white/5 p-3 md:p-4 rounded-lg">
@@ -945,7 +945,7 @@ export default function SimplePublicProfile() {
                       </div>
                       <div className="flex items-center gap-2 text-muted-foreground mb-3 text-sm">
                         <Calendar className="w-3 md:w-4 h-3 md:h-4" />
-                        <span>{new Date(show.date).toLocaleDateString('en-US', { 
+                        <span>{new Date(show.date + 'T00:00:00').toLocaleDateString('en-US', { 
                           year: 'numeric', 
                           month: 'long', 
                           day: 'numeric' 
@@ -985,7 +985,7 @@ export default function SimplePublicProfile() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {profile.past_shows
-                    .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                    .sort((a: any, b: any) => new Date(b.date + 'T00:00:00').getTime() - new Date(a.date + 'T00:00:00').getTime())
                     .slice(0, 2)
                     .map((show: any, index: number) => (
                     <div key={index} className="bg-white/5 p-3 rounded-lg">
@@ -994,7 +994,7 @@ export default function SimplePublicProfile() {
                         <MapPin className="w-3 h-3" />
                         {getShowLocation(show)}
                       </p>
-                      <p className="text-xs text-muted-foreground">{new Date(show.date).toLocaleDateString('en-US', { 
+                      <p className="text-xs text-muted-foreground">{new Date(show.date + 'T00:00:00').toLocaleDateString('en-US', { 
                         year: 'numeric', 
                         month: 'long', 
                         day: 'numeric' 

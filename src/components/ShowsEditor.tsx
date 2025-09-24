@@ -208,7 +208,7 @@ function SortableShow({ show, index, onDelete, onEdit, onToggleHighlight, initia
           </p>
           <p className={cn("text-muted-foreground flex items-center gap-1", isMobile ? "text-sm" : "text-xs")}>
             <MapPin className="w-3 h-3 flex-shrink-0" />
-            <span className="truncate">{show.city} • {format(new Date(show.date), 'MMM d, yyyy')}</span>
+            <span className="truncate">{show.city} • {format(new Date(show.date + 'T00:00:00'), 'MMM d, yyyy')}</span>
           </p>
         </div>
       </div>

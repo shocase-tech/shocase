@@ -46,24 +46,24 @@ export function AllShowsModal({
   const upcomingShows = allShows
     .filter(show => {
       if (!show.date) return false;
-      const showDate = new Date(show.date);
+      const showDate = new Date(show.date + 'T00:00:00');
       showDate.setHours(0, 0, 0, 0);
       return showDate >= today;
     })
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    .sort((a, b) => new Date(a.date + 'T00:00:00').getTime() - new Date(b.date + 'T00:00:00').getTime());
 
   const pastShows = allShows
     .filter(show => {
       if (!show.date) return false;
-      const showDate = new Date(show.date);
+      const showDate = new Date(show.date + 'T00:00:00');
       showDate.setHours(0, 0, 0, 0);
       return showDate < today;
     })
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    .sort((a, b) => new Date(b.date + 'T00:00:00').getTime() - new Date(a.date + 'T00:00:00').getTime());
 
   const formatShowDate = (dateString: string) => {
     try {
-      return format(new Date(dateString), 'EEEE, MMMM d, yyyy');
+      return format(new Date(dateString + 'T00:00:00'), 'EEEE, MMMM d, yyyy');
     } catch {
       return dateString;
     }

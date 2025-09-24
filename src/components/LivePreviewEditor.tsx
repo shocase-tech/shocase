@@ -231,13 +231,13 @@ export default function LivePreviewEditor({
     today.setHours(0, 0, 0, 0);
     
     const regularUpcoming = regularShows
-      .filter(show => new Date(show.date) >= today)
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .filter(show => new Date(show.date + 'T00:00:00') >= today)
+      .sort((a, b) => new Date(a.date + 'T00:00:00').getTime() - new Date(b.date + 'T00:00:00').getTime())
       .slice(0, 3);
       
     const regularPast = regularShows
-      .filter(show => new Date(show.date) < today)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .filter(show => new Date(show.date + 'T00:00:00') < today)
+      .sort((a, b) => new Date(b.date + 'T00:00:00').getTime() - new Date(a.date + 'T00:00:00').getTime())
       .slice(0, 3);
     
     const totalShows = allShows.length;
@@ -265,7 +265,7 @@ export default function LivePreviewEditor({
                         </p>
                         <p className="text-xs md:text-sm text-muted-foreground flex items-center gap-1">
                           <MapPin className="w-3 h-3 flex-shrink-0" />
-                          <span className="truncate">{show.city} • {new Date(show.date).toLocaleDateString()}</span>
+                          <span className="truncate">{show.city} • {new Date(show.date + 'T00:00:00').toLocaleDateString()}</span>
                         </p>
                       </div>
                     </div>
@@ -299,7 +299,7 @@ export default function LivePreviewEditor({
                         <p className="font-medium text-sm md:text-base truncate">{show.venue}</p>
                         <p className="text-xs md:text-sm text-muted-foreground flex items-center gap-1">
                           <MapPin className="w-3 h-3 flex-shrink-0" />
-                          <span className="truncate">{show.city} • {new Date(show.date).toLocaleDateString()}</span>
+                          <span className="truncate">{show.city} • {new Date(show.date + 'T00:00:00').toLocaleDateString()}</span>
                         </p>
                       </div>
                     </div>
@@ -333,7 +333,7 @@ export default function LivePreviewEditor({
                         <p className="font-medium text-muted-foreground text-sm md:text-base truncate">{show.venue}</p>
                         <p className="text-xs md:text-sm text-muted-foreground flex items-center gap-1">
                           <MapPin className="w-3 h-3 flex-shrink-0" />
-                          <span className="truncate">{show.city} • {new Date(show.date).toLocaleDateString()}</span>
+                          <span className="truncate">{show.city} • {new Date(show.date + 'T00:00:00').toLocaleDateString()}</span>
                         </p>
                       </div>
                     </div>

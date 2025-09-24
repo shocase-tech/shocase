@@ -716,7 +716,7 @@ export default function PublicArtistProfile() {
                          </div>
                          <p className="text-xs md:text-sm text-muted-foreground flex items-center gap-1 mb-3">
                            <MapPin className="w-3 h-3" />
-                           {getShowLocation(show)} • {new Date(show.date).toLocaleDateString('en-US', { 
+                            {getShowLocation(show)} • {new Date(show.date + 'T00:00:00').toLocaleDateString('en-US', {
                              year: 'numeric', 
                              month: window.innerWidth < 768 ? 'short' : 'long', 
                              day: 'numeric' 
@@ -820,7 +820,7 @@ export default function PublicArtistProfile() {
                      <p className="font-semibold text-base md:text-lg">{show.venue}</p>
                      <p className="text-xs md:text-sm text-muted-foreground flex items-center gap-1">
                        <MapPin className="w-3 h-3" />
-                       {getShowLocation(show)} • {new Date(show.date).toLocaleDateString('en-US', { 
+                       {getShowLocation(show)} • {new Date(show.date + 'T00:00:00').toLocaleDateString('en-US', { 
                          year: 'numeric', 
                          month: window.innerWidth < 768 ? 'short' : 'long', 
                          day: 'numeric' 

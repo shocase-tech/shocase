@@ -624,7 +624,7 @@ export function PreviewModal({ open, onOpenChange, profile, onPublish }: Preview
                           </div>
                           <div className="flex items-center gap-2 text-muted-foreground mb-3 text-sm">
                             <Calendar className="w-3 h-3" />
-                            <span>{new Date(show.date).toLocaleDateString('en-US', { 
+                            <span>{new Date(show.date + 'T00:00:00').toLocaleDateString('en-US', { 
                               year: 'numeric', 
                               month: 'long', 
                               day: 'numeric' 
