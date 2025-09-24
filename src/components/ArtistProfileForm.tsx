@@ -313,33 +313,60 @@ const saveSection = async (sectionData: any) => {
   console.log("🔥 profile exists:", !!profile);
   console.log("🔥 profile.id:", profile?.id);
   
-  if (!profile) {
-    console.log("🔥 ERROR: No profile found!");
-    return;
-  }
-  
   try {
     setLoading(true);
-    console.log("🔥 Calling supabase update...");
     
-    const { error, data } = await supabase
-      .from("artist_profiles")
-      .update(sectionData)
-      .eq("id", profile.id)
-      .select(); // Add .select() to see what was actually updated
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Not authenticated");
 
-    console.log("🔥 Supabase update result:", { error, data });
+    if (profile?.id) {
+      // Update existing profile
+      console.log("🔥 Updating existing profile...");
+      const { error, data } = await supabase
+        .from("artist_profiles")
+        .update(sectionData)
+        .eq("id", profile.id)
+        .eq("user_id", user.id)
+        .select();
 
-    if (error) {
-      console.error("🔥 Database error:", error);
-      throw error;
+      console.log("🔥 Supabase update result:", { error, data });
+
+      if (error) {
+        console.error("🔥 Database error:", error);
+        throw error;
+      }
+    } else {
+      // Create new profile if none exists
+      console.log("🔥 Creating new profile...");
+      const profileData = {
+        user_id: user.id,
+        artist_name: formData.artist_name || "New Artist",
+        ...sectionData
+      };
+
+      const { error, data } = await supabase
+        .from("artist_profiles")
+        .insert([profileData])
+        .select();
+
+      console.log("🔥 Supabase insert result:", { error, data });
+
+      if (error) {
+        console.error("🔥 Database error:", error);
+        throw error;
+      }
     }
     
-    console.log("🔥 Update successful!");
+    console.log("🔥 Database operation successful!");
     onSaved();
     
   } catch (error) {
     console.error("🔥 saveSection failed:", error);
+    toast({
+      title: "Error",
+      description: `Failed to save: ${error.message}`,
+      variant: "destructive",
+    });
     throw error;
   } finally {
     setLoading(false);

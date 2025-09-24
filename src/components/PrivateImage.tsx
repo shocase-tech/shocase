@@ -10,8 +10,10 @@ interface CachedUrl {
 const urlCache = new Map<string, CachedUrl>();
 const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
 
-// Clear cache on component load to fix URL issues
-urlCache.clear();
+// Clear cache on component mount to ensure fresh URLs
+if (typeof window !== 'undefined') {
+  urlCache.clear();
+}
 
 interface PrivateImageProps {
   storagePath: string | any; // Allow objects for nested path format
@@ -74,16 +76,18 @@ export default function PrivateImage({ storagePath, alt, className, fallback }: 
           const signedUrl = await ImageStorageService.getSignedUrl(actualPath);
           console.log("Received signed URL:", signedUrl);
           
-          // Cache the new URL
-          if (signedUrl) {
+          // Only cache and use URL if it's valid
+          if (signedUrl && signedUrl.startsWith('http')) {
             urlCache.set(actualPath, {
               url: signedUrl,
               timestamp: now
             });
+            setImageUrl(signedUrl);
+            setError(false);
+          } else {
+            console.error("Invalid signed URL received:", signedUrl);
+            setError(true);
           }
-          
-          setImageUrl(signedUrl);
-          setError(!signedUrl);
         }
       } catch (err) {
         console.error("Error loading image:", err);

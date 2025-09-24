@@ -45,28 +45,45 @@ export class ImageStorageService {
    * Generate signed URL for viewing
    */
   static async getSignedUrl(storagePath: string, expiresIn: number = 3600): Promise<string> {
-    if (!storagePath) return '';
+    if (!storagePath) {
+      console.log('No storage path provided');
+      return '';
+    }
     
     if (storagePath.startsWith('http')) {
+      console.log('Storage path is already a URL:', storagePath);
       return storagePath;
     }
 
-    const { data, error } = await supabase.storage
-      .from(this.BUCKET_NAME)
-      .createSignedUrl(storagePath, expiresIn);
+    console.log('Creating signed URL for storage path:', storagePath);
 
-    if (error) {
-      console.error('Error creating signed URL:', error);
+    try {
+      const { data, error } = await supabase.storage
+        .from(this.BUCKET_NAME)
+        .createSignedUrl(storagePath, expiresIn);
+
+      if (error) {
+        console.error('Error creating signed URL:', error);
+        return '';
+      }
+
+      let signedUrl = data?.signedUrl || '';
+      
+      if (!signedUrl) {
+        console.error('No signed URL returned from Supabase');
+        return '';
+      }
+      
+      if (signedUrl.startsWith('/')) {
+        signedUrl = `${this.SUPABASE_URL}/storage/v1${signedUrl}`;
+      }
+
+      console.log('Generated signed URL:', signedUrl);
+      return signedUrl;
+    } catch (err) {
+      console.error('Exception creating signed URL:', err);
       return '';
     }
-
-    let signedUrl = data?.signedUrl || '';
-    
-    if (signedUrl && signedUrl.startsWith('/')) {
-      signedUrl = `${this.SUPABASE_URL}/storage/v1${signedUrl}`;
-    }
-
-    return signedUrl;
   }
 
   /**
