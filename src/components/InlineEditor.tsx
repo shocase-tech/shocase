@@ -117,8 +117,7 @@ export default function InlineEditor({
     }
   }, [formData, onFormDataChange]);
 
-  // File upload handlers
-  const handleProfilePhotoUpload = async (file: File) => {
+const handleProfilePhotoUpload = async (file: File) => {
   console.log("🔥 handleProfilePhotoUpload called");
   
   if (!user) throw new Error('User not authenticated');
@@ -128,28 +127,28 @@ export default function InlineEditor({
   // Update local state
   setFormData({ ...formData, profile_photo_url: storagePath });
   
-  // SAVE TO DATABASE - This was missing!
+  // SAVE TO DATABASE but DON'T CLOSE EDITOR
   console.log("🔥 Saving to database...");
-  await handleSave(); // This triggers the actual database save
-  console.log("🔥 Database save completed");
+  await handleSave(false, false); // isDoneAction=false, shouldClose=false
+  console.log("🔥 Database save completed - editor stays open");
   
   return storagePath;
-  };
+};
 
-  const handleBackgroundImageUpload = async (file: File) => {
+const handleBackgroundImageUpload = async (file: File) => {
   if (!user) throw new Error('User not authenticated');
   const storagePath = await ImageStorageService.uploadFile(file, 'hero', user.id);
   
   // Update local state
   setFormData({ ...formData, hero_photo_url: storagePath });
   
-  // SAVE TO DATABASE - This was missing!
-  await handleSave();
+  // SAVE TO DATABASE but DON'T CLOSE EDITOR
+  await handleSave(false, false); // isDoneAction=false, shouldClose=false
   
   return storagePath;
-  };
+};
 
-  const handleGalleryUpload = async (file: File) => {
+const handleGalleryUpload = async (file: File) => {
   console.log("🔥 handleGalleryUpload called");
   
   if (!user) throw new Error('User not authenticated');
@@ -164,13 +163,13 @@ export default function InlineEditor({
   setFormData({ ...formData, gallery_photos: updatedPhotos });
   console.log("🔥 Updated local gallery photos:", updatedPhotos);
   
-  // SAVE TO DATABASE - This was missing!
+  // SAVE TO DATABASE but DON'T CLOSE EDITOR
   console.log("🔥 Saving gallery to database...");
-  await handleSave();
-  console.log("🔥 Gallery database save completed");
+  await handleSave(false, false); // isDoneAction=false, shouldClose=false
+  console.log("🔥 Gallery database save completed - editor stays open");
   
   return storagePath;
-  };
+};
 
   const updateGalleryPhotos = (photos: any[]) => {
     setFormData({ ...formData, gallery_photos: photos });
@@ -213,123 +212,122 @@ export default function InlineEditor({
     }
   };
 
-  const handleSave = async (isDoneAction = false) => {
-    if (!user) return;
+  const handleSave = async (isDoneAction = false, shouldClose = true) => {
+  if (!user) return;
 
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      // Create section-specific data to avoid schema conflicts
-      let updateData: any = {};
-      
-      switch (sectionId) {
-        case 'bio':
-          updateData = {
-            bio: formData.bio,
-            blurb: formData.blurb,
-            artist_name: formData.artist_name,
-            genre: formData.genre,
-          };
-          break;
-        case 'basic':
-          updateData = {
-            artist_name: formData.artist_name,
-            genre: formData.genre,
-            blurb: formData.blurb,
-            performance_type: formData.performance_type,
-            location: formData.location,
-            featured_track_url: formData.featured_track_url,
-            contact_info: formData.contact_info,
-            profile_photo_url: formData.profile_photo_url,
-          };
-          break;
-        case 'streaming':
-          updateData = {
-            streaming_links: formData.streaming_links,
-            featured_track_url: formData.featured_track_url,
-          };
-          break;
-        case 'social':
-          updateData = {
-            social_links: formData.social_links,
-          };
-          break;
-        case 'videos':
-          updateData = {
-            show_videos: formData.show_videos,
-          };
-          break;
-        case 'background':
-          updateData = {
-            hero_photo_url: formData.hero_photo_url,
-          };
-          break;
-        case 'gallery':
-          updateData = {
-            gallery_photos: formData.gallery_photos,
-          };
-          break;
-        default:
-          // For unknown sections, use the original approach but filter out problematic fields
-          updateData = { ...formData };
-          // Remove any fields that might cause schema conflicts
-          delete updateData.featured_track_url;
-          break;
-      }
-
-      if (profile) {
-        // Update existing profile with section-specific data only
-        const { error } = await supabase
-          .from('artist_profiles')
-          .update(updateData)
-          .eq('user_id', user.id);
-
-        if (error) {
-          console.error('Save error details:', error);
-          throw error;
-        }
-      } else {
-        // Create new profile - use full formData but ensure no conflicts
-        const createData = { ...formData };
-        // Ensure featured_track_url is properly set
-        if (!createData.featured_track_url) {
-          createData.featured_track_url = null;
-        }
-        
-        const { error } = await supabase
-          .from('artist_profiles')
-          .insert({
-            ...createData,
-            user_id: user.id,
-          });
-
-        if (error) {
-          console.error('Create error details:', error);
-          throw error;
-        }
-      }
-
-      toast({
-        title: isDoneAction ? "Profile created!" : "Section updated!",
-        description: isDoneAction ? "Welcome to your press kit dashboard!" : "Your changes have been saved.",
-      });
-
-      // Update parent with new data instead of triggering refetch
-      onSave(updateData);
-      
-      // For initial setup completion, reload the page to show full dashboard
-      if (isDoneAction) {
-        window.location.reload();
-      }
-    } catch (error: any) {
-      console.error('Save error:', error);
-      const errorMessage = handleSchemaError(error);
-      toast(errorMessage);
-      throw error; // Re-throw for handleAutoSaveAndClose error handling
-    } finally {
-      setLoading(false);
+    // Create section-specific data to avoid schema conflicts
+    let updateData: any = {};
+    
+    switch (sectionId) {
+      case 'bio':
+        updateData = {
+          bio: formData.bio,
+          blurb: formData.blurb,
+          artist_name: formData.artist_name,
+          genre: formData.genre,
+        };
+        break;
+      case 'basic':
+        updateData = {
+          artist_name: formData.artist_name,
+          genre: formData.genre,
+          blurb: formData.blurb,
+          performance_type: formData.performance_type,
+          location: formData.location,
+          featured_track_url: formData.featured_track_url,
+          contact_info: formData.contact_info,
+          profile_photo_url: formData.profile_photo_url,
+        };
+        break;
+      case 'streaming':
+        updateData = {
+          streaming_links: formData.streaming_links,
+          featured_track_url: formData.featured_track_url,
+        };
+        break;
+      case 'social':
+        updateData = {
+          social_links: formData.social_links,
+        };
+        break;
+      case 'videos':
+        updateData = {
+          show_videos: formData.show_videos,
+        };
+        break;
+      case 'background':
+        updateData = {
+          hero_photo_url: formData.hero_photo_url,
+        };
+        break;
+      case 'gallery':
+        updateData = {
+          gallery_photos: formData.gallery_photos,
+        };
+        break;
+      default:
+        updateData = { ...formData };
+        delete updateData.featured_track_url;
+        break;
     }
-  };
+
+    if (profile) {
+      // Update existing profile with section-specific data only
+      const { error } = await supabase
+        .from('artist_profiles')
+        .update(updateData)
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Save error details:', error);
+        throw error;
+      }
+    } else {
+      // Create new profile logic...
+      const createData = { ...formData };
+      if (!createData.featured_track_url) {
+        createData.featured_track_url = null;
+      }
+      
+      const { error } = await supabase
+        .from('artist_profiles')
+        .insert({
+          ...createData,
+          user_id: user.id,
+        });
+
+      if (error) {
+        console.error('Create error details:', error);
+        throw error;
+      }
+    }
+
+    toast({
+      title: isDoneAction ? "Profile created!" : "Section updated!",
+      description: isDoneAction ? "Welcome to your press kit dashboard!" : "Your changes have been saved.",
+    });
+
+    // ONLY call onSave (which closes editor) if shouldClose is true
+    if (shouldClose) {
+      onSave(updateData);
+    }
+    
+    // For initial setup completion, reload the page to show full dashboard
+    if (isDoneAction) {
+      window.location.reload();
+    }
+  } catch (error: any) {
+    console.error('Save error:', error);
+    const errorMessage = handleSchemaError(error);
+    toast(errorMessage);
+    throw error;
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Auto-save and close handler
   const handleAutoSaveAndClose = useCallback(async () => {
