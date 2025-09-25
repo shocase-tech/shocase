@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { Save, X, GripVertical, Upload, AlertTriangle, Edit, Loader2, Trash2 } from "lucide-react";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragStartEvent, DragEndEvent, DragOverEvent } from '@dnd-kit/core';
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { ImageStorageService } from "@/lib/imageStorage";
@@ -695,7 +695,7 @@ export default function GalleryEditor({ profile, user, onSave, onCancel }: Galle
           >
             <SortableContext
               items={photos.map((_, index) => `photo-${index}`)}
-              strategy={verticalListSortingStrategy}
+              strategy={rectSortingStrategy}
             >
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {(previewOrder || photos).map((photo, index) => {
