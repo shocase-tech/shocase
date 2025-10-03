@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { Search, MapPin, Users, X } from "lucide-react";
 import VenueCard from "@/components/VenueCard";
 import { Helmet } from "react-helmet-async";
-
 interface Venue {
   id: string;
   name: string;
@@ -22,7 +21,6 @@ interface Venue {
   venue_type: string | null;
   neighbourhood: string | null;
 }
-
 const Venues = () => {
   const [venues, setVenues] = useState<Venue[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,19 +29,15 @@ const Venues = () => {
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [capacityRange, setCapacityRange] = useState<number[]>([0, 5000]);
   const [sortBy, setSortBy] = useState<string>("name-asc");
-
   useEffect(() => {
     fetchVenues();
   }, []);
-
   const fetchVenues = async () => {
     try {
-      const { data, error } = await supabase
-        .from("venues" as any)
-        .select("id, name, slug, city, state, capacity, genres, hero_image_url, venue_type, neighbourhood")
-        .eq("is_active", true)
-        .order("name");
-
+      const {
+        data,
+        error
+      } = await supabase.from("venues" as any).select("id, name, slug, city, state, capacity, genres, hero_image_url, venue_type, neighbourhood").eq("is_active", true).order("name");
       if (error) throw error;
       setVenues((data || []) as unknown as Venue[]);
     } catch (error) {
@@ -52,30 +46,23 @@ const Venues = () => {
       setLoading(false);
     }
   };
-
   const allCities = useMemo(() => {
     const cities = new Set(venues.map(v => v.city));
     return Array.from(cities).sort();
   }, [venues]);
-
   const allGenres = useMemo(() => {
     const genres = new Set<string>();
     venues.forEach(v => v.genres?.forEach(g => genres.add(g)));
     return Array.from(genres).sort();
   }, [venues]);
-
   const filteredAndSortedVenues = useMemo(() => {
     let filtered = venues.filter(venue => {
       const matchesSearch = venue.name.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCity = selectedCity === "all" || venue.city === selectedCity;
-      const matchesGenres = selectedGenres.length === 0 || 
-        (venue.genres && venue.genres.some(g => selectedGenres.includes(g)));
-      const matchesCapacity = !venue.capacity || 
-        (venue.capacity >= capacityRange[0] && venue.capacity <= capacityRange[1]);
-      
+      const matchesGenres = selectedGenres.length === 0 || venue.genres && venue.genres.some(g => selectedGenres.includes(g));
+      const matchesCapacity = !venue.capacity || venue.capacity >= capacityRange[0] && venue.capacity <= capacityRange[1];
       return matchesSearch && matchesCity && matchesGenres && matchesCapacity;
     });
-
     filtered.sort((a, b) => {
       switch (sortBy) {
         case "name-asc":
@@ -90,16 +77,11 @@ const Venues = () => {
           return 0;
       }
     });
-
     return filtered;
   }, [venues, searchQuery, selectedCity, selectedGenres, capacityRange, sortBy]);
-
   const toggleGenre = (genre: string) => {
-    setSelectedGenres(prev =>
-      prev.includes(genre) ? prev.filter(g => g !== genre) : [...prev, genre]
-    );
+    setSelectedGenres(prev => prev.includes(genre) ? prev.filter(g => g !== genre) : [...prev, genre]);
   };
-
   const resetFilters = () => {
     setSearchQuery("");
     setSelectedCity("all");
@@ -107,9 +89,7 @@ const Venues = () => {
     setCapacityRange([0, 5000]);
     setSortBy("name-asc");
   };
-
-  return (
-    <>
+  return <>
       <Helmet>
         <title>Find Venues - SHOCASE</title>
         <meta name="description" content="Discover and connect with live music venues. Browse by location, capacity, and genre." />
@@ -120,7 +100,7 @@ const Venues = () => {
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-white mb-2">Find Your Next Venue</h1>
-            <p className="text-gray-400">Discover the perfect stage for your music</p>
+            <p className="text-gray-400">Discover the perfect New York City stage for your music</p>
           </div>
 
           {/* Filters */}
@@ -128,12 +108,7 @@ const Venues = () => {
             {/* Search */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search venues..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-gray-800 border-gray-700 text-white"
-              />
+              <Input placeholder="Search venues..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10 bg-gray-800 border-gray-700 text-white" />
             </div>
 
             {/* Filter Row */}
@@ -146,37 +121,22 @@ const Venues = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Cities</SelectItem>
-                  {allCities.map(city => (
-                    <SelectItem key={city} value={city}>{city}</SelectItem>
-                  ))}
+                  {allCities.map(city => <SelectItem key={city} value={city}>{city}</SelectItem>)}
                 </SelectContent>
               </Select>
 
               {/* Genre */}
               <div className="relative">
-                <Button
-                  variant="outline"
-                  className="w-full justify-start bg-gray-800 border-gray-700 text-white hover:bg-gray-700"
-                  onClick={() => {}}
-                >
+                <Button variant="outline" className="w-full justify-start bg-gray-800 border-gray-700 text-white hover:bg-gray-700" onClick={() => {}}>
                   Genres {selectedGenres.length > 0 && `(${selectedGenres.length})`}
                 </Button>
-                {allGenres.length > 0 && (
-                  <div className="absolute top-full mt-2 w-full bg-gray-800 border border-gray-700 rounded-lg p-3 z-10 max-h-64 overflow-y-auto">
+                {allGenres.length > 0 && <div className="absolute top-full mt-2 w-full bg-gray-800 border border-gray-700 rounded-lg p-3 z-10 max-h-64 overflow-y-auto">
                     <div className="flex flex-wrap gap-2">
-                      {allGenres.map(genre => (
-                        <Badge
-                          key={genre}
-                          variant={selectedGenres.includes(genre) ? "default" : "outline"}
-                          className="cursor-pointer"
-                          onClick={() => toggleGenre(genre)}
-                        >
+                      {allGenres.map(genre => <Badge key={genre} variant={selectedGenres.includes(genre) ? "default" : "outline"} className="cursor-pointer" onClick={() => toggleGenre(genre)}>
                           {genre}
-                        </Badge>
-                      ))}
+                        </Badge>)}
                     </div>
-                  </div>
-                )}
+                  </div>}
               </div>
 
               {/* Sort */}
@@ -202,73 +162,40 @@ const Venues = () => {
                 </span>
                 <span>{capacityRange[0]} - {capacityRange[1]}</span>
               </div>
-              <Slider
-                min={0}
-                max={5000}
-                step={100}
-                value={capacityRange}
-                onValueChange={setCapacityRange}
-                className="w-full"
-              />
+              <Slider min={0} max={5000} step={100} value={capacityRange} onValueChange={setCapacityRange} className="w-full" />
             </div>
 
             {/* Selected Genres */}
-            {selectedGenres.length > 0 && (
-              <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-800">
-                {selectedGenres.map(genre => (
-                  <Badge key={genre} variant="secondary" className="gap-1">
+            {selectedGenres.length > 0 && <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-800">
+                {selectedGenres.map(genre => <Badge key={genre} variant="secondary" className="gap-1">
                     {genre}
-                    <X
-                      className="h-3 w-3 cursor-pointer"
-                      onClick={() => toggleGenre(genre)}
-                    />
-                  </Badge>
-                ))}
-              </div>
-            )}
+                    <X className="h-3 w-3 cursor-pointer" onClick={() => toggleGenre(genre)} />
+                  </Badge>)}
+              </div>}
 
             {/* Reset Button */}
-            {(searchQuery || selectedCity !== "all" || selectedGenres.length > 0) && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={resetFilters}
-                className="text-gray-400 hover:text-white"
-              >
+            {(searchQuery || selectedCity !== "all" || selectedGenres.length > 0) && <Button variant="ghost" size="sm" onClick={resetFilters} className="text-gray-400 hover:text-white">
                 Reset Filters
-              </Button>
-            )}
+              </Button>}
           </div>
 
           {/* Results */}
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3, 4, 5, 6].map(i => (
-                <div key={i} className="space-y-3">
+          {loading ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="space-y-3">
                   <Skeleton className="w-full aspect-video rounded-lg" />
                   <Skeleton className="h-6 w-3/4" />
                   <Skeleton className="h-4 w-1/2" />
-                </div>
-              ))}
-            </div>
-          ) : filteredAndSortedVenues.length === 0 ? (
-            <div className="text-center py-16">
+                </div>)}
+            </div> : filteredAndSortedVenues.length === 0 ? <div className="text-center py-16">
               <p className="text-gray-400 text-lg mb-4">No venues match your filters</p>
               <Button onClick={resetFilters} variant="outline">
                 Reset Filters
               </Button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredAndSortedVenues.map(venue => (
-                <VenueCard key={venue.id} venue={venue} />
-              ))}
-            </div>
-          )}
+            </div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredAndSortedVenues.map(venue => <VenueCard key={venue.id} venue={venue} />)}
+            </div>}
         </div>
       </div>
-    </>
-  );
+    </>;
 };
-
 export default Venues;
