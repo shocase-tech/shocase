@@ -7,7 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { Copy, ExternalLink, Edit3, Eye, EyeOff, CheckCircle, Circle, Menu, Globe, Settings } from "lucide-react";
+import { Copy, ExternalLink, Edit3, Eye, EyeOff, CheckCircle, Circle, Menu, Globe, Settings, BarChart } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import showcaseIcon from "@/assets/shocase-icon.png";
 import { cn } from "@/lib/utils";
@@ -468,13 +468,22 @@ export default function Dashboard() {
               </>
             )}
             <Button 
+              onClick={() => navigate("/dashboard/outreach")}
+              variant="ghost" 
+              size="sm" 
+              className="flex items-center gap-2"
+            >
+              <BarChart className="w-4 h-4" />
+              Outreach Tracker
+            </Button>
+            <Button 
               onClick={() => navigate("/dashboard/outreach-settings")}
               variant="ghost" 
               size="sm" 
               className="flex items-center gap-2"
             >
               <Settings className="w-4 h-4" />
-              Outreach Settings
+              Settings
             </Button>
             <Button onClick={handleSignOut} variant="ghost" size="sm" className="flex items-center gap-2">
               <Edit3 className="w-4 h-4" />
@@ -504,6 +513,10 @@ export default function Dashboard() {
                     <DropdownMenuSeparator />
                   </>
                 )}
+                <DropdownMenuItem onClick={() => navigate("/dashboard/outreach")} className="flex items-center gap-2">
+                  <BarChart className="w-4 h-4" />
+                  Outreach Tracker
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/dashboard/outreach-settings")} className="flex items-center gap-2">
                   <Settings className="w-4 h-4" />
                   Outreach Settings
