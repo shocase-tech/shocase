@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { CheckCircle2, Loader2, ExternalLink } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import EmailPreviewSection from "./EmailPreviewSection";
 
 interface BookVenueModalProps {
   isOpen: boolean;
@@ -398,36 +399,19 @@ export default function BookVenueModal({ isOpen, onClose, venue, artistProfile }
             </Card>
           </div>
         ) : (
-          <div className="space-y-4">
-            <Card className="bg-gray-800 border-gray-700">
-              <CardHeader>
-                <CardTitle>Email Preview</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <div className="text-sm text-gray-400 mb-1">Subject:</div>
-                  <div className="font-semibold">{generatedEmail.subject}</div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-400 mb-1">Body:</div>
-                  <div className="whitespace-pre-wrap text-sm text-gray-300 bg-gray-900 p-4 rounded-lg">
-                    {generatedEmail.body}
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setGeneratedEmail(null)}
-                  >
-                    Generate New Email
-                  </Button>
-                  <Button className="flex-1" disabled>
-                    Send Application (Coming Soon)
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <EmailPreviewSection
+            emailSubject={generatedEmail.subject}
+            emailBody={generatedEmail.body}
+            venueEmail={venue.booking_contact_email}
+            onRegenerate={handleGenerateEmail}
+            onMarkAsSent={async () => {
+              // TODO: Implement marking as sent
+              toast({
+                title: "Feature Coming Soon",
+                description: "Application tracking will be available soon.",
+              });
+            }}
+          />
         )}
       </DialogContent>
     </Dialog>
