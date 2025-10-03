@@ -148,8 +148,17 @@ const Header = () => {
 
       {/* Main Header */}
       <header className="absolute top-0 left-0 right-0 z-40 p-6">
-        <div className="max-w-7xl mx-auto flex justify-end items-center">
-          {/* Left side removed */}
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          {/* Navigation */}
+          <nav className="flex items-center gap-6">
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate("/venues")}
+              className="text-white hover:text-gray-300"
+            >
+              Venues
+            </Button>
+          </nav>
           
           {/* Auth Section */}
           <div className="flex items-center">
