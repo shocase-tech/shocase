@@ -104,14 +104,424 @@ export type Database = {
         }
         Relationships: []
       }
+      outreach_components: {
+        Row: {
+          created_at: string | null
+          expected_draw: string | null
+          id: string
+          notable_achievements: string[] | null
+          social_proof: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          expected_draw?: string | null
+          id?: string
+          notable_achievements?: string[] | null
+          social_proof?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          expected_draw?: string | null
+          id?: string
+          notable_achievements?: string[] | null
+          social_proof?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      subscription_tiers: {
+        Row: {
+          cooldown_days: number | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          monthly_application_limit: number | null
+          price_monthly: number
+          stripe_price_id: string | null
+          tier_name: string
+        }
+        Insert: {
+          cooldown_days?: number | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          monthly_application_limit?: number | null
+          price_monthly: number
+          stripe_price_id?: string | null
+          tier_name: string
+        }
+        Update: {
+          cooldown_days?: number | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          monthly_application_limit?: number | null
+          price_monthly?: number
+          stripe_price_id?: string | null
+          tier_name?: string
+        }
+        Relationships: []
+      }
+      user_subscriptions: {
+        Row: {
+          applications_this_period: number | null
+          created_at: string | null
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          period_reset_date: string | null
+          status: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          tier_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          applications_this_period?: number | null
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          period_reset_date?: string | null
+          status?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          tier_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          applications_this_period?: number | null
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          period_reset_date?: string | null
+          status?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          tier_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_subscriptions_tier_id_fkey"
+            columns: ["tier_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_tiers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      venue_applications: {
+        Row: {
+          additional_context: string | null
+          artist_id: string
+          artist_tier_at_time: string | null
+          booked_at: string | null
+          created_at: string | null
+          email_body: string
+          email_subject: string
+          gmail_draft_id: string | null
+          gmail_message_id: string | null
+          id: string
+          proposed_bill: string | null
+          proposed_dates: string | null
+          responded_at: string | null
+          show_date: string | null
+          status: string | null
+          updated_at: string | null
+          venue_id: string
+        }
+        Insert: {
+          additional_context?: string | null
+          artist_id: string
+          artist_tier_at_time?: string | null
+          booked_at?: string | null
+          created_at?: string | null
+          email_body: string
+          email_subject: string
+          gmail_draft_id?: string | null
+          gmail_message_id?: string | null
+          id?: string
+          proposed_bill?: string | null
+          proposed_dates?: string | null
+          responded_at?: string | null
+          show_date?: string | null
+          status?: string | null
+          updated_at?: string | null
+          venue_id: string
+        }
+        Update: {
+          additional_context?: string | null
+          artist_id?: string
+          artist_tier_at_time?: string | null
+          booked_at?: string | null
+          created_at?: string | null
+          email_body?: string
+          email_subject?: string
+          gmail_draft_id?: string | null
+          gmail_message_id?: string | null
+          id?: string
+          proposed_bill?: string | null
+          proposed_dates?: string | null
+          responded_at?: string | null
+          show_date?: string | null
+          status?: string | null
+          updated_at?: string | null
+          venue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venue_applications_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venue_analytics_comprehensive"
+            referencedColumns: ["venue_id"]
+          },
+          {
+            foreignKeyName: "venue_applications_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      venues: {
+        Row: {
+          address: string
+          backline_details: string | null
+          booking_contact_email: string
+          booking_guidelines: string | null
+          borough: string | null
+          capacity: number | null
+          city: string
+          country: string | null
+          created_at: string | null
+          description: string | null
+          dice_venue_url: string | null
+          facebook_url: string | null
+          featured: boolean | null
+          gallery_images: string[] | null
+          genres: string[] | null
+          hero_image_url: string | null
+          id: string
+          instagram_handle: string | null
+          is_active: boolean | null
+          latitude: number | null
+          logo_url: string | null
+          longitude: number | null
+          name: string
+          neighbourhood: string | null
+          outreach_type: string | null
+          requirements: Json | null
+          slug: string
+          spotify_venue_id: string | null
+          state: string | null
+          total_applications: number | null
+          total_bookings_claimed: number | null
+          typical_door_split: string | null
+          typical_guarantee: string | null
+          updated_at: string | null
+          venue_notes: string | null
+          venue_type: string | null
+          website_url: string | null
+          zip_code: string | null
+        }
+        Insert: {
+          address: string
+          backline_details?: string | null
+          booking_contact_email: string
+          booking_guidelines?: string | null
+          borough?: string | null
+          capacity?: number | null
+          city: string
+          country?: string | null
+          created_at?: string | null
+          description?: string | null
+          dice_venue_url?: string | null
+          facebook_url?: string | null
+          featured?: boolean | null
+          gallery_images?: string[] | null
+          genres?: string[] | null
+          hero_image_url?: string | null
+          id?: string
+          instagram_handle?: string | null
+          is_active?: boolean | null
+          latitude?: number | null
+          logo_url?: string | null
+          longitude?: number | null
+          name: string
+          neighbourhood?: string | null
+          outreach_type?: string | null
+          requirements?: Json | null
+          slug: string
+          spotify_venue_id?: string | null
+          state?: string | null
+          total_applications?: number | null
+          total_bookings_claimed?: number | null
+          typical_door_split?: string | null
+          typical_guarantee?: string | null
+          updated_at?: string | null
+          venue_notes?: string | null
+          venue_type?: string | null
+          website_url?: string | null
+          zip_code?: string | null
+        }
+        Update: {
+          address?: string
+          backline_details?: string | null
+          booking_contact_email?: string
+          booking_guidelines?: string | null
+          borough?: string | null
+          capacity?: number | null
+          city?: string
+          country?: string | null
+          created_at?: string | null
+          description?: string | null
+          dice_venue_url?: string | null
+          facebook_url?: string | null
+          featured?: boolean | null
+          gallery_images?: string[] | null
+          genres?: string[] | null
+          hero_image_url?: string | null
+          id?: string
+          instagram_handle?: string | null
+          is_active?: boolean | null
+          latitude?: number | null
+          logo_url?: string | null
+          longitude?: number | null
+          name?: string
+          neighbourhood?: string | null
+          outreach_type?: string | null
+          requirements?: Json | null
+          slug?: string
+          spotify_venue_id?: string | null
+          state?: string | null
+          total_applications?: number | null
+          total_bookings_claimed?: number | null
+          typical_door_split?: string | null
+          typical_guarantee?: string | null
+          updated_at?: string | null
+          venue_notes?: string | null
+          venue_type?: string | null
+          website_url?: string | null
+          zip_code?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
-      [_ in never]: never
+      artist_analytics: {
+        Row: {
+          applications_remaining_this_month: number | null
+          applications_this_month: number | null
+          artist_id: string | null
+          artist_location: string | null
+          artist_name: string | null
+          booking_success_rate_percent: number | null
+          current_tier: string | null
+          days_active: number | null
+          first_application_date: string | null
+          genre: string | null
+          last_application_date: string | null
+          monthly_revenue_from_artist: number | null
+          most_applied_city: string | null
+          pending_responses: number | null
+          preferred_venue_type: string | null
+          subscription_start_date: string | null
+          subscription_status: string | null
+          total_applications: number | null
+          total_bookings: number | null
+          total_rejections: number | null
+        }
+        Relationships: []
+      }
+      platform_analytics: {
+        Row: {
+          active_artists_last_30_days: number | null
+          active_venues: number | null
+          applications_last_30_days: number | null
+          applications_last_7_days: number | null
+          applications_today: number | null
+          artists_with_bookings: number | null
+          avg_applications_per_artist: number | null
+          bookings_last_30_days: number | null
+          featured_venues: number | null
+          max_applications_by_single_artist: number | null
+          most_popular_application_day: number | null
+          most_popular_application_hour: number | null
+          most_popular_venue_city: string | null
+          mrr_from_elite: number | null
+          mrr_from_pro: number | null
+          new_users_last_30_days: number | null
+          new_users_last_7_days: number | null
+          platform_conversion_rate_percent: number | null
+          total_active_artists: number | null
+          total_applications_all_time: number | null
+          total_bookings_all_time: number | null
+          total_mrr: number | null
+          total_venues: number | null
+          users_on_elite: number | null
+          users_on_free: number | null
+          users_on_pro: number | null
+          venues_with_applications: number | null
+        }
+        Relationships: []
+      }
+      venue_analytics_comprehensive: {
+        Row: {
+          applications_awaiting: number | null
+          applications_booked: number | null
+          applications_from_elite_tier: number | null
+          applications_from_free_tier: number | null
+          applications_from_pro_tier: number | null
+          applications_last_30_days: number | null
+          applications_last_90_days: number | null
+          applications_passed: number | null
+          applications_sent: number | null
+          avg_booking_lead_time_days: number | null
+          avg_response_time_days: number | null
+          booking_conversion_rate_percent: number | null
+          bookings_last_30_days: number | null
+          bookings_last_90_days: number | null
+          borough: string | null
+          capacity: number | null
+          city: string | null
+          featured: boolean | null
+          first_application_date: string | null
+          first_booking_date: string | null
+          genres: string[] | null
+          is_active: boolean | null
+          last_application_date: string | null
+          last_booking_date: string | null
+          neighbourhood: string | null
+          popularity_score: number | null
+          state: string | null
+          total_applications: number | null
+          unique_artists_applied: number | null
+          unique_artists_booked: number | null
+          upcoming_shows_count: number | null
+          venue_added_date: string | null
+          venue_id: string | null
+          venue_name: string | null
+          venue_type: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      extract_user_id_from_folder_path: {
-        Args: { folder_path: string }
-        Returns: string
+      can_apply_to_venue: {
+        Args: { p_artist_id: string; p_venue_id: string }
+        Returns: boolean
       }
       generate_url_slug: {
         Args: { artist_name: string }
