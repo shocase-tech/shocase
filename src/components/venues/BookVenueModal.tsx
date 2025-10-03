@@ -163,6 +163,81 @@ export default function BookVenueModal({ isOpen, onClose, venue, artistProfile }
     }
   };
 
+  const handleMarkAsSent = async (editedEmailBody: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || !generatedEmail) return;
+
+      // Double-check monthly limit before proceeding
+      if (subscription?.tier_name === 'pro') {
+        if (subscription.applications_this_period >= (subscription.monthly_application_limit || 10)) {
+          toast({
+            title: "Monthly Limit Reached",
+            description: "You've reached your monthly application limit. Upgrade to Elite for unlimited applications.",
+            variant: "destructive",
+          });
+          throw new Error("Monthly limit reached");
+        }
+      }
+
+      // 1. Create venue application record
+      const { error: applicationError } = await (supabase as any)
+        .from('venue_applications')
+        .insert({
+          artist_id: user.id,
+          venue_id: venue.id,
+          email_subject: generatedEmail.subject,
+          email_body: editedEmailBody,
+          status: 'sent',
+          artist_tier_at_time: subscription?.tier_name,
+        });
+
+      if (applicationError) throw applicationError;
+
+      // 2. Increment user's applications_this_period
+      const { error: subscriptionError } = await (supabase as any)
+        .from('user_subscriptions')
+        .update({ 
+          applications_this_period: (subscription?.applications_this_period || 0) + 1 
+        })
+        .eq('user_id', user.id);
+
+      if (subscriptionError) throw subscriptionError;
+
+      // 3. Increment venue's total_applications
+      const { error: venueError } = await (supabase as any)
+        .from('venues')
+        .update({ 
+          total_applications: (venue.total_applications || 0) + 1 
+        })
+        .eq('id', venue.id);
+
+      if (venueError) throw venueError;
+
+      // Success!
+      toast({
+        title: "Application Sent!",
+        description: "We're tracking this in your outreach dashboard.",
+      });
+
+      toast({
+        title: "Cooldown Active",
+        description: `You can apply to ${venue.name} again in ${subscription?.cooldown_days || 60} days.`,
+      });
+
+      onClose();
+      navigate('/venues/outreach');
+    } catch (error) {
+      console.error('Error marking as sent:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save application. Please try again.",
+        variant: "destructive",
+      });
+      throw error; // Re-throw to prevent dialog from closing
+    }
+  };
+
   if (loading) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
@@ -404,13 +479,7 @@ export default function BookVenueModal({ isOpen, onClose, venue, artistProfile }
             emailBody={generatedEmail.body}
             venueEmail={venue.booking_contact_email}
             onRegenerate={handleGenerateEmail}
-            onMarkAsSent={async () => {
-              // TODO: Implement marking as sent
-              toast({
-                title: "Feature Coming Soon",
-                description: "Application tracking will be available soon.",
-              });
-            }}
+            onMarkAsSent={handleMarkAsSent}
           />
         )}
       </DialogContent>

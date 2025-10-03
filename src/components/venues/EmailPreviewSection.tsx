@@ -12,7 +12,7 @@ interface EmailPreviewSectionProps {
   emailSubject: string;
   emailBody: string;
   onRegenerate: () => void;
-  onMarkAsSent: () => void;
+  onMarkAsSent: (editedEmailBody: string) => Promise<void>;
   venueEmail: string;
 }
 
@@ -77,9 +77,11 @@ export default function EmailPreviewSection({
 
     setMarkingAsSent(true);
     try {
-      await onMarkAsSent();
+      await onMarkAsSent(editedBody);
       setShowMarkAsSentDialog(false);
       setConfirmSent(false);
+    } catch (error) {
+      // Error handled in parent component
     } finally {
       setMarkingAsSent(false);
     }
