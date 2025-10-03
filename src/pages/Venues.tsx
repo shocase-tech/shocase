@@ -29,6 +29,7 @@ const Venues = () => {
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [capacityRange, setCapacityRange] = useState<number[]>([0, 5000]);
   const [sortBy, setSortBy] = useState<string>("name-asc");
+  const [genreDropdownOpen, setGenreDropdownOpen] = useState(false);
   useEffect(() => {
     fetchVenues();
   }, []);
@@ -117,20 +118,20 @@ const Venues = () => {
               <Select value={selectedCity} onValueChange={setSelectedCity}>
                 <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
                   <MapPin className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="All Cities" />
+                  <SelectValue placeholder="All Boroughs" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Cities</SelectItem>
+                  <SelectItem value="all">All Boroughs</SelectItem>
                   {allCities.map(city => <SelectItem key={city} value={city}>{city}</SelectItem>)}
                 </SelectContent>
               </Select>
 
               {/* Genre */}
               <div className="relative">
-                <Button variant="outline" className="w-full justify-start bg-gray-800 border-gray-700 text-white hover:bg-gray-700" onClick={() => {}}>
+                <Button variant="outline" className="w-full justify-start bg-gray-800 border-gray-700 text-white hover:bg-gray-700" onClick={() => setGenreDropdownOpen(!genreDropdownOpen)}>
                   Genres {selectedGenres.length > 0 && `(${selectedGenres.length})`}
                 </Button>
-                {allGenres.length > 0 && <div className="absolute top-full mt-2 w-full bg-gray-800 border border-gray-700 rounded-lg p-3 z-10 max-h-64 overflow-y-auto">
+                {genreDropdownOpen && allGenres.length > 0 && <div className="absolute top-full mt-2 w-full bg-gray-800 border border-gray-700 rounded-lg p-3 z-10 max-h-64 overflow-y-auto">
                     <div className="flex flex-wrap gap-2">
                       {allGenres.map(genre => <Badge key={genre} variant={selectedGenres.includes(genre) ? "default" : "outline"} className="cursor-pointer" onClick={() => toggleGenre(genre)}>
                           {genre}
