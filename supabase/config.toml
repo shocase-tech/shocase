@@ -1,1 +1,7 @@
 project_id = "kaetsegwzfvkermjokmh"
+
+[functions.generate-bio]
+verify_jwt = true
+
+[functions.generate-venue-email]
+verify_jwt = true
