@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, MapPin, Users, ExternalLink, Instagram, Globe, Check, Lock } from "lucide-react";
 import { Helmet } from "react-helmet-async";
+import BookVenueModal from "@/components/venues/BookVenueModal";
 
 interface Venue {
   id: string;
@@ -37,13 +39,28 @@ interface Venue {
 const VenuePage = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [venue, setVenue] = useState<Venue | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [bookModalOpen, setBookModalOpen] = useState(false);
+  const [artistProfile, setArtistProfile] = useState<any | null>(null);
+  const [outreachComponents, setOutreachComponents] = useState<any | null>(null);
+  const [user, setUser] = useState<any | null>(null);
 
   useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUser(session.user);
+        await fetchArtistProfile(session.user.id);
+        await fetchOutreachComponents(session.user.id);
+      }
+    };
+
     if (slug) {
       fetchVenue(slug);
+      checkAuth();
     }
   }, [slug]);
 
@@ -67,6 +84,66 @@ const VenuePage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchArtistProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("artist_profiles")
+        .select("*")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (error && error.code !== "PGRST116") {
+        console.error("Error fetching artist profile:", error);
+        return;
+      }
+
+      setArtistProfile(data);
+    } catch (error) {
+      console.error("Error fetching artist profile:", error);
+    }
+  };
+
+  const fetchOutreachComponents = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("outreach_components")
+        .select("*")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (error && error.code !== "PGRST116") {
+        console.error("Error fetching outreach components:", error);
+        return;
+      }
+
+      setOutreachComponents(data);
+    } catch (error) {
+      console.error("Error fetching outreach components:", error);
+    }
+  };
+
+  const handleBookVenue = () => {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to apply to venues",
+      });
+      navigate("/auth");
+      return;
+    }
+
+    if (!artistProfile) {
+      toast({
+        title: "EPK required",
+        description: "Please create your EPK first before applying to venues",
+      });
+      navigate("/dashboard");
+      return;
+    }
+
+    setBookModalOpen(true);
   };
 
   if (loading) {
@@ -126,10 +203,11 @@ const VenuePage = () => {
                 {venue.name}
               </h1>
             </div>
-            <Button disabled className="relative">
-              <Lock className="h-4 w-4 mr-2" />
+            <Button 
+              onClick={handleBookVenue}
+              className="relative bg-primary hover:bg-primary/90"
+            >
               Book This Venue
-              <Badge variant="secondary" className="ml-2 text-xs">Pro Feature</Badge>
             </Button>
           </div>
         </header>
@@ -377,6 +455,17 @@ const VenuePage = () => {
             </Card>
           </section>
         </div>
+
+        {/* Book Venue Modal */}
+        {venue && artistProfile && (
+          <BookVenueModal
+            isOpen={bookModalOpen}
+            onClose={() => setBookModalOpen(false)}
+            venue={venue}
+            artistProfile={artistProfile}
+            outreachComponents={outreachComponents}
+          />
+        )}
       </div>
     </>
   );
