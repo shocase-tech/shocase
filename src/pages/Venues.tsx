@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Users, X } from "lucide-react";
+import { Search, MapPin, Users, X, Home } from "lucide-react";
 import VenueCard from "@/components/VenueCard";
 import { Helmet } from "react-helmet-async";
+import { useNavigate } from "react-router-dom";
+import shocaseIcon from "@/assets/newicon.svg";
 interface Venue {
   id: string;
   name: string;
@@ -30,6 +32,8 @@ const Venues = () => {
   const [capacityRange, setCapacityRange] = useState<number[]>([0, 5000]);
   const [sortBy, setSortBy] = useState<string>("name-asc");
   const [genreDropdownOpen, setGenreDropdownOpen] = useState(false);
+  const navigate = useNavigate();
+  
   useEffect(() => {
     fetchVenues();
   }, []);
@@ -99,9 +103,22 @@ const Venues = () => {
       <div className="min-h-screen bg-gray-950">
         <div className="max-w-7xl mx-auto px-4 py-12">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-white mb-2">Find Your Next Venue</h1>
-            <p className="text-gray-400">Discover the perfect New York City stage for your music</p>
+          <div className="mb-8 flex items-start justify-between">
+            <div className="flex items-center gap-4">
+              <img src={shocaseIcon} alt="SHOCASE" className="h-12 w-12" />
+              <div>
+                <h1 className="text-4xl font-bold text-white mb-2">Find Your Next Venue</h1>
+                <p className="text-gray-400">Discover the perfect New York City stage for your music</p>
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => navigate("/dashboard")}
+              className="bg-gray-800 border-gray-700 text-white hover:bg-gray-700"
+            >
+              <Home className="h-4 w-4 mr-2" />
+              Dashboard
+            </Button>
           </div>
 
           {/* Filters */}
