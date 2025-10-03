@@ -8,6 +8,7 @@ import { toast } from "@/hooks/use-toast";
 import { CheckCircle2, Loader2, ExternalLink } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import EmailPreviewSection from "./EmailPreviewSection";
+import { canApplyToVenue } from "@/lib/venue-booking-helpers";
 
 interface BookVenueModalProps {
   isOpen: boolean;
@@ -83,42 +84,19 @@ export default function BookVenueModal({ isOpen, onClose, venue, artistProfile }
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data, error } = await (supabase as any)
-        .from('venue_applications')
-        .select('created_at')
-        .eq('artist_id', user.id)
-        .eq('venue_id', venue.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      const result = await canApplyToVenue(user.id, venue.id);
 
-      if (error && error.code !== 'PGRST116') throw error;
-
-      if (data) {
-        const daysSinceApplication = Math.floor(
-          (Date.now() - new Date(data.created_at).getTime()) / (1000 * 60 * 60 * 24)
-        );
-        const cooldownDays = subscription?.cooldown_days || 60;
-
-        if (daysSinceApplication < cooldownDays) {
-          const daysRemaining = cooldownDays - daysSinceApplication;
-          setApplicationStatus(`You applied to this venue ${daysSinceApplication} days ago. Try again in ${daysRemaining} days.`);
-          setCanApply(false);
-          return;
+      if (result.canApply) {
+        setCanApply(true);
+        setApplicationStatus(null);
+      } else {
+        setCanApply(false);
+        if (result.daysUntilCanApply) {
+          setApplicationStatus(`${result.reason}. You can apply again in ${result.daysUntilCanApply} days.`);
+        } else {
+          setApplicationStatus(result.reason || 'Cannot apply to this venue at this time');
         }
       }
-
-      // Check monthly limit for pro tier
-      if (subscription?.tier_name === 'pro') {
-        if (subscription.applications_this_period >= (subscription.monthly_application_limit || 10)) {
-          setApplicationStatus('Monthly application limit reached. Upgrade to Elite for unlimited applications.');
-          setCanApply(false);
-          return;
-        }
-      }
-
-      setCanApply(true);
-      setApplicationStatus(null);
     } catch (error) {
       console.error('Error checking application status:', error);
     }
