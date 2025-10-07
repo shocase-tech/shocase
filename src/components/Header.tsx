@@ -149,19 +149,36 @@ const Header = () => {
       {/* Main Header */}
       <header className="absolute top-0 left-0 right-0 z-40 p-6">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          {/* Navigation */}
-          <nav className="flex items-center gap-6">
+          {/* Left - Empty spacer for balance */}
+          <div className="w-24" />
+          
+          {/* Center Navigation */}
+          <nav className="flex items-center gap-2">
             <Button 
               variant="ghost" 
               onClick={() => navigate("/venues")}
-              className="text-white hover:text-gray-300"
+              className="text-white/80 hover:text-white hover:bg-white/10 transition-all duration-300 backdrop-blur-sm border border-transparent hover:border-white/20"
             >
               Venues
             </Button>
+            <Button 
+              variant="ghost" 
+              onClick={() => user ? navigate("/epk") : navigate("/auth")}
+              className="text-white/80 hover:text-white hover:bg-white/10 transition-all duration-300 backdrop-blur-sm border border-transparent hover:border-white/20"
+            >
+              Press Kit
+            </Button>
+            <Button 
+              variant="ghost" 
+              onClick={() => user ? navigate("/outreach") : navigate("/auth")}
+              className="text-white/80 hover:text-white hover:bg-white/10 transition-all duration-300 backdrop-blur-sm border border-transparent hover:border-white/20"
+            >
+              Outreach
+            </Button>
           </nav>
           
-          {/* Auth Section */}
-          <div className="flex items-center">
+          {/* Right - Auth Section */}
+          <div className="flex items-center w-24 justify-end">
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -173,7 +190,7 @@ const Header = () => {
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuContent className="w-56 bg-card/95 backdrop-blur-sm border-white/10 z-50" align="end" forceMount>
                   <div className="flex flex-col space-y-1 p-2">
                     <p className="text-sm font-medium leading-none">{artistName || user.email}</p>
                     <p className="text-xs leading-none text-muted-foreground">
@@ -181,13 +198,13 @@ const Header = () => {
                     </p>
                   </div>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate("/epk")}>
+                  <DropdownMenuItem onClick={() => navigate("/account-settings")}>
                     <Settings className="mr-2 h-4 w-4" />
-                    <span>Press Kit</span>
+                    <span>Settings</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="mr-2 h-4 w-4" />
-                    <span>Sign out</span>
+                    <span>Sign Out</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
