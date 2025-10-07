@@ -7,9 +7,8 @@ import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { Copy, ExternalLink, Edit3, Eye, EyeOff, CheckCircle, Circle, Menu, Globe, Settings, BarChart } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import showcaseIcon from "@/assets/shocase-icon.png";
+import { Copy, ExternalLink, Edit3, Eye, EyeOff, CheckCircle, Circle } from "lucide-react";
+import AppHeader from "@/components/AppHeader";
 import { cn } from "@/lib/utils";
 import LivePreviewEditor from "@/components/LivePreviewEditor";
 import FloatingProgressIndicator from "@/components/FloatingProgressIndicator";
@@ -421,119 +420,42 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/80 pb-20">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-white/10 backdrop-blur-sm bg-background/80">
-        <div className="container mx-auto px-3 md:px-4 py-3 md:py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2 md:gap-4">
-            {/* Mobile: Show logo icon, Desktop: Show text */}
-            <div className="flex items-center">
-              <img 
-                src={showcaseIcon} 
-                alt="Shocase" 
-                className="w-8 h-8 md:hidden"
-              />
-              <span className="hidden md:block text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                Shocase
-              </span>
-            </div>
-            
-            {/* Status Badge */}
-            <div className="flex items-center gap-2">
-              {getStatusBadge()}
-            </div>
-          </div>
-          
-          {/* Desktop Menu */}
-          <div className="hidden md:flex items-center gap-3">
-            {profile?.is_published && (
-              <>
-                <Button
-                  onClick={copyPublicLink}
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2"
-                >
-                  <Copy className="w-4 h-4" />
-                  Copy Link
-                </Button>
-                <Button
-                  onClick={previewProfile}
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  View EPK
-                </Button>
-              </>
-            )}
-            <Button 
-              onClick={() => navigate("/outreach")}
-              variant="ghost" 
-              size="sm" 
-              className="flex items-center gap-2"
-            >
-              <BarChart className="w-4 h-4" />
-              Outreach Tracker
-            </Button>
-            <Button 
-              onClick={() => navigate("/outreach?tab=settings")}
-              variant="ghost" 
-              size="sm" 
-              className="flex items-center gap-2"
-            >
-              <Settings className="w-4 h-4" />
-              Settings
-            </Button>
-            <Button onClick={handleSignOut} variant="ghost" size="sm" className="flex items-center gap-2">
-              <Edit3 className="w-4 h-4" />
-              Sign Out
-            </Button>
-          </div>
-
-          {/* Mobile Dropdown Menu */}
-          <div className="md:hidden">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <Menu className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                {profile?.is_published && (
-                  <>
-                    <DropdownMenuItem onClick={previewProfile} className="flex items-center gap-2">
-                      <Globe className="w-4 h-4" />
-                      View EPK
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={copyPublicLink} className="flex items-center gap-2">
-                      <Copy className="w-4 h-4" />
-                      Copy Link
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                  </>
-                )}
-                <DropdownMenuItem onClick={() => navigate("/outreach")} className="flex items-center gap-2">
-                  <BarChart className="w-4 h-4" />
-                  Outreach Tracker
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/outreach?tab=settings")} className="flex items-center gap-2">
-                  <Settings className="w-4 h-4" />
-                  Outreach Settings
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut} className="flex items-center gap-2">
-                  <Eye className="w-4 h-4" />
-                  Sign Out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-6">
+      <AppHeader />
+      
+      <main className="container mx-auto px-4 py-6 pt-20">
         <div className="max-w-4xl mx-auto space-y-6">
+          {/* Quick Actions Bar */}
+          {profile && (
+            <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-lg bg-card/50 backdrop-blur border border-white/10">
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-muted-foreground">Status:</span>
+                {getStatusBadge()}
+              </div>
+              {profile.is_published && (
+                <div className="flex items-center gap-2">
+                  <Button
+                    onClick={copyPublicLink}
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2"
+                  >
+                    <Copy className="w-4 h-4" />
+                    <span className="hidden sm:inline">Copy Link</span>
+                  </Button>
+                  <Button
+                    onClick={previewProfile}
+                    variant="default"
+                    size="sm"
+                    className="flex items-center gap-2"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    <span className="hidden sm:inline">View EPK</span>
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Progress Section with Publish Controls */}
           {profile && (
             <Card ref={progressCardRef} className="glass-card border-white/10 animate-slide-in-up">

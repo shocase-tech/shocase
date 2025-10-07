@@ -8,7 +8,12 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { User, LogOut, Settings } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { User, LogOut, Settings, Menu } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -21,6 +26,7 @@ const Header = () => {
   const [iconPosition, setIconPosition] = useState({ x: 24, y: 24 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -152,8 +158,8 @@ const Header = () => {
           {/* Left - Empty spacer for balance */}
           <div className="w-24" />
           
-          {/* Center Navigation */}
-          <nav className="flex items-center gap-2">
+          {/* Center Navigation - Desktop */}
+          <nav className="hidden md:flex items-center gap-2">
             <Button 
               variant="ghost" 
               onClick={() => navigate("/venues")}
@@ -178,7 +184,54 @@ const Header = () => {
           </nav>
           
           {/* Right - Auth Section */}
-          <div className="flex items-center w-24 justify-end">
+          <div className="flex items-center gap-2 w-24 justify-end">
+            {/* Mobile Hamburger Menu */}
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="md:hidden text-white hover:bg-white/10 h-11 w-11"
+                >
+                  <Menu className="h-6 w-6" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-64 bg-card/95 backdrop-blur-sm">
+                <nav className="flex flex-col gap-2 mt-8">
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      navigate("/venues");
+                      setMobileMenuOpen(false);
+                    }}
+                    className="justify-start text-base h-12 text-foreground hover:bg-muted"
+                  >
+                    Venues
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      user ? navigate("/epk") : navigate("/auth");
+                      setMobileMenuOpen(false);
+                    }}
+                    className="justify-start text-base h-12 text-foreground hover:bg-muted"
+                  >
+                    Press Kit
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      user ? navigate("/outreach") : navigate("/auth");
+                      setMobileMenuOpen(false);
+                    }}
+                    className="justify-start text-base h-12 text-foreground hover:bg-muted"
+                  >
+                    Outreach
+                  </Button>
+                </nav>
+              </SheetContent>
+            </Sheet>
+
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -213,7 +266,7 @@ const Header = () => {
                 variant="ghost" 
                 size="sm" 
                 onClick={() => navigate("/auth")}
-                className="flex items-center gap-2 text-white hover:text-gray-300"
+                className="hidden md:flex items-center gap-2 text-white hover:text-gray-300"
               >
                 <User className="w-4 h-4" />
                 Sign In

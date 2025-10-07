@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, MapPin, Users, ExternalLink, Instagram, Globe, Check, Lock } from "lucide-react";
 import { Helmet } from "react-helmet-async";
+import AppHeader from "@/components/AppHeader";
 import BookVenueModal from "@/components/venues/BookVenueModal";
 
 interface Venue {
@@ -185,10 +186,12 @@ const VenuePage = () => {
         <meta name="description" content={venue.description || `Book ${venue.name} in ${venue.city}`} />
       </Helmet>
 
-      <div className="min-h-screen bg-gray-950">
-        {/* Sticky Header */}
-        <header className="sticky top-0 z-40 bg-gray-950/95 backdrop-blur-sm border-b border-gray-800">
-          <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+      <AppHeader />
+
+      <div className="min-h-screen bg-gray-950 pt-16">
+        {/* Sub-header with back button and Book CTA */}
+        <div className="sticky top-16 z-30 bg-gray-950/95 backdrop-blur-sm border-b border-gray-800">
+          <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button
                 variant="ghost"
@@ -210,7 +213,7 @@ const VenuePage = () => {
               Book This Venue
             </Button>
           </div>
-        </header>
+        </div>
 
         {/* Hero Section */}
         <div className="relative h-[50vh] overflow-hidden">

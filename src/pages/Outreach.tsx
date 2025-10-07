@@ -40,6 +40,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { Helmet } from "react-helmet-async";
+import AppHeader from "@/components/AppHeader";
 import BookShowModal from "@/components/venues/BookShowModal";
 import BookVenueModal from "@/components/venues/BookVenueModal";
 
@@ -477,23 +478,10 @@ export default function Outreach() {
         <meta name="description" content="Track your venue applications and bookings" />
       </Helmet>
 
-      <div className="min-h-screen bg-gradient-dark pb-20">
-        <div className="container max-w-6xl mx-auto px-4 py-8">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate("/epk")}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Press Kit
-              </Button>
-            </div>
-          </div>
+      <AppHeader />
 
+      <div className="min-h-screen bg-gradient-dark pb-20 pt-16">
+        <div className="container max-w-6xl mx-auto px-4 py-8">
           <div className="mb-8">
             <h1 className="text-3xl font-bold mb-2">Outreach Tracker</h1>
             <p className="text-muted-foreground">

@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import Outreach from "./pages/Outreach";
 import Venues from "./pages/Venues";
 import VenuePage from "./pages/VenuePage";
+import AccountSettings from "./pages/AccountSettings";
 import SimplePublicProfile from "./pages/SimplePublicProfile";
 import NotFound from "./pages/NotFound";
 
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/outreach" element={<Outreach />} />
             <Route path="/venues" element={<Venues />} />
             <Route path="/venues/:slug" element={<VenuePage />} />
+            <Route path="/account-settings" element={<AccountSettings />} />
             <Route path="/:identifier" element={<SimplePublicProfile />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
