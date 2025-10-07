@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Select,
   SelectContent,
@@ -31,6 +34,10 @@ import {
   CheckCircle,
   FileText,
   Calendar,
+  Plus,
+  X,
+  Info,
+  Loader2,
 } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import BookShowModal from "@/components/venues/BookShowModal";
@@ -60,12 +67,13 @@ interface ApplicationWithVenue {
 }
 
 export default function Outreach() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [applications, setApplications] = useState<ApplicationWithVenue[]>([]);
   const [filteredApplications, setFilteredApplications] = useState<ApplicationWithVenue[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"newest" | "oldest" | "venue-az">("newest");
-  const [activeTab, setActiveTab] = useState("all");
+  const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "all");
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
   const [bookShowModal, setBookShowModal] = useState<{
     isOpen: boolean;
@@ -79,6 +87,11 @@ export default function Outreach() {
   const [artistProfile, setArtistProfile] = useState<any>(null);
   const [outreachComponents, setOutreachComponents] = useState<any>(null);
   const [user, setUser] = useState<any>(null);
+  
+  // Settings state
+  const [saving, setSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | null>(null);
+  const [saveTimeout, setSaveTimeout] = useState<NodeJS.Timeout | null>(null);
 
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -143,7 +156,25 @@ export default function Outreach() {
         .maybeSingle();
 
       if (error && error.code !== "PGRST116") throw error;
-      setOutreachComponents(data);
+      
+      if (data) {
+        setOutreachComponents(data);
+      } else {
+        // Create empty record
+        const { data: newData, error: insertError } = await supabase
+          .from("outreach_components")
+          .insert({
+            user_id: userId,
+            expected_draw: "",
+            social_proof: "",
+            notable_achievements: [],
+          })
+          .select()
+          .single();
+
+        if (insertError) throw insertError;
+        setOutreachComponents(newData);
+      }
     } catch (error) {
       console.error("Error fetching outreach components:", error);
     }
@@ -290,6 +321,103 @@ export default function Outreach() {
     );
   };
 
+  const triggerAutoSave = (updatedComponents: any) => {
+    if (saveTimeout) {
+      clearTimeout(saveTimeout);
+    }
+
+    setSaveStatus("saving");
+
+    const timeout = setTimeout(() => {
+      saveOutreachComponents(updatedComponents);
+    }, 1000);
+
+    setSaveTimeout(timeout);
+  };
+
+  const saveOutreachComponents = async (componentsToSave: any) => {
+    if (!user) return;
+
+    try {
+      setSaving(true);
+      const { error } = await supabase
+        .from("outreach_components")
+        .upsert({
+          user_id: user.id,
+          expected_draw: componentsToSave.expected_draw,
+          social_proof: componentsToSave.social_proof,
+          notable_achievements: componentsToSave.notable_achievements,
+        }, {
+          onConflict: "user_id",
+        });
+
+      if (error) throw error;
+
+      setSaveStatus("saved");
+      setTimeout(() => setSaveStatus(null), 2000);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to save: " + error.message,
+        variant: "destructive",
+      });
+      setSaveStatus(null);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleFieldChange = (field: string, value: any) => {
+    const updated = { ...outreachComponents, [field]: value };
+    setOutreachComponents(updated);
+    triggerAutoSave(updated);
+  };
+
+  const addAchievement = () => {
+    if (!outreachComponents || outreachComponents.notable_achievements?.length >= 5) return;
+    const updated = {
+      ...outreachComponents,
+      notable_achievements: [...(outreachComponents.notable_achievements || []), ""],
+    };
+    setOutreachComponents(updated);
+  };
+
+  const updateAchievement = (index: number, value: string) => {
+    const updated = {
+      ...outreachComponents,
+      notable_achievements: outreachComponents.notable_achievements.map((a: string, i: number) =>
+        i === index ? value : a
+      ),
+    };
+    setOutreachComponents(updated);
+    triggerAutoSave(updated);
+  };
+
+  const removeAchievement = (index: number) => {
+    const updated = {
+      ...outreachComponents,
+      notable_achievements: outreachComponents.notable_achievements.filter((_: any, i: number) => i !== index),
+    };
+    setOutreachComponents(updated);
+    triggerAutoSave(updated);
+  };
+
+  const getSectionBadge = (value: string | string[]) => {
+    const isEmpty = Array.isArray(value) 
+      ? value.length === 0 || value.every(v => !v.trim())
+      : !value?.trim();
+
+    return isEmpty ? (
+      <Badge variant="secondary" className="bg-muted text-muted-foreground">
+        Empty
+      </Badge>
+    ) : (
+      <Badge variant="default" className="bg-green-500/20 text-green-400 border-green-500/30">
+        Added ✓
+      </Badge>
+    );
+  };
+
   const toggleExpanded = (id: string) => {
     const newExpanded = new Set(expandedCards);
     if (newExpanded.has(id)) {
@@ -357,11 +485,11 @@ export default function Outreach() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => navigate("/dashboard")}
+                onClick={() => navigate("/epk")}
                 className="text-muted-foreground hover:text-foreground"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Dashboard
+                Back to Press Kit
               </Button>
             </div>
           </div>
@@ -436,16 +564,22 @@ export default function Outreach() {
           </div>
 
           {/* Tabs */}
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <Tabs value={activeTab} onValueChange={(value) => {
+            setActiveTab(value);
+            setSearchParams(value !== "all" ? { tab: value } : {});
+          }}>
             <TabsList className="mb-6">
               <TabsTrigger value="all">All</TabsTrigger>
               <TabsTrigger value="drafts">Drafts</TabsTrigger>
               <TabsTrigger value="sent">Sent</TabsTrigger>
               <TabsTrigger value="booked">Booked</TabsTrigger>
               <TabsTrigger value="declined">Declined</TabsTrigger>
+              <TabsTrigger value="settings">Settings</TabsTrigger>
             </TabsList>
 
-            <TabsContent value={activeTab}>
+            {/* Applications Tabs */}
+            {["all", "drafts", "sent", "booked", "declined"].includes(activeTab) && (
+              <TabsContent value={activeTab}>
               {filteredApplications.length === 0 ? (
                 <Card className="bg-card/50 backdrop-blur border-white/10">
                   <CardContent className="py-12 text-center">
@@ -627,6 +761,157 @@ export default function Outreach() {
                   ))}
                 </div>
               )}
+            </TabsContent>
+            )}
+
+            {/* Settings Tab */}
+            <TabsContent value="settings">
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Outreach Settings</h2>
+                    <p className="text-muted-foreground">
+                      Create reusable components to strengthen your venue applications
+                    </p>
+                  </div>
+                  {saveStatus && (
+                    <div className="flex items-center gap-2 text-sm">
+                      {saveStatus === "saving" ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                          <span className="text-muted-foreground">Saving...</span>
+                        </>
+                      ) : (
+                        <span className="text-green-400">Saved ✓</span>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Info Banner */}
+                <Alert className="border-blue-500/30 bg-blue-500/10">
+                  <Info className="w-4 h-4 text-blue-400" />
+                  <AlertDescription className="text-blue-200">
+                    These details strengthen your venue pitches but are optional. They'll be suggested when you apply to venues.
+                  </AlertDescription>
+                </Alert>
+
+                {/* Expected Draw */}
+                <Card className="bg-card/50 backdrop-blur border-white/10">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-xl">Expected Draw</CardTitle>
+                      {outreachComponents && getSectionBadge(outreachComponents.expected_draw || "")}
+                    </div>
+                    <CardDescription>
+                      How many people typically attend your shows in this area?
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Textarea
+                      placeholder="Example: 50-100 in Brooklyn venues"
+                      value={outreachComponents?.expected_draw || ""}
+                      onChange={(e) => {
+                        if (e.target.value.length <= 200) {
+                          handleFieldChange("expected_draw", e.target.value);
+                        }
+                      }}
+                      maxLength={200}
+                      rows={3}
+                      className="resize-none"
+                    />
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {(outreachComponents?.expected_draw || "").length}/200 characters
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Social Proof */}
+                <Card className="bg-card/50 backdrop-blur border-white/10">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-xl">Social Proof</CardTitle>
+                      {outreachComponents && getSectionBadge(outreachComponents.social_proof || "")}
+                    </div>
+                    <CardDescription>
+                      Notable press mentions, blog features, or industry recognition
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Textarea
+                      placeholder="Example: Featured in Brooklyn Vegan and Consequence"
+                      value={outreachComponents?.social_proof || ""}
+                      onChange={(e) => {
+                        if (e.target.value.length <= 300) {
+                          handleFieldChange("social_proof", e.target.value);
+                        }
+                      }}
+                      maxLength={300}
+                      rows={4}
+                      className="resize-none"
+                    />
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {(outreachComponents?.social_proof || "").length}/300 characters
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Notable Achievements */}
+                <Card className="bg-card/50 backdrop-blur border-white/10">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-xl">Notable Achievements</CardTitle>
+                      {outreachComponents && getSectionBadge(outreachComponents.notable_achievements || [])}
+                    </div>
+                    <CardDescription>
+                      Sold-out shows, streaming milestones, awards (max 5)
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {outreachComponents?.notable_achievements?.map((achievement: string, index: number) => (
+                      <div key={index} className="flex gap-2">
+                        <Input
+                          placeholder="Example: Sold out Baby's All Right (250 cap)"
+                          value={achievement}
+                          onChange={(e) => {
+                            if (e.target.value.length <= 100) {
+                              updateAchievement(index, e.target.value);
+                            }
+                          }}
+                          maxLength={100}
+                          className="flex-1"
+                        />
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeAchievement(index)}
+                          className="text-muted-foreground hover:text-destructive"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
+
+                    {(!outreachComponents?.notable_achievements || outreachComponents.notable_achievements.length < 5) && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={addAchievement}
+                        className="w-full"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Achievement
+                      </Button>
+                    )}
+
+                    {outreachComponents?.notable_achievements?.length >= 5 && (
+                      <p className="text-xs text-muted-foreground text-center">
+                        Maximum of 5 achievements reached
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
           </Tabs>
         </div>

@@ -468,7 +468,7 @@ export default function Dashboard() {
               </>
             )}
             <Button 
-              onClick={() => navigate("/dashboard/outreach")}
+              onClick={() => navigate("/outreach")}
               variant="ghost" 
               size="sm" 
               className="flex items-center gap-2"
@@ -477,7 +477,7 @@ export default function Dashboard() {
               Outreach Tracker
             </Button>
             <Button 
-              onClick={() => navigate("/dashboard/outreach-settings")}
+              onClick={() => navigate("/outreach?tab=settings")}
               variant="ghost" 
               size="sm" 
               className="flex items-center gap-2"
@@ -513,11 +513,11 @@ export default function Dashboard() {
                     <DropdownMenuSeparator />
                   </>
                 )}
-                <DropdownMenuItem onClick={() => navigate("/dashboard/outreach")} className="flex items-center gap-2">
+                <DropdownMenuItem onClick={() => navigate("/outreach")} className="flex items-center gap-2">
                   <BarChart className="w-4 h-4" />
                   Outreach Tracker
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/dashboard/outreach-settings")} className="flex items-center gap-2">
+                <DropdownMenuItem onClick={() => navigate("/outreach?tab=settings")} className="flex items-center gap-2">
                   <Settings className="w-4 h-4" />
                   Outreach Settings
                 </DropdownMenuItem>

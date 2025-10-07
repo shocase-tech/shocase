@@ -138,7 +138,7 @@ export default function OnboardingWizard({ user, onComplete, userEmail, userPhon
   };
 
   const handleSkip = () => {
-    navigate("/dashboard");
+    navigate("/epk");
   };
 
   const handleComplete = async () => {

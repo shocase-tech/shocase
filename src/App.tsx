@@ -7,7 +7,6 @@ import { HelmetProvider } from 'react-helmet-async';
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
-import OutreachSettings from "./pages/OutreachSettings";
 import Outreach from "./pages/Outreach";
 import Venues from "./pages/Venues";
 import VenuePage from "./pages/VenuePage";
@@ -26,9 +25,8 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/dashboard/outreach-settings" element={<OutreachSettings />} />
-            <Route path="/dashboard/outreach" element={<Outreach />} />
+            <Route path="/epk" element={<Dashboard />} />
+            <Route path="/outreach" element={<Outreach />} />
             <Route path="/venues" element={<Venues />} />
             <Route path="/venues/:slug" element={<VenuePage />} />
             <Route path="/:identifier" element={<SimplePublicProfile />} />

@@ -139,7 +139,7 @@ const VenuePage = () => {
         title: "EPK required",
         description: "Please create your EPK first before applying to venues",
       });
-      navigate("/dashboard");
+      navigate("/epk");
       return;
     }
 

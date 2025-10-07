@@ -84,7 +84,7 @@ export default function Auth() {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        navigate("/dashboard");
+        navigate("/epk");
       }
     };
     checkAuth();
@@ -224,7 +224,7 @@ export default function Auth() {
       if (error) throw error;
 
       if (data.user) {
-        navigate("/dashboard");
+        navigate("/epk");
       }
     } catch (error: any) {
       toast({

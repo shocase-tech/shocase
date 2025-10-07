@@ -113,7 +113,7 @@ const Venues = () => {
             </div>
             <Button
               variant="outline"
-              onClick={() => navigate("/dashboard")}
+              onClick={() => navigate("/epk")}
               className="bg-gray-800 border-gray-700 text-white hover:bg-gray-700"
             >
               <Home className="h-4 w-4 mr-2" />

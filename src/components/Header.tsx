@@ -181,9 +181,9 @@ const Header = () => {
                     </p>
                   </div>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+                  <DropdownMenuItem onClick={() => navigate("/epk")}>
                     <Settings className="mr-2 h-4 w-4" />
-                    <span>Dashboard</span>
+                    <span>Press Kit</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="mr-2 h-4 w-4" />

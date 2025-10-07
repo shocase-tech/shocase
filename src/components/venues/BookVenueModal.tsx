@@ -256,7 +256,7 @@ export default function BookVenueModal({
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => navigate("/dashboard")}
+                      onClick={() => navigate("/epk")}
                       className="w-full"
                     >
                       <ExternalLink className="w-4 h-4 mr-2" />
@@ -324,7 +324,7 @@ export default function BookVenueModal({
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => navigate("/dashboard/outreach-settings")}
+                          onClick={() => navigate("/outreach?tab=settings")}
                           className="w-full"
                         >
                           <ExternalLink className="w-4 h-4 mr-2" />
@@ -340,7 +340,7 @@ export default function BookVenueModal({
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => navigate("/dashboard/outreach-settings")}
+                          onClick={() => navigate("/outreach?tab=settings")}
                           className="w-full"
                         >
                           <ExternalLink className="w-4 h-4 mr-2" />
