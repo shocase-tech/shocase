@@ -121,8 +121,7 @@ const FeaturedVenuesSection = () => {
                 }}
                 onMouseEnter={() => setHoveredCard(index)}
                 onMouseLeave={() => setHoveredCard(null)}
-                className="group cursor-pointer"
-                onClick={() => navigate(`/venues/${venue.slug}`)}
+                className="group"
               >
                 <motion.div
                   className="relative h-80 rounded-2xl overflow-hidden glass-card"

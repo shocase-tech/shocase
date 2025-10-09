@@ -10,7 +10,7 @@ const CTASection = () => {
   return (
     <>
       {/* Existing CTA Section */}
-      <section className="pt-44 pb-24 md:pt-24 px-6 bg-gradient-to-b from-secondary/20 to-background">
+      <section className="pt-44 pb-24 md:pt-24 px-6 bg-gradient-to-b from-background via-background/95 to-background">
         <div className="max-w-6xl mx-auto">
           <div className="text-center">
             <Card className="bg-gradient-card backdrop-blur-glass border border-glass max-w-2xl mx-auto">

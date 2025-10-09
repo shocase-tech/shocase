@@ -14,7 +14,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { User, LogOut, Settings, Menu } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
@@ -28,7 +28,10 @@ const Header = () => {
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+
+  const isLandingPage = location.pathname === '/';
 
   useEffect(() => {
     // Set up auth state listener
@@ -53,6 +56,13 @@ const Header = () => {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const scrollToPricing = () => {
+    const pricingSection = document.getElementById('pricing-section');
+    if (pricingSection) {
+      pricingSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   const fetchArtistProfile = async (userId: string) => {
     try {
@@ -181,6 +191,15 @@ const Header = () => {
             >
               Outreach
             </Button>
+            {isLandingPage && (
+              <Button 
+                variant="ghost" 
+                onClick={scrollToPricing}
+                className="text-white/80 hover:text-white hover:bg-white/10 transition-all duration-300 backdrop-blur-sm border border-transparent hover:border-white/20"
+              >
+                Pricing
+              </Button>
+            )}
           </nav>
           
           {/* Right - Auth Section */}
@@ -228,6 +247,18 @@ const Header = () => {
                   >
                     Outreach
                   </Button>
+                  {isLandingPage && (
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        scrollToPricing();
+                        setMobileMenuOpen(false);
+                      }}
+                      className="justify-start text-base h-12 text-foreground hover:bg-muted"
+                    >
+                      Pricing
+                    </Button>
+                  )}
                 </nav>
               </SheetContent>
             </Sheet>

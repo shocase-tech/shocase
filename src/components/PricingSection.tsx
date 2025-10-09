@@ -76,6 +76,7 @@ const PricingSection = () => {
 
   return (
     <section 
+      id="pricing-section"
       ref={sectionRef}
       className="relative py-24 px-6 bg-gradient-to-b from-background via-background/95 to-background overflow-hidden"
     >

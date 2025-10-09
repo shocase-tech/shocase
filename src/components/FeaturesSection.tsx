@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import { 
   Sparkles, 
   Camera, 
@@ -57,6 +58,21 @@ const FeaturesSection = () => {
   const [visibleCards, setVisibleCards] = useState<number[]>([]);
   const sectionRef = useRef<HTMLDivElement>(null);
 
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"]
+  });
+
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
+
+  const y = useTransform(smoothProgress, [0, 1], [100, -100]);
+  const opacity = useTransform(smoothProgress, [0, 0.2, 0.8, 1], [0.5, 1, 1, 0.5]);
+  const scale = useTransform(smoothProgress, [0, 0.2, 0.8, 1], [0.95, 1, 1, 0.95]);
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -83,10 +99,26 @@ const FeaturesSection = () => {
       ref={sectionRef}
       className="relative py-24 px-6 bg-gradient-to-b from-background via-background/95 to-background overflow-hidden"
     >
-      <div className="max-w-7xl mx-auto">
-        <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 gradient-text">
+      {/* Animated background gradient blobs */}
+      <motion.div 
+        className="absolute top-1/4 right-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl"
+        style={{ y }}
+      />
+      <motion.div 
+        className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl"
+        style={{ y: useTransform(y, (value) => -value) }}
+      />
+
+      <motion.div 
+        className="max-w-7xl mx-auto"
+        style={{ opacity, scale }}
+      >
+        <motion.h2 
+          className="text-4xl md:text-5xl font-bold text-center mb-16 gradient-text"
+          style={{ y: useTransform(smoothProgress, [0, 1], [30, -30]) }}
+        >
           Everything You Need to Grow
-        </h2>
+        </motion.h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {features.map((feature, index) => {
@@ -115,7 +147,7 @@ const FeaturesSection = () => {
             );
           })}
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 };
