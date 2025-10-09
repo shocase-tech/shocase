@@ -5,7 +5,7 @@ import { User } from "@supabase/supabase-js";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket, Download, Mail, Phone, Star, Quote, Play, Users, Award, TrendingUp, User as UserIcon, Users2, Guitar, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket, Download, Mail, Phone, Star, Quote, Play, Users, Award, TrendingUp, User as UserIcon, Users2, Guitar, ChevronLeft, ChevronRight, X, Youtube } from "lucide-react";
 import spotifyColorIcon from "@/assets/streaming/spotify-color.png";
 import spotifyLightIcon from "@/assets/streaming/spotify-light.png";
 import soundcloudColorIcon from "@/assets/streaming/soundcloud-color.png";
@@ -474,6 +474,14 @@ export default function SimplePublicProfile() {
                     </a>
                   </Button>
                 )}
+                {socialLinks.youtube && (
+                  <Button variant="outline" size="sm" asChild>
+                    <a href={socialLinks.youtube} target="_blank" rel="noopener noreferrer">
+                      <Youtube className="w-4 h-4 mr-2" />
+                      YouTube
+                    </a>
+                  </Button>
+                )}
               </div>
 
               {/* Streaming Links Row */}
@@ -868,6 +876,16 @@ export default function SimplePublicProfile() {
                       className="hover:scale-110 transition-transform duration-300"
                     >
                       <img src={tiktokIcon} alt="TikTok" className="w-10 h-10" />
+                    </a>
+                  )}
+                  {socialLinks.youtube && (
+                    <a 
+                      href={socialLinks.youtube} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="hover:scale-110 transition-transform duration-300"
+                    >
+                      <Youtube className="w-10 h-10 text-red-500 hover:text-red-400" />
                     </a>
                   )}
                 </div>

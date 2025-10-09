@@ -6,7 +6,7 @@ import { User } from "@supabase/supabase-js";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket, Download, Mail, Phone, Star, Quote, Play, Users, Award, TrendingUp, X } from "lucide-react";
+import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket, Download, Mail, Phone, Star, Quote, Play, Users, Award, TrendingUp, X, Youtube } from "lucide-react";
 import PublicImage from "@/components/PublicImage";
 import { FeaturedTrackEmbed } from "@/components/FeaturedTrackEmbed";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -464,6 +464,15 @@ export default function PublicArtistProfile() {
                       </a>
                     </Button>
                   )}
+                  
+                  {profile.social_links && typeof profile.social_links === 'object' && profile.social_links !== null && !Array.isArray(profile.social_links) && (profile.social_links as any).youtube && (
+                    <Button asChild variant="secondary" className="flex-1">
+                      <a href={(profile.social_links as any).youtube} target="_blank" rel="noopener noreferrer">
+                        <Youtube className="w-4 h-4 mr-1" />
+                        YouTube
+                      </a>
+                    </Button>
+                  )}
                 </div>
               </div>
               
@@ -790,6 +799,18 @@ export default function PublicArtistProfile() {
                       >
                         <img src={tiktokIcon} alt="TikTok" className="w-5 h-5" />
                         TikTok
+                        <ExternalLink className="w-4 h-4 ml-auto" />
+                      </a>
+                    )}
+                    {(profile.social_links as any).youtube && (
+                      <a
+                        href={(profile.social_links as any).youtube}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 w-full px-4 py-3 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors"
+                      >
+                        <Youtube className="w-5 h-5" />
+                        YouTube
                         <ExternalLink className="w-4 h-4 ml-auto" />
                       </a>
                     )}

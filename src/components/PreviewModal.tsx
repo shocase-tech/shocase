@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket, Mail, Phone, Star, Quote, Play, Users, Award, TrendingUp, User as UserIcon, Users2, Guitar, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket, Mail, Phone, Star, Quote, Play, Users, Award, TrendingUp, User as UserIcon, Users2, Guitar, ChevronLeft, ChevronRight, X, Youtube } from "lucide-react";
 import spotifyColorIcon from "@/assets/streaming/spotify-color.png";
 import spotifyLightIcon from "@/assets/streaming/spotify-light.png";
 import soundcloudColorIcon from "@/assets/streaming/soundcloud-color.png";
@@ -294,6 +294,16 @@ export function PreviewModal({ open, onOpenChange, profile, onPublish }: Preview
                         <img src={tiktokIcon} alt="TikTok" className="w-10 h-10" />
                       </a>
                     )}
+                    {socialLinks.youtube && (
+                      <a 
+                        href={socialLinks.youtube} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="hover:scale-110 transition-transform duration-300"
+                      >
+                        <Youtube className="w-10 h-10 text-red-500 hover:text-red-400" />
+                      </a>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -533,6 +543,16 @@ export function PreviewModal({ open, onOpenChange, profile, onPublish }: Preview
                           className="hover:scale-110 transition-transform duration-300"
                         >
                           <img src={tiktokIcon} alt="TikTok" className="w-10 h-10" />
+                        </a>
+                      )}
+                      {socialLinks.youtube && (
+                        <a 
+                          href={socialLinks.youtube} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="hover:scale-110 transition-transform duration-300"
+                        >
+                          <Youtube className="w-10 h-10 text-red-500 hover:text-red-400" />
                         </a>
                       )}
                     </div>

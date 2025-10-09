@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket, Edit3, Plus, Quote, Star, User as UserIcon, Users, Sparkles, FileText } from "lucide-react";
+import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket, Edit3, Plus, Quote, Star, User as UserIcon, Users, Sparkles, FileText, Youtube } from "lucide-react";
 import PrivateImage from "@/components/PrivateImage";
 import InlineEditor from "@/components/InlineEditor";
 import MobileEditorModal from "@/components/MobileEditorModal";
@@ -693,6 +693,18 @@ export default function LivePreviewEditor({
                     >
                       <Music className="w-4 h-4 flex-shrink-0" />
                       <span className="hidden sm:inline">TikTok</span>
+                      <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                    </a>
+                  )}
+                  {profile.social_links.youtube && (
+                    <a
+                      href={profile.social_links.youtube}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-3 py-2 rounded-md bg-white/5 hover:bg-white/10 transition-colors text-sm min-h-[44px]"
+                    >
+                      <Youtube className="w-4 h-4 flex-shrink-0" />
+                      <span className="hidden sm:inline">YouTube</span>
                       <ExternalLink className="w-3 h-3 flex-shrink-0" />
                     </a>
                   )}

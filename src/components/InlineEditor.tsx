@@ -944,6 +944,19 @@ const handleGalleryUpload = async (file: File) => {
             placeholder="@username"
           />
         </div>
+
+        <div>
+          <Label htmlFor="youtube">YouTube</Label>
+          <Input
+            id="youtube"
+            value={formData.social_links?.youtube || ''}
+            onChange={(e) => setFormData({
+              ...formData,
+              social_links: { ...formData.social_links, youtube: e.target.value }
+            })}
+            placeholder="YouTube channel URL"
+          />
+        </div>
       </div>
     </div>
   );

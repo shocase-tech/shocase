@@ -61,6 +61,7 @@ export default function ArtistProfileForm({ profile, onSaved, userEmail, userPho
     instagram: profile?.social_links?.instagram || "",
     spotify: profile?.social_links?.spotify || "",
     tiktok: profile?.social_links?.tiktok || "",
+    youtube: profile?.social_links?.youtube || "",
     performance_type: profile?.performance_type || "",
     location: profile?.location || "",
     featured_track_url: profile?.featured_track_url || "",
@@ -586,6 +587,16 @@ const saveSection = async (sectionData: any) => {
                     placeholder="@yourusername"
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="youtube">YouTube</Label>
+                  <Input
+                    id="youtube"
+                    type="url"
+                    value={formData.youtube}
+                    onChange={(e) => setFormData({ ...formData, youtube: e.target.value })}
+                    placeholder="YouTube channel URL"
+                  />
+                </div>
               </div>
 
               <div className="space-y-4">
@@ -712,6 +723,7 @@ const saveSection = async (sectionData: any) => {
                     instagram: formData.instagram,
                     spotify: formData.spotify,
                     tiktok: formData.tiktok,
+                    youtube: formData.youtube,
                   },
                   contact_info: formData.contact_info,
                 })}

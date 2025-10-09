@@ -424,38 +424,6 @@ export default function Dashboard() {
       
       <main className="container mx-auto px-4 py-6 pt-20">
         <div className="max-w-4xl mx-auto space-y-6">
-          {/* Quick Actions Bar */}
-          {profile && (
-            <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-lg bg-card/50 backdrop-blur border border-white/10">
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-muted-foreground">Status:</span>
-                {getStatusBadge()}
-              </div>
-              {profile.is_published && (
-                <div className="flex items-center gap-2">
-                  <Button
-                    onClick={copyPublicLink}
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center gap-2"
-                  >
-                    <Copy className="w-4 h-4" />
-                    <span className="hidden sm:inline">Copy Link</span>
-                  </Button>
-                  <Button
-                    onClick={previewProfile}
-                    variant="default"
-                    size="sm"
-                    className="flex items-center gap-2"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    <span className="hidden sm:inline">View EPK</span>
-                  </Button>
-                </div>
-              )}
-            </div>
-          )}
-
           {/* Progress Section with Publish Controls */}
           {profile && (
             <Card ref={progressCardRef} className="glass-card border-white/10 animate-slide-in-up">
