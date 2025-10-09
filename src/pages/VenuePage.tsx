@@ -188,7 +188,7 @@ const VenuePage = () => {
 
       <AppHeader />
 
-      <div className="min-h-screen bg-gray-950">
+      <div className="min-h-screen bg-gray-950 pt-16">
         {/* Hero Section */}
         <div className="relative h-[60vh] overflow-hidden">
           {venue.hero_image_url ? (
@@ -215,14 +215,14 @@ const VenuePage = () => {
             Back
           </Button>
 
-          {/* Book Button - Centered Floating */}
-          <button
+          {/* Book Button */}
+          <Button
             onClick={handleBookVenue}
-            className="absolute left-1/2 -translate-x-1/2 bottom-12 h-24 w-24 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-purple-600 hover:from-purple-600 hover:via-pink-600 hover:to-purple-700 shadow-[0_0_40px_rgba(168,85,247,0.6)] hover:shadow-[0_0_60px_rgba(168,85,247,0.8)] transition-all duration-300 hover:scale-110 flex flex-col items-center justify-center text-white font-bold text-sm tracking-wide group"
+            size="lg"
+            className="absolute bottom-8 right-8 h-16 w-16 rounded-full bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all p-0 text-xs font-semibold"
           >
-            <span className="text-lg">BOOK</span>
-            <span className="text-xs opacity-90 group-hover:opacity-100">NOW</span>
-          </button>
+            Book
+          </Button>
           
           {/* Hero Content */}
           <div className="absolute bottom-0 left-0 right-0 p-8">
@@ -425,13 +425,13 @@ const VenuePage = () => {
 
           {/* Bottom CTA */}
           <section className="flex justify-center">
-            <button
+            <Button
               onClick={handleBookVenue}
-              className="relative px-12 py-6 text-xl font-bold text-white rounded-2xl bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 hover:from-purple-600 hover:via-pink-600 hover:to-purple-700 shadow-[0_0_30px_rgba(168,85,247,0.5)] hover:shadow-[0_0_50px_rgba(168,85,247,0.7)] transition-all duration-300 hover:scale-105 overflow-hidden group"
+              size="lg"
+              className="bg-primary hover:bg-primary/90 text-lg px-8 py-6"
             >
-              <span className="relative z-10 tracking-wider">BOOK THIS VENUE</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </button>
+              Book This Venue
+            </Button>
           </section>
         </div>
 
