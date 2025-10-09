@@ -125,9 +125,17 @@ const FeaturesSection = () => {
             const Icon = feature.icon;
             const isVisible = visibleCards.includes(index);
             
+            // Create unique parallax effect for each card based on its position
+            const cardY = useTransform(
+              smoothProgress, 
+              [0, 0.5, 1], 
+              [50 + (index % 4) * 10, 0, -50 - (index % 4) * 10]
+            );
+            
             return (
-              <div
+              <motion.div
                 key={feature.title}
+                style={{ y: cardY }}
                 className={`glass-card rounded-2xl p-6 group hover:-translate-y-2 hover:shadow-glow transition-all duration-500 ${
                   isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`}
@@ -143,7 +151,7 @@ const FeaturesSection = () => {
                 <p className="text-sm text-muted-foreground">
                   {feature.description}
                 </p>
-              </div>
+              </motion.div>
             );
           })}
         </div>

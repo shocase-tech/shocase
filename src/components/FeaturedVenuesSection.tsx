@@ -169,25 +169,11 @@ const FeaturedVenuesSection = () => {
                         {venue.city}
                       </p>
                       {venue.capacity && (
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Users className="w-4 h-4" />
                           <span>Capacity: {venue.capacity}</span>
                         </div>
                       )}
-                      
-                      {/* View button - appears on hover */}
-                      <motion.div
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{
-                          opacity: hoveredCard === index ? 1 : 0,
-                          x: hoveredCard === index ? 0 : -10
-                        }}
-                        transition={{ duration: 0.2 }}
-                        className="flex items-center gap-2 text-sm text-primary font-semibold"
-                      >
-                        View Venue
-                        <ArrowRight className="w-4 h-4" />
-                      </motion.div>
                     </motion.div>
                   </div>
 
