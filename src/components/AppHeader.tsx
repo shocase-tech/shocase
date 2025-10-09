@@ -109,10 +109,10 @@ const AppHeader = () => {
         navigate(path);
         setMobileMenuOpen(false);
       }}
-      className={`transition-all duration-200 ${
+      className={`transition-all duration-200 hover:border hover:border-white/20 hover:backdrop-blur-sm ${
         isActivePath(path)
-          ? "bg-primary/10 text-primary font-semibold border-b-2 border-primary"
-          : "text-muted-foreground hover:text-foreground hover:bg-muted"
+          ? "text-primary font-semibold"
+          : "text-muted-foreground hover:text-foreground"
       }`}
     >
       {label}
@@ -120,7 +120,13 @@ const AppHeader = () => {
   );
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header 
+      className="sticky top-0 z-50 w-full bg-background/20 backdrop-blur-md"
+      style={{
+        maskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
+        WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
+      }}
+    >
       <div className="container max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         {/* Left - Logo */}
         <button

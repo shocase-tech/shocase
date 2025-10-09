@@ -2,7 +2,20 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, Users } from "lucide-react";
+import { MapPin, Users, Lock } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface VenueCardProps {
   venue: {
@@ -21,9 +34,55 @@ interface VenueCardProps {
 
 const VenueCard = ({ venue }: VenueCardProps) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [userTier, setUserTier] = useState<string | null>(null);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const displayGenres = venue.genres?.slice(0, 3) || [];
   const remainingGenres = (venue.genres?.length || 0) - 3;
+
+  useEffect(() => {
+    checkUserTier();
+  }, []);
+
+  const checkUserTier = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        setUserTier("none");
+        setLoading(false);
+        return;
+      }
+
+      const { data: subscription } = await supabase
+        .from('user_subscriptions')
+        .select('tier_id, subscription_tiers(tier_name)')
+        .eq('user_id', user.id)
+        .single();
+
+      if (subscription?.subscription_tiers) {
+        const tierName = (subscription.subscription_tiers as any).tier_name;
+        setUserTier(tierName);
+      }
+    } catch (error) {
+      console.error("Error checking user tier:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleViewDetails = () => {
+    if (loading) return;
+    
+    if (!userTier || userTier === "none" || userTier === "free") {
+      setShowUpgradeDialog(true);
+      return;
+    }
+
+    navigate(`/venues/${venue.slug}`);
+  };
 
   return (
     <Card className="bg-gray-900 border-gray-800 overflow-hidden hover:border-gray-700 transition-all group">
@@ -92,13 +151,40 @@ const VenueCard = ({ venue }: VenueCardProps) => {
 
         {/* View Details Button */}
         <Button
-          onClick={() => navigate(`/venues/${venue.slug}`)}
+          onClick={handleViewDetails}
           className="w-full"
           variant="secondary"
+          disabled={loading}
         >
-          View Details
+          {(!userTier || userTier === "none" || userTier === "free") ? (
+            <>
+              <Lock className="h-4 w-4 mr-2" />
+              Upgrade to View
+            </>
+          ) : (
+            "View Details"
+          )}
         </Button>
       </div>
+
+      {/* Upgrade Dialog */}
+      <AlertDialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Upgrade Required</AlertDialogTitle>
+            <AlertDialogDescription>
+              You need a Pro or Elite subscription to view venue details and apply to venues.
+              Upgrade now to unlock full access to all venues and features.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => navigate("/account-settings")}>
+              View Subscription Plans
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 };

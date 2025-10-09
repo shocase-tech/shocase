@@ -32,6 +32,7 @@ const Venues = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCity, setSelectedCity] = useState<string>("all");
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+  const [selectedVenueType, setSelectedVenueType] = useState<string>("all");
   const [capacityRange, setCapacityRange] = useState<number[]>([0, 1000]);
   const [sortBy, setSortBy] = useState<string>("name-asc");
   const [genreDropdownOpen, setGenreDropdownOpen] = useState(false);
@@ -111,13 +112,19 @@ const Venues = () => {
     venues.forEach(v => v.genres?.forEach(g => genres.add(g)));
     return Array.from(genres).sort();
   }, [venues]);
+
+  const allVenueTypes = useMemo(() => {
+    const types = new Set(venues.map(v => v.venue_type).filter(Boolean));
+    return Array.from(types).sort();
+  }, [venues]);
   const filteredAndSortedVenues = useMemo(() => {
     let filtered = venues.filter(venue => {
       const matchesSearch = venue.name.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCity = selectedCity === "all" || venue.city === selectedCity;
       const matchesGenres = selectedGenres.length === 0 || venue.genres && venue.genres.some(g => selectedGenres.includes(g));
+      const matchesVenueType = selectedVenueType === "all" || venue.venue_type === selectedVenueType;
       const matchesCapacity = !venue.capacity || venue.capacity >= capacityRange[0] && venue.capacity <= capacityRange[1];
-      return matchesSearch && matchesCity && matchesGenres && matchesCapacity;
+      return matchesSearch && matchesCity && matchesGenres && matchesVenueType && matchesCapacity;
     });
     filtered.sort((a, b) => {
       switch (sortBy) {
@@ -151,6 +158,7 @@ const Venues = () => {
     setSearchQuery("");
     setSelectedCity("all");
     setSelectedGenres([]);
+    setSelectedVenueType("all");
     setCapacityRange([0, 1000]);
     setSortBy("name-asc");
     setSortByProximity(false);
@@ -164,7 +172,7 @@ const Venues = () => {
       
       <AppHeader />
 
-      <div className="min-h-screen bg-gray-950 pt-16">
+      <div className="min-h-screen bg-gray-950 pt-20">
         <div className="max-w-7xl mx-auto px-4 py-6">
           {/* Header */}
           <div className="mb-6">
@@ -181,7 +189,7 @@ const Venues = () => {
             </div>
 
             {/* Filter Row */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
               {/* City */}
               <Select value={selectedCity} onValueChange={setSelectedCity}>
                 <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
@@ -191,6 +199,17 @@ const Venues = () => {
                 <SelectContent>
                   <SelectItem value="all">All Boroughs</SelectItem>
                   {allCities.map(city => <SelectItem key={city} value={city}>{city}</SelectItem>)}
+                </SelectContent>
+              </Select>
+
+              {/* Venue Type */}
+              <Select value={selectedVenueType} onValueChange={setSelectedVenueType}>
+                <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                  <SelectValue placeholder="All Types" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  {allVenueTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
                 </SelectContent>
               </Select>
 
@@ -254,7 +273,7 @@ const Venues = () => {
               </div>}
 
             {/* Reset Button */}
-            {(searchQuery || selectedCity !== "all" || selectedGenres.length > 0) && <Button variant="ghost" size="sm" onClick={resetFilters} className="text-gray-400 hover:text-white">
+            {(searchQuery || selectedCity !== "all" || selectedGenres.length > 0 || selectedVenueType !== "all") && <Button variant="ghost" size="sm" onClick={resetFilters} className="text-gray-400 hover:text-white">
                 Reset Filters
               </Button>}
           </div>
