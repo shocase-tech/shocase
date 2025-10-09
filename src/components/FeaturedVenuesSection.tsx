@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,9 +20,7 @@ const FeaturedVenuesSection = () => {
   const navigate = useNavigate();
   const [venues, setVenues] = useState<Venue[]>([]);
   const [loading, setLoading] = useState(true);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
-  const textRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchVenues = async () => {
@@ -40,45 +38,6 @@ const FeaturedVenuesSection = () => {
     fetchVenues();
   }, []);
 
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (textRef.current) {
-        const rect = textRef.current.getBoundingClientRect();
-        setMousePos({
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top
-        });
-      }
-    };
-
-    const textElement = textRef.current;
-    if (textElement) {
-      textElement.addEventListener('mousemove', handleMouseMove);
-      return () => textElement.removeEventListener('mousemove', handleMouseMove);
-    }
-  }, []);
-
-  const getLetterStyle = (rect: DOMRect) => {
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    const distance = Math.sqrt(
-      Math.pow(mousePos.x - centerX, 2) + Math.pow(mousePos.y - centerY, 2)
-    );
-    const effectRadius = 100;
-    
-    if (distance < effectRadius) {
-      const intensity = 1 - distance / effectRadius;
-      return {
-        transform: `scale(${1 + intensity * 0.2})`,
-        textShadow: `0 0 ${intensity * 20}px hsl(var(--primary))`,
-        transition: 'all 0.15s ease'
-      };
-    }
-    
-    return {
-      transition: 'all 0.15s ease'
-    };
-  };
 
   return (
     <section className="relative min-h-screen py-24 px-6 bg-gradient-to-b from-background via-background/95 to-background overflow-hidden">
@@ -86,27 +45,11 @@ const FeaturedVenuesSection = () => {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 items-center min-h-[600px]">
           {/* Left - Interactive Text */}
           <div className="lg:col-span-2 flex items-center justify-center">
-            <div 
-              ref={textRef}
-              className="text-6xl md:text-8xl lg:text-9xl font-bold leading-none gradient-text cursor-default select-none"
-            >
-              {['shocase', 'your', 'music'].map((word, wordIndex) => (
-                <div key={wordIndex} className="relative">
-                  {word.split('').map((letter, letterIndex) => (
-                    <span
-                      key={`${wordIndex}-${letterIndex}`}
-                      className="inline-block"
-                      style={getLetterStyle(
-                        document.getElementById(`letter-${wordIndex}-${letterIndex}`)?.getBoundingClientRect() || new DOMRect()
-                      )}
-                      id={`letter-${wordIndex}-${letterIndex}`}
-                    >
-                      {letter}
-                    </span>
-                  ))}
-                </div>
-              ))}
-            </div>
+            <h2 className="text-6xl md:text-8xl lg:text-9xl font-bold leading-tight gradient-text">
+              shocase<br />
+              your<br />
+              music
+            </h2>
           </div>
 
           {/* Right - Stacked Venue Cards */}
