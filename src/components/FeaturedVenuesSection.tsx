@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,13 +21,8 @@ const FeaturedVenuesSection = () => {
   const [venues, setVenues] = useState<Venue[]>([]);
   const [loading, setLoading] = useState(true);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const sectionRef = useRef<HTMLDivElement>(null);
+  const [isHovered, setIsHovered] = useState(false);
   const textRef = useRef<HTMLDivElement>(null);
-
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"]
-  });
 
   useEffect(() => {
     const fetchVenues = async () => {
@@ -86,10 +81,7 @@ const FeaturedVenuesSection = () => {
   };
 
   return (
-    <section 
-      ref={sectionRef}
-      className="relative min-h-screen py-24 px-6 bg-gradient-to-b from-background via-background/95 to-background overflow-hidden"
-    >
+    <section className="relative min-h-screen py-24 px-6 bg-gradient-to-b from-background via-background/95 to-background overflow-hidden">
       <div className="max-w-7xl mx-auto h-full">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 items-center min-h-[600px]">
           {/* Left - Interactive Text */}
@@ -126,27 +118,43 @@ const FeaturedVenuesSection = () => {
                 ))}
               </div>
             ) : (
-              <div className="relative w-full max-w-md h-full">
+              <div 
+                className="relative w-full max-w-md h-full"
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+              >
                 {venues.map((venue, index) => {
-                  const progress = useTransform(
-                    scrollYProgress,
-                    [0.3, 0.8],
-                    [0, 1]
-                  );
-                  const rotation = useTransform(progress, [0, 1], [0, index * 6 - 12]);
-                  const translateX = useTransform(progress, [0, 1], [0, index * 30 - 60]);
-                  const translateY = useTransform(progress, [0, 1], [index * -80, index * 20 - 40]);
+                  const rotation = isHovered ? index * 8 - 16 : index * 2 - 4;
+                  const translateX = isHovered ? index * 40 - 80 : 0;
+                  const translateY = index * -80;
 
                   return (
                     <motion.div
                       key={venue.id}
-                      className="absolute top-1/2 left-1/2 w-full max-w-sm glass-card overflow-hidden cursor-pointer hover:shadow-glow transition-shadow"
-                      style={{
+                      className="absolute top-1/2 left-1/2 w-full max-w-sm glass-card overflow-hidden cursor-pointer hover:shadow-glow"
+                      initial={{
+                        rotate: 0,
+                        translateX: 0,
+                        translateY,
+                        x: '-50%',
+                        y: '-50%',
+                        opacity: 0
+                      }}
+                      animate={{
                         rotate: rotation,
                         translateX,
                         translateY,
                         x: '-50%',
                         y: '-50%',
+                        opacity: 1
+                      }}
+                      transition={{
+                        duration: 0.5,
+                        delay: index * 0.1,
+                        type: "spring",
+                        stiffness: 100
+                      }}
+                      style={{
                         zIndex: venues.length - index
                       }}
                       onClick={() => navigate(`/venues/${venue.slug}`)}
