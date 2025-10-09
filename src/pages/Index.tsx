@@ -1,5 +1,8 @@
 import HeroSection from "@/components/HeroSection";
-import ExperienceSection from "@/components/ExperienceSection";
+import HowItWorksSection from "@/components/HowItWorksSection";
+import FeaturesSection from "@/components/FeaturesSection";
+import FeaturedVenuesSection from "@/components/FeaturedVenuesSection";
+import PricingSection from "@/components/PricingSection";
 import CTASection from "@/components/CTASection";
 import Header from "@/components/Header";
 import { useEffect } from "react";
@@ -19,7 +22,10 @@ const Index = () => {
     <main className="min-h-screen bg-gradient-dark">
       <Header />
       <HeroSection />
-      <ExperienceSection />
+      <HowItWorksSection />
+      <FeaturesSection />
+      <FeaturedVenuesSection />
+      <PricingSection />
       <CTASection />
     </main>
   );
