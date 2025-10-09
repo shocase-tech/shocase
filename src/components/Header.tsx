@@ -163,7 +163,10 @@ const Header = () => {
       </div>
 
       {/* Main Header */}
-      <header className="fixed top-0 left-0 right-0 z-40 p-6 backdrop-blur-md bg-background/30">
+      <header className="fixed top-0 left-0 right-0 z-40 p-6 backdrop-blur-md bg-background/20" style={{
+        maskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
+        WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)'
+      }}>
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           {/* Left - Empty spacer for balance */}
           <div className="w-24" />
@@ -173,21 +176,21 @@ const Header = () => {
             <Button 
               variant="ghost" 
               onClick={() => navigate("/venues")}
-              className="text-white/80 hover:text-white hover:bg-white/10 transition-all duration-300 backdrop-blur-sm border border-transparent hover:border-white/20"
+              className="text-white/80 hover:text-white hover:bg-white/10 hover:border hover:border-white/20 transition-all duration-300"
             >
               Venues
             </Button>
             <Button 
               variant="ghost" 
               onClick={() => user ? navigate("/epk") : navigate("/auth")}
-              className="text-white/80 hover:text-white hover:bg-white/10 transition-all duration-300 backdrop-blur-sm border border-transparent hover:border-white/20"
+              className="text-white/80 hover:text-white hover:bg-white/10 hover:border hover:border-white/20 transition-all duration-300"
             >
               Press Kit
             </Button>
             <Button 
               variant="ghost" 
               onClick={() => user ? navigate("/outreach") : navigate("/auth")}
-              className="text-white/80 hover:text-white hover:bg-white/10 transition-all duration-300 backdrop-blur-sm border border-transparent hover:border-white/20"
+              className="text-white/80 hover:text-white hover:bg-white/10 hover:border hover:border-white/20 transition-all duration-300"
             >
               Outreach
             </Button>
@@ -195,7 +198,7 @@ const Header = () => {
               <Button 
                 variant="ghost" 
                 onClick={scrollToPricing}
-                className="text-white/80 hover:text-white hover:bg-white/10 transition-all duration-300 backdrop-blur-sm border border-transparent hover:border-white/20"
+                className="text-white/80 hover:text-white hover:bg-white/10 hover:border hover:border-white/20 transition-all duration-300"
               >
                 Pricing
               </Button>
