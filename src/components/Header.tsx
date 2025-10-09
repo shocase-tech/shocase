@@ -153,7 +153,7 @@ const Header = () => {
       </div>
 
       {/* Main Header */}
-      <header className="absolute top-0 left-0 right-0 z-40 p-6">
+      <header className="fixed top-0 left-0 right-0 z-40 p-6 backdrop-blur-md bg-background/30">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           {/* Left - Empty spacer for balance */}
           <div className="w-24" />

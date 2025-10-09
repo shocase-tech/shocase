@@ -88,7 +88,7 @@ const PricingSection = () => {
           {tiers.map((tier, index) => (
             <div
               key={tier.name}
-              className={`glass-card p-8 relative group hover:-translate-y-2 hover:shadow-glow transition-all duration-500 ${
+              className={`glass-card rounded-2xl p-8 relative group hover:-translate-y-2 hover:shadow-glow transition-all duration-500 ${
                 isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}
               style={{

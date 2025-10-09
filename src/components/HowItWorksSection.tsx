@@ -59,7 +59,7 @@ const HowItWorksSection = () => {
             return (
               <div
                 key={step.number}
-                className={`glass-card p-8 relative group transition-all duration-500 hover:-translate-y-2 hover:shadow-glow ${
+                className={`glass-card rounded-2xl p-8 relative group transition-all duration-500 hover:-translate-y-2 hover:shadow-glow ${
                   isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`}
                 style={{

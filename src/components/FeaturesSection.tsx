@@ -96,12 +96,12 @@ const FeaturesSection = () => {
             return (
               <div
                 key={feature.title}
-                className={`glass-card p-6 group hover:-translate-y-2 hover:shadow-glow transition-all duration-500 ${
+                className={`glass-card rounded-2xl p-6 group hover:-translate-y-2 hover:shadow-glow transition-all duration-500 ${
                   isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`}
               >
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center mb-4">
-                  <Icon className="w-6 h-6 text-primary-foreground" />
+                <div className="w-12 h-12 rounded-full bg-primary/10 backdrop-blur-sm border border-primary/20 flex items-center justify-center mb-4">
+                  <Icon className="w-6 h-6 text-primary" />
                 </div>
                 
                 <h3 className="text-lg font-semibold mb-2">

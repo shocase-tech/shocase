@@ -23,8 +23,8 @@ const Index = () => {
       <Header />
       <HeroSection />
       <HowItWorksSection />
-      <FeaturesSection />
       <FeaturedVenuesSection />
+      <FeaturesSection />
       <PricingSection />
       <CTASection />
     </main>

@@ -74,7 +74,7 @@ const FeaturedVenuesSection = () => {
                   return (
                     <motion.div
                       key={venue.id}
-                      className="absolute top-1/2 left-1/2 w-full max-w-sm glass-card overflow-hidden cursor-pointer hover:shadow-glow"
+                      className="absolute top-1/2 left-1/2 w-full max-w-sm glass-card rounded-2xl overflow-hidden cursor-pointer hover:shadow-glow"
                       initial={{
                         rotate: 0,
                         translateX: 0,
