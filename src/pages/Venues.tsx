@@ -6,11 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Users, X } from "lucide-react";
+import { Search, MapPin, Users, X, Navigation } from "lucide-react";
 import VenueCard from "@/components/VenueCard";
 import AppHeader from "@/components/AppHeader";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 interface Venue {
   id: string;
   name: string;
@@ -22,6 +23,8 @@ interface Venue {
   hero_image_url: string | null;
   venue_type: string | null;
   neighbourhood: string | null;
+  latitude: number | null;
+  longitude: number | null;
 }
 const Venues = () => {
   const [venues, setVenues] = useState<Venue[]>([]);
@@ -29,10 +32,13 @@ const Venues = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCity, setSelectedCity] = useState<string>("all");
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
-  const [capacityRange, setCapacityRange] = useState<number[]>([0, 5000]);
+  const [capacityRange, setCapacityRange] = useState<number[]>([0, 1000]);
   const [sortBy, setSortBy] = useState<string>("name-asc");
   const [genreDropdownOpen, setGenreDropdownOpen] = useState(false);
+  const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
+  const [sortByProximity, setSortByProximity] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
   
   useEffect(() => {
     fetchVenues();
@@ -42,7 +48,7 @@ const Venues = () => {
       const {
         data,
         error
-      } = await supabase.from("venues" as any).select("id, name, slug, city, state, capacity, genres, hero_image_url, venue_type, neighbourhood").eq("is_active", true).order("name");
+      } = await supabase.from("venues" as any).select("id, name, slug, city, state, capacity, genres, hero_image_url, venue_type, neighbourhood, latitude, longitude").eq("is_active", true).order("name");
       if (error) throw error;
       setVenues((data || []) as unknown as Venue[]);
     } catch (error) {
@@ -50,6 +56,51 @@ const Venues = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const getUserLocation = () => {
+    if (!navigator.geolocation) {
+      toast({
+        title: "Geolocation not supported",
+        description: "Your browser doesn't support location services",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserLocation({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+        setSortByProximity(true);
+        setSortBy("proximity");
+        toast({
+          title: "Location found",
+          description: "Showing venues sorted by distance",
+        });
+      },
+      (error) => {
+        toast({
+          title: "Location access denied",
+          description: "Please enable location access to use this feature",
+          variant: "destructive",
+        });
+      }
+    );
+  };
+
+  const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
+    const R = 3959; // Earth's radius in miles
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLng/2) * Math.sin(dLng/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
   };
   const allCities = useMemo(() => {
     const cities = new Set(venues.map(v => v.city));
@@ -78,12 +129,21 @@ const Venues = () => {
           return (a.capacity || 0) - (b.capacity || 0);
         case "capacity-desc":
           return (b.capacity || 0) - (a.capacity || 0);
+        case "proximity":
+          if (!userLocation) return 0;
+          const distA = a.latitude && a.longitude 
+            ? calculateDistance(userLocation.lat, userLocation.lng, a.latitude, a.longitude)
+            : Infinity;
+          const distB = b.latitude && b.longitude
+            ? calculateDistance(userLocation.lat, userLocation.lng, b.latitude, b.longitude)
+            : Infinity;
+          return distA - distB;
         default:
           return 0;
       }
     });
     return filtered;
-  }, [venues, searchQuery, selectedCity, selectedGenres, capacityRange, sortBy]);
+  }, [venues, searchQuery, selectedCity, selectedGenres, capacityRange, sortBy, userLocation]);
   const toggleGenre = (genre: string) => {
     setSelectedGenres(prev => prev.includes(genre) ? prev.filter(g => g !== genre) : [...prev, genre]);
   };
@@ -91,8 +151,10 @@ const Venues = () => {
     setSearchQuery("");
     setSelectedCity("all");
     setSelectedGenres([]);
-    setCapacityRange([0, 5000]);
+    setCapacityRange([0, 1000]);
     setSortBy("name-asc");
+    setSortByProximity(false);
+    setUserLocation(null);
   };
   return <>
       <Helmet>
@@ -103,9 +165,9 @@ const Venues = () => {
       <AppHeader />
 
       <div className="min-h-screen bg-gray-950 pt-16">
-        <div className="max-w-7xl mx-auto px-4 py-12">
+        <div className="max-w-7xl mx-auto px-4 py-6">
           {/* Header */}
-          <div className="mb-8">
+          <div className="mb-6">
             <h1 className="text-4xl font-bold text-white mb-2">Find Your Next Venue</h1>
             <p className="text-gray-400">Discover the perfect New York City stage for your music</p>
           </div>
@@ -119,7 +181,7 @@ const Venues = () => {
             </div>
 
             {/* Filter Row */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               {/* City */}
               <Select value={selectedCity} onValueChange={setSelectedCity}>
                 <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
@@ -146,6 +208,16 @@ const Venues = () => {
                   </div>}
               </div>
 
+              {/* Proximity */}
+              <Button 
+                variant="outline" 
+                className={`w-full justify-start ${sortByProximity ? 'bg-primary/20 border-primary' : 'bg-gray-800 border-gray-700'} text-white hover:bg-gray-700`}
+                onClick={getUserLocation}
+              >
+                <Navigation className="h-4 w-4 mr-2" />
+                Near Me {sortByProximity && '✓'}
+              </Button>
+
               {/* Sort */}
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
@@ -156,6 +228,7 @@ const Venues = () => {
                   <SelectItem value="name-desc">Name (Z-A)</SelectItem>
                   <SelectItem value="capacity-asc">Capacity (Low-High)</SelectItem>
                   <SelectItem value="capacity-desc">Capacity (High-Low)</SelectItem>
+                  {userLocation && <SelectItem value="proximity">Distance</SelectItem>}
                 </SelectContent>
               </Select>
             </div>
@@ -169,7 +242,7 @@ const Venues = () => {
                 </span>
                 <span>{capacityRange[0]} - {capacityRange[1]}</span>
               </div>
-              <Slider min={0} max={5000} step={100} value={capacityRange} onValueChange={setCapacityRange} className="w-full" />
+              <Slider min={0} max={1000} step={50} value={capacityRange} onValueChange={setCapacityRange} className="w-full" />
             </div>
 
             {/* Selected Genres */}

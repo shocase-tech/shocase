@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, MapPin, Users, ExternalLink, Instagram, Globe, Check, Lock } from "lucide-react";
+import { ArrowLeft, MapPin, Users, ExternalLink, Instagram, Globe, Check, Lock, Facebook } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import AppHeader from "@/components/AppHeader";
 import BookVenueModal from "@/components/venues/BookVenueModal";
@@ -189,34 +189,8 @@ const VenuePage = () => {
       <AppHeader />
 
       <div className="min-h-screen bg-gray-950 pt-16">
-        {/* Sub-header with back button and Book CTA */}
-        <div className="sticky top-16 z-30 bg-gray-950/95 backdrop-blur-sm border-b border-gray-800">
-          <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate("/venues")}
-                className="text-gray-400 hover:text-white"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
-              </Button>
-              <h1 className="text-lg font-semibold text-white truncate max-w-md">
-                {venue.name}
-              </h1>
-            </div>
-            <Button 
-              onClick={handleBookVenue}
-              className="relative bg-primary hover:bg-primary/90"
-            >
-              Book This Venue
-            </Button>
-          </div>
-        </div>
-
         {/* Hero Section */}
-        <div className="relative h-[50vh] overflow-hidden">
+        <div className="relative h-[60vh] overflow-hidden">
           {venue.hero_image_url ? (
             <img
               src={venue.hero_image_url}
@@ -229,6 +203,26 @@ const VenuePage = () => {
             </div>
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/70 to-transparent" />
+          
+          {/* Back Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/venues")}
+            className="absolute top-4 left-4 text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+
+          {/* Book Button */}
+          <Button
+            onClick={handleBookVenue}
+            size="lg"
+            className="absolute bottom-8 right-8 h-16 w-16 rounded-full bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all p-0 text-xs font-semibold"
+          >
+            Book
+          </Button>
           
           {/* Hero Content */}
           <div className="absolute bottom-0 left-0 right-0 p-8">
@@ -244,7 +238,7 @@ const VenuePage = () => {
                 ))}
               </div>
               <h1 className="text-5xl font-bold text-white mb-4">{venue.name}</h1>
-              <div className="flex flex-wrap gap-4 text-gray-300">
+              <div className="flex flex-wrap gap-4 text-gray-300 items-center">
                 <div className="flex items-center gap-2">
                   <MapPin className="h-5 w-5" />
                   <span>{fullLocation}</span>
@@ -255,6 +249,39 @@ const VenuePage = () => {
                     <span>Capacity: {venue.capacity}</span>
                   </div>
                 )}
+                {/* Social Links */}
+                <div className="flex items-center gap-3 ml-2">
+                  {venue.website_url && (
+                    <a
+                      href={venue.website_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-gray-300 hover:text-white transition-colors"
+                    >
+                      <Globe className="h-5 w-5" />
+                    </a>
+                  )}
+                  {venue.instagram_handle && (
+                    <a
+                      href={`https://instagram.com/${venue.instagram_handle.replace('@', '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-gray-300 hover:text-white transition-colors"
+                    >
+                      <Instagram className="h-5 w-5" />
+                    </a>
+                  )}
+                  {venue.facebook_url && (
+                    <a
+                      href={venue.facebook_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-gray-300 hover:text-white transition-colors"
+                    >
+                      <Facebook className="h-5 w-5" />
+                    </a>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -396,66 +423,15 @@ const VenuePage = () => {
             </section>
           )}
 
-          {/* Contact Section */}
-          <section>
-            <h2 className="text-2xl font-bold text-white mb-4">Contact & Links</h2>
-            <Card className="bg-gray-900 border-gray-800">
-              <CardContent className="pt-6 space-y-3">
-                {venue.booking_contact_email && (
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-800 hover:bg-gray-750 transition-colors">
-                    <span className="text-gray-400">Booking Email</span>
-                    <a
-                      href={`mailto:${venue.booking_contact_email}`}
-                      className="text-white hover:text-gray-300 font-medium"
-                    >
-                      {venue.booking_contact_email}
-                    </a>
-                  </div>
-                )}
-                {venue.website_url && (
-                  <a
-                    href={venue.website_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-between p-3 rounded-lg bg-gray-800 hover:bg-gray-750 transition-colors"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Globe className="h-5 w-5 text-gray-400" />
-                      <span className="text-white">Website</span>
-                    </div>
-                    <ExternalLink className="h-4 w-4 text-gray-400" />
-                  </a>
-                )}
-                {venue.instagram_handle && (
-                  <a
-                    href={`https://instagram.com/${venue.instagram_handle.replace('@', '')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-between p-3 rounded-lg bg-gray-800 hover:bg-gray-750 transition-colors"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Instagram className="h-5 w-5 text-gray-400" />
-                      <span className="text-white">Instagram</span>
-                    </div>
-                    <ExternalLink className="h-4 w-4 text-gray-400" />
-                  </a>
-                )}
-                {venue.facebook_url && (
-                  <a
-                    href={venue.facebook_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-between p-3 rounded-lg bg-gray-800 hover:bg-gray-750 transition-colors"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Globe className="h-5 w-5 text-gray-400" />
-                      <span className="text-white">Facebook</span>
-                    </div>
-                    <ExternalLink className="h-4 w-4 text-gray-400" />
-                  </a>
-                )}
-              </CardContent>
-            </Card>
+          {/* Bottom CTA */}
+          <section className="flex justify-center">
+            <Button
+              onClick={handleBookVenue}
+              size="lg"
+              className="bg-primary hover:bg-primary/90 text-lg px-8 py-6"
+            >
+              Book This Venue
+            </Button>
           </section>
         </div>
 
