@@ -38,12 +38,29 @@ import {
   X,
   Info,
   Loader2,
+  ExternalLink,
 } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import AppHeader from "@/components/AppHeader";
 import BookShowModal from "@/components/venues/BookShowModal";
 import BookVenueModal from "@/components/venues/BookVenueModal";
 import Footer from "@/components/Footer";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Calendar as CalendarPicker } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface ApplicationWithVenue {
   id: string;
@@ -59,6 +76,7 @@ interface ApplicationWithVenue {
   email_body: string | null;
   show_date: string | null;
   booked_at: string | null;
+  gmail_draft_id: string | null;
   venue: {
     id: string;
     name: string;
@@ -89,6 +107,13 @@ export default function Outreach() {
   const [artistProfile, setArtistProfile] = useState<any>(null);
   const [outreachComponents, setOutreachComponents] = useState<any>(null);
   const [user, setUser] = useState<any>(null);
+  
+  // Mark as sent dialog state
+  const [markAsSentDialog, setMarkAsSentDialog] = useState<{
+    isOpen: boolean;
+    applicationId: string | null;
+  }>({ isOpen: false, applicationId: null });
+  const [sentDate, setSentDate] = useState<Date | undefined>(new Date());
   
   // Settings state
   const [saving, setSaving] = useState(false);
@@ -234,6 +259,11 @@ export default function Outreach() {
           app.email_body?.includes("Placeholder") ||
           !app.email_body
       );
+    } else if (activeTab === "gmail-drafts") {
+      // Filter for Gmail drafts
+      filtered = filtered.filter(
+        (app) => app.gmail_draft_id && app.status === "draft"
+      );
     } else if (activeTab !== "all") {
       filtered = filtered.filter((app) => app.status === activeTab);
     }
@@ -271,9 +301,12 @@ export default function Outreach() {
         app.email_body?.includes("Placeholder") ||
         !app.email_body
     ).length;
+    const gmailDrafts = applications.filter(
+      (app) => app.gmail_draft_id && app.status === "draft"
+    ).length;
     const booked = applications.filter((app) => app.status === "booked").length;
 
-    return { total, drafts, booked };
+    return { total, drafts, gmailDrafts, booked };
   };
 
   const getStatusBadge = (status: string, emailBody?: string | null) => {
@@ -432,9 +465,16 @@ export default function Outreach() {
 
   const handleUpdateStatus = async (applicationId: string, newStatus: string) => {
     try {
+      const updateData: any = { status: newStatus };
+      
+      // If marking as sent, set the sent_at timestamp
+      if (newStatus === "sent") {
+        updateData.sent_at = new Date().toISOString();
+      }
+
       const { error } = await supabase
         .from("venue_applications")
-        .update({ status: newStatus })
+        .update(updateData)
         .eq("id", applicationId);
 
       if (error) throw error;
@@ -452,6 +492,43 @@ export default function Outreach() {
         variant: "destructive",
       });
     }
+  };
+
+  const handleMarkAsSent = async () => {
+    if (!markAsSentDialog.applicationId || !sentDate) return;
+
+    try {
+      const { error } = await supabase
+        .from("venue_applications")
+        .update({
+          status: "sent",
+          sent_at: sentDate.toISOString(),
+        })
+        .eq("id", markAsSentDialog.applicationId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Marked as sent",
+        description: `Email marked as sent on ${format(sentDate, "PPP")}`,
+      });
+
+      setMarkAsSentDialog({ isOpen: false, applicationId: null });
+      setSentDate(new Date());
+
+      if (user) fetchApplications(user.id);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to mark as sent: " + error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const openGmailDraft = (draftId: string) => {
+    const gmailUrl = `https://mail.google.com/mail/u/0/#drafts?compose=${draftId}`;
+    window.open(gmailUrl, "_blank", "noopener,noreferrer");
   };
 
   const stats = getStats();
@@ -560,6 +637,14 @@ export default function Outreach() {
             <TabsList className="mb-6">
               <TabsTrigger value="all">All</TabsTrigger>
               <TabsTrigger value="drafts">Drafts</TabsTrigger>
+              <TabsTrigger value="gmail-drafts">
+                Gmail Drafts
+                {stats.gmailDrafts > 0 && (
+                  <Badge variant="secondary" className="ml-2 bg-blue-500/20 text-blue-400 border-blue-500/30">
+                    {stats.gmailDrafts}
+                  </Badge>
+                )}
+              </TabsTrigger>
               <TabsTrigger value="sent">Sent</TabsTrigger>
               <TabsTrigger value="booked">Booked</TabsTrigger>
               <TabsTrigger value="declined">Declined</TabsTrigger>
@@ -567,7 +652,7 @@ export default function Outreach() {
             </TabsList>
 
             {/* Applications Tabs */}
-            {["all", "drafts", "sent", "booked", "declined"].includes(activeTab) && (
+            {["all", "drafts", "gmail-drafts", "sent", "booked", "declined"].includes(activeTab) && (
               <TabsContent value={activeTab}>
               {filteredApplications.length === 0 ? (
                 <Card className="bg-card/50 backdrop-blur border-white/10">
@@ -576,6 +661,8 @@ export default function Outreach() {
                     <h3 className="text-lg font-semibold mb-2">
                       {activeTab === "all" || activeTab === "drafts"
                         ? "No drafts yet"
+                        : activeTab === "gmail-drafts"
+                        ? "No Gmail drafts yet"
                         : activeTab === "sent"
                         ? "No emails sent yet"
                         : activeTab === "booked"
@@ -585,6 +672,8 @@ export default function Outreach() {
                     <p className="text-muted-foreground mb-4">
                       {activeTab === "all" || activeTab === "drafts"
                         ? "Browse venues to get started!"
+                        : activeTab === "gmail-drafts"
+                        ? "Generate and save emails to Gmail from venue applications"
                         : activeTab === "booked"
                         ? "Keep reaching out!"
                         : ""}
@@ -624,11 +713,24 @@ export default function Outreach() {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
+                                {app.gmail_draft_id && (
+                                  <DropdownMenuItem
+                                    onClick={() => openGmailDraft(app.gmail_draft_id!)}
+                                  >
+                                    <ExternalLink className="w-4 h-4 mr-2" />
+                                    View in Gmail
+                                  </DropdownMenuItem>
+                                )}
                                 <DropdownMenuItem
-                                  onClick={() =>
-                                    handleUpdateStatus(app.id, "sent")
-                                  }
+                                  onClick={() => {
+                                    setMarkAsSentDialog({
+                                      isOpen: true,
+                                      applicationId: app.id,
+                                    });
+                                    setSentDate(new Date());
+                                  }}
                                 >
+                                  <CheckCircle className="w-4 h-4 mr-2" />
                                   Mark as Sent
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
@@ -651,6 +753,15 @@ export default function Outreach() {
 
                           <div className="flex items-center justify-between">
                             {getStatusBadge(app.status, app.email_body)}
+                            {app.gmail_draft_id && (
+                              <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/30">
+                                <Mail className="w-3 h-3 mr-1" />
+                                Gmail Draft
+                              </Badge>
+                            )}
+                          </div>
+
+                          <div className="flex items-center justify-between">
                             <span className="text-xs text-muted-foreground">
                               {new Date(app.created_at).toLocaleDateString()}
                             </span>
@@ -689,6 +800,32 @@ export default function Outreach() {
 
                             {expandedCards.has(app.id) && (
                               <div className="space-y-3 pt-2 border-t border-white/10">
+                                {app.gmail_draft_id && (
+                                  <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                                    <div className="flex items-start justify-between mb-2">
+                                      <div>
+                                        <p className="text-xs font-medium text-blue-400 mb-1">
+                                          Gmail Draft Saved
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">
+                                          {app.status === "draft" 
+                                            ? "This email is saved as a draft in your Gmail. Open Gmail to review and send."
+                                            : "This email was saved to Gmail"}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => openGmailDraft(app.gmail_draft_id!)}
+                                      className="w-full mt-2"
+                                    >
+                                      <ExternalLink className="w-4 h-4 mr-2" />
+                                      Open in Gmail
+                                    </Button>
+                                  </div>
+                                )}
+
                                 {app.proposed_bill && (
                                   <div>
                                     <p className="text-xs text-muted-foreground mb-1">
@@ -932,6 +1069,72 @@ export default function Outreach() {
           outreachComponents={outreachComponents}
         />
       )}
+
+      {/* Mark as Sent Dialog */}
+      <Dialog 
+        open={markAsSentDialog.isOpen} 
+        onOpenChange={(open) => {
+          if (!open) {
+            setMarkAsSentDialog({ isOpen: false, applicationId: null });
+            setSentDate(new Date());
+          }
+        }}
+      >
+        <DialogContent className="bg-background border-white/10">
+          <DialogHeader>
+            <DialogTitle>Mark as Sent</DialogTitle>
+            <DialogDescription>
+              Did you send this email? Select the date you sent it.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div>
+              <Label className="mb-2 block">When did you send it?</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !sentDate && "text-muted-foreground"
+                    )}
+                  >
+                    <Calendar className="mr-2 h-4 w-4" />
+                    {sentDate ? format(sentDate, "PPP") : "Pick a date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarPicker
+                    mode="single"
+                    selected={sentDate}
+                    onSelect={setSentDate}
+                    disabled={(date) => date > new Date()}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setMarkAsSentDialog({ isOpen: false, applicationId: null });
+                setSentDate(new Date());
+              }}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleMarkAsSent} disabled={!sentDate}>
+              Confirm
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Footer />
     </>
   );
