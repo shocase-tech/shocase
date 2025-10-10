@@ -189,7 +189,7 @@ const VenuePage = () => {
 
       <AppHeader />
 
-      <div className="min-h-screen bg-gray-950 pt-16">
+      <div className="min-h-screen bg-gray-950">
         {/* Hero Section */}
         <div className="relative h-[60vh] overflow-hidden">
           {venue.hero_image_url ? (
