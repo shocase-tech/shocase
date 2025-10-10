@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ExternalLink, Instagram, Globe, Music, MapPin, Calendar, Ticket, Download, Mail, Phone, Star, Quote, Play, Users, Award, TrendingUp, X, Youtube } from "lucide-react";
 import PublicImage from "@/components/PublicImage";
+import Footer from "@/components/Footer";
 import { FeaturedTrackEmbed } from "@/components/FeaturedTrackEmbed";
 import { Skeleton } from "@/components/ui/skeleton";
 import tiktokIcon from "@/assets/social/tiktok-white.png";
@@ -896,6 +897,7 @@ export default function PublicArtistProfile() {
         {/* Add bottom padding when booking banner is visible */}
         <div className={`${showBookingBanner && profile.contact_info && (profile.contact_info as any).email ? 'h-20' : 'h-0'} md:hidden`}></div>
        </div>
+       <Footer />
      </>
    );
  }

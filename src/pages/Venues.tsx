@@ -12,6 +12,7 @@ import AppHeader from "@/components/AppHeader";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import Footer from "@/components/Footer";
 interface Venue {
   id: string;
   name: string;
@@ -295,6 +296,7 @@ const Venues = () => {
             </div>}
         </div>
       </div>
+      <Footer />
     </>;
 };
 export default Venues;

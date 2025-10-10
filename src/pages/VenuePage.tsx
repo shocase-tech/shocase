@@ -10,6 +10,7 @@ import { ArrowLeft, MapPin, Users, ExternalLink, Instagram, Globe, Check, Lock, 
 import { Helmet } from "react-helmet-async";
 import AppHeader from "@/components/AppHeader";
 import BookVenueModal from "@/components/venues/BookVenueModal";
+import Footer from "@/components/Footer";
 
 interface Venue {
   id: string;
@@ -446,6 +447,7 @@ const VenuePage = () => {
           />
         )}
       </div>
+      <Footer />
     </>
   );
 };

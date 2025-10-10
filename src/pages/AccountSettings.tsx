@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Helmet } from "react-helmet-async";
 import AppHeader from "@/components/AppHeader";
 import { Loader2, User, Mail, Key } from "lucide-react";
+import Footer from "@/components/Footer";
 
 export default function AccountSettings() {
   const [loading, setLoading] = useState(true);
@@ -214,6 +215,7 @@ export default function AccountSettings() {
           </div>
         </div>
       </div>
+      <Footer />
     </>
   );
 }

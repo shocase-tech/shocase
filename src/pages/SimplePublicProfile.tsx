@@ -17,6 +17,7 @@ import appleMusicLightIcon from "@/assets/streaming/apple-music-light.svg";
 import tiktokIcon from "@/assets/social/tiktok-white.png";
 import instagramIcon from "@/assets/social/instagram-gradient.png";
 import PublicImage from "@/components/PublicImage";
+import Footer from "@/components/Footer";
 import { FeaturedTrackEmbed } from "@/components/FeaturedTrackEmbed";
 import { VideoCarousel } from "@/components/VideoCarousel";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -241,6 +242,7 @@ export default function SimplePublicProfile() {
   };
 
   return (
+    <>
     <div className="min-h-screen bg-gradient-dark pb-20 md:pb-0">
       {/* Owner Preview Banner */}
       {isOwnerPreview && !profile.is_published && (
@@ -1129,6 +1131,8 @@ export default function SimplePublicProfile() {
         </div>
       )}
     </div>
+    <Footer />
+    </>
   );
 }
 

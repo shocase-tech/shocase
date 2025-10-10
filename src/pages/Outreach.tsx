@@ -43,6 +43,7 @@ import { Helmet } from "react-helmet-async";
 import AppHeader from "@/components/AppHeader";
 import BookShowModal from "@/components/venues/BookShowModal";
 import BookVenueModal from "@/components/venues/BookVenueModal";
+import Footer from "@/components/Footer";
 
 interface ApplicationWithVenue {
   id: string;
@@ -931,6 +932,7 @@ export default function Outreach() {
           outreachComponents={outreachComponents}
         />
       )}
+      <Footer />
     </>
   );
 }

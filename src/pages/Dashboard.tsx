@@ -19,6 +19,7 @@ import { useScrollVisibility } from "@/hooks/useScrollVisibility";
 import { useScrollPosition } from "@/hooks/useScrollPosition";
 import { useTabStateManager } from "@/hooks/useTabStateManager";
 import { useDashboardStatePersistence } from "@/hooks/useDashboardStatePersistence";
+import Footer from "@/components/Footer";
 
 interface DashboardArtistProfile {
   id: string;
@@ -583,6 +584,7 @@ export default function Dashboard() {
           onViewEPK={previewProfile}
         />
       </main>
+      <Footer />
     </div>
   );
 }

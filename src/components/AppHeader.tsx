@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +23,7 @@ import newLogo from "@/assets/newlogo.svg";
 const AppHeader = () => {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [artistName, setArtistName] = useState<string | null>(null);
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -56,7 +57,7 @@ const AppHeader = () => {
     try {
       const { data, error } = await supabase
         .from('artist_profiles')
-        .select('artist_name')
+        .select('artist_name, profile_photo_url')
         .eq('user_id', userId)
         .single();
 
@@ -66,6 +67,7 @@ const AppHeader = () => {
       }
 
       setArtistName(data?.artist_name || null);
+      setProfileImageUrl(data?.profile_photo_url || null);
     } catch (error) {
       console.error('Error fetching artist profile:', error);
     }
@@ -185,6 +187,9 @@ const AppHeader = () => {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                   <Avatar className="h-10 w-10">
+                    {profileImageUrl && (
+                      <AvatarImage src={profileImageUrl} alt={artistName || user.email || "Profile"} />
+                    )}
                     <AvatarFallback className="bg-primary text-primary-foreground">
                       {getInitials(user.email || "")}
                     </AvatarFallback>
