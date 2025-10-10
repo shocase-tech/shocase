@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import { encode as base64Encode } from "https://deno.land/std@0.224.0/encoding/base64.ts";
+import { encodeBase64 } from "https://deno.land/std@0.224.0/encoding/base64.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -109,10 +109,10 @@ serve(async (req) => {
     ];
     const email = emailLines.join('\r\n');
 
-    // Base64url encode the message with proper UTF-8 handling
+    // Proper UTF-8 to Base64URL encoding
     const encoder = new TextEncoder();
     const emailBytes = encoder.encode(email);
-    const base64 = base64Encode(emailBytes);
+    const base64 = encodeBase64(emailBytes);
     
     // Convert to base64url format (Gmail API requirement)
     const encodedMessage = base64
