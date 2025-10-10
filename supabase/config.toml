@@ -1,1 +1,4 @@
 project_id = "kaetsegwzfvkermjokmh"
+
+[functions.generate-venue-email]
+verify_jwt = false
