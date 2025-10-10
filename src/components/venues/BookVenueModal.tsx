@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { initiateGmailAuth, createGmailDraft } from "@/lib/gmail";
 import {
   Dialog,
   DialogContent,
@@ -20,7 +21,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, Mail, Loader2, Pencil, Check, Copy, RefreshCw } from "lucide-react";
+import { ExternalLink, Mail, Loader2, Pencil, Check, Copy, RefreshCw, CheckCircle2 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Tooltip,
   TooltipContent,
@@ -58,14 +65,41 @@ export default function BookVenueModal({
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
 
+  // Gmail integration states
+  const [gmailConnected, setGmailConnected] = useState(false);
+  const [savingDraft, setSavingDraft] = useState(false);
+  const [checkingGmailConnection, setCheckingGmailConnection] = useState(false);
+
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
     if (isOpen && artistProfile) {
       loadExistingDraft();
+      checkGmailConnection();
     }
   }, [isOpen, artistProfile, venue]);
+
+  // Check Gmail connection status on mount
+  const checkGmailConnection = async () => {
+    if (!artistProfile?.user_id) return;
+
+    setCheckingGmailConnection(true);
+    try {
+      const { data, error } = await supabase
+        .from('gmail_tokens')
+        .select('user_id')
+        .eq('user_id', artistProfile.user_id)
+        .maybeSingle();
+
+      setGmailConnected(!error && !!data);
+    } catch (error) {
+      console.error('Error checking Gmail connection:', error);
+      setGmailConnected(false);
+    } finally {
+      setCheckingGmailConnection(false);
+    }
+  };
 
   const loadExistingDraft = async () => {
     if (!artistProfile?.user_id || !venue?.id) return;
@@ -318,16 +352,150 @@ export default function BookVenueModal({
     }
   };
 
+  const saveToDraftInGmail = async () => {
+    if (!generatedEmail) return;
+
+    setSavingDraft(true);
+
+    try {
+      const result = await createGmailDraft({
+        to: generatedEmail.to,
+        subject: generatedEmail.subject,
+        body: generatedEmail.body,
+        venue_id: venue.id,
+        proposed_dates: proposedDates,
+        proposed_bill: proposedBill,
+        additional_context: additionalContext,
+      });
+
+      if (result.error) {
+        // Handle specific error types
+        if (result.error === 'gmail_not_connected' || result.error === 'gmail_token_expired' || result.error === 'gmail_token_invalid') {
+          toast({
+            title: "Gmail connection expired",
+            description: "Please reconnect your Gmail account.",
+            variant: "destructive",
+          });
+          setGmailConnected(false);
+          return;
+        }
+
+        if (result.error === 'rate_limited') {
+          toast({
+            title: "Rate limited",
+            description: "Gmail API rate limit exceeded. Please wait and try again.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        throw new Error(result.message || 'Failed to create draft');
+      }
+
+      // Show success with link to open draft
+      toast({
+        title: "Draft saved to Gmail!",
+        description: (
+          <div className="space-y-2">
+            <p>Your email is ready in Gmail drafts.</p>
+            <a 
+              href={result.draftUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-primary hover:underline font-medium flex items-center gap-1"
+            >
+              Open in Gmail →
+            </a>
+          </div>
+        ),
+      });
+
+      // Close modal
+      onClose();
+      
+      // Navigate to outreach dashboard
+      setTimeout(() => {
+        navigate('/outreach');
+      }, 500);
+
+    } catch (error: any) {
+      console.error('Error saving draft to Gmail:', error);
+      toast({
+        title: "Failed to save draft",
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingDraft(false);
+    }
+  };
+
+  const handleGmailConnect = async () => {
+    try {
+      await initiateGmailAuth();
+    } catch (error: any) {
+      console.error('Error initiating Gmail auth:', error);
+      toast({
+        title: "Connection failed",
+        description: "Failed to connect Gmail. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDisconnectGmail = async () => {
+    try {
+      const { error } = await supabase
+        .from('gmail_tokens')
+        .delete()
+        .eq('user_id', artistProfile.user_id);
+
+      if (error) throw error;
+
+      setGmailConnected(false);
+      toast({
+        title: "Gmail disconnected",
+        description: "Your Gmail account has been disconnected.",
+      });
+    } catch (error: any) {
+      console.error('Error disconnecting Gmail:', error);
+      toast({
+        title: "Disconnection failed",
+        description: "Failed to disconnect Gmail. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-background border-white/10">
         <DialogHeader>
-          <DialogTitle className="text-2xl">
-            Apply to {venue?.name}
-          </DialogTitle>
-          <p className="text-sm text-muted-foreground">
-            {venue?.city}, {venue?.state}
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <DialogTitle className="text-2xl">
+                Apply to {venue?.name}
+              </DialogTitle>
+              <p className="text-sm text-muted-foreground">
+                {venue?.city}, {venue?.state}
+              </p>
+            </div>
+            {!checkingGmailConnection && gmailConnected && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-green-500" />
+                    Gmail Connected
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={handleDisconnectGmail}>
+                    Disconnect Gmail
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -725,10 +893,39 @@ export default function BookVenueModal({
             Cancel
           </Button>
           {generatedEmail && (
-            <Button disabled className="w-full sm:w-auto">
-              <Mail className="w-4 h-4 mr-2" />
-              Save as Gmail Draft
-            </Button>
+            <>
+              <Button 
+                variant="outline" 
+                size="default"
+                onClick={handleCopyToClipboard}
+                className="w-full sm:w-auto"
+              >
+                <Copy className="w-4 h-4 mr-2" />
+                Copy Email
+              </Button>
+              <Button 
+                onClick={gmailConnected ? saveToDraftInGmail : handleGmailConnect}
+                disabled={savingDraft || checkingGmailConnection}
+                className="w-full sm:w-auto"
+              >
+                {savingDraft ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Saving to Gmail...
+                  </>
+                ) : gmailConnected ? (
+                  <>
+                    <Mail className="w-4 h-4 mr-2" />
+                    Save as Gmail Draft
+                  </>
+                ) : (
+                  <>
+                    <Mail className="w-4 h-4 mr-2" />
+                    Connect Gmail to Save Draft
+                  </>
+                )}
+              </Button>
+            </>
           )}
         </DialogFooter>
       </DialogContent>
