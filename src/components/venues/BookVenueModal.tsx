@@ -20,7 +20,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, Mail, Loader2 } from "lucide-react";
+import { ExternalLink, Mail, Loader2, Pencil, Check, Copy, RefreshCw } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Input } from "@/components/ui/input";
 
 interface BookVenueModalProps {
   isOpen: boolean;
@@ -44,6 +51,12 @@ export default function BookVenueModal({
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [existingApplicationId, setExistingApplicationId] = useState<string | null>(null);
+  
+  // Email generation states
+  const [generatedEmail, setGeneratedEmail] = useState<{ subject: string; body: string; to: string } | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generationError, setGenerationError] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
 
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -181,6 +194,128 @@ export default function BookVenueModal({
       return artistProfile.genre.join(", ");
     }
     return artistProfile.genre;
+  };
+
+  const handleGenerateEmail = async () => {
+    if (!proposedDates.trim()) {
+      toast({
+        title: "Missing information",
+        description: "Please enter proposed dates first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    setGenerationError(null);
+
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session?.user) {
+        throw new Error("Not authenticated");
+      }
+
+      const { data, error } = await supabase.functions.invoke('generate-venue-email', {
+        body: {
+          user_id: artistProfile.user_id,
+          venue_id: venue.id,
+          artist_name: artistProfile.artist_name,
+          artist_genre: artistProfile.genre,
+          artist_location: artistProfile.location,
+          performance_type: artistProfile.performance_type,
+          artist_bio: artistProfile.bio,
+          past_shows: artistProfile.past_shows,
+          artist_epk_url: `${window.location.origin}/${artistProfile.url_slug}`,
+          venue_name: venue.name,
+          venue_city: venue.city,
+          venue_genres: venue.genres,
+          venue_booking_guidelines: venue.booking_guidelines,
+          venue_requirements: venue.requirements,
+          venue_booking_email: venue.booking_contact_email,
+          proposed_dates: proposedDates,
+          proposed_bill: proposedBill,
+          additional_context: additionalContext,
+        }
+      });
+
+      if (error) {
+        // Handle specific error types
+        if (error.message?.includes('upgrade_required')) {
+          toast({
+            title: "Upgrade Required",
+            description: "Email generation requires a Pro or Elite subscription.",
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        if (error.message?.includes('limit_reached')) {
+          toast({
+            title: "Monthly Limit Reached",
+            description: "You've reached your monthly application limit. Upgrade to Elite for unlimited applications.",
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        if (error.message?.includes('cooldown_active')) {
+          const errorData = JSON.parse(error.message);
+          toast({
+            title: "Cooldown Period Active",
+            description: errorData.message || "You need to wait before applying to this venue again.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        throw error;
+      }
+
+      setGeneratedEmail(data);
+      setIsEditing(false);
+      
+      toast({
+        title: "Email Generated!",
+        description: "Review and edit your personalized pitch below.",
+      });
+    } catch (error: any) {
+      console.error("Error generating email:", error);
+      setGenerationError(error.message || "Failed to generate email");
+      toast({
+        title: "Generation Failed",
+        description: error.message || "Failed to generate email. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleCopyToClipboard = async () => {
+    if (!generatedEmail) return;
+
+    const fullEmail = `To: ${generatedEmail.to}\nSubject: ${generatedEmail.subject}\n\n${generatedEmail.body}`;
+    
+    try {
+      await navigator.clipboard.writeText(fullEmail);
+      toast({
+        title: "Email copied!",
+        description: "Email content copied to clipboard",
+      });
+    } catch (error) {
+      toast({
+        title: "Copy failed",
+        description: "Failed to copy to clipboard",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleRegenerateEmail = () => {
+    if (window.confirm("This will count as a new application. Are you sure you want to regenerate the email?")) {
+      setGeneratedEmail(null);
+      handleGenerateEmail();
+    }
   };
 
   return (
@@ -463,22 +598,121 @@ export default function BookVenueModal({
               <AccordionContent>
                 <Card className="bg-card/50 border-white/10">
                   <CardContent className="pt-6">
-                    <div className="text-center py-8 space-y-4">
-                      <div className="flex justify-center">
-                        <div className="rounded-full bg-muted p-4">
-                          <Mail className="w-8 h-8 text-muted-foreground" />
+                    {!generatedEmail ? (
+                      <div className="text-center py-8 space-y-4">
+                        <div className="flex justify-center">
+                          <div className="rounded-full bg-muted p-4">
+                            <Mail className="w-8 h-8 text-muted-foreground" />
+                          </div>
+                        </div>
+                        <p className="text-muted-foreground">
+                          Your personalized email will be generated here
+                        </p>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div>
+                                <Button 
+                                  onClick={handleGenerateEmail}
+                                  disabled={!proposedDates.trim() || isGenerating}
+                                  className="w-full"
+                                >
+                                  {isGenerating ? (
+                                    <>
+                                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                      Generating...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Mail className="w-4 h-4 mr-2" />
+                                      Generate Email
+                                    </>
+                                  )}
+                                </Button>
+                              </div>
+                            </TooltipTrigger>
+                            {!proposedDates.trim() && (
+                              <TooltipContent>
+                                <p>Please enter proposed dates first</p>
+                              </TooltipContent>
+                            )}
+                          </Tooltip>
+                        </TooltipProvider>
+                        {generationError && (
+                          <p className="text-sm text-destructive">{generationError}</p>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <div>
+                          <Label className="text-sm font-medium">Subject</Label>
+                          <Input 
+                            value={generatedEmail.subject}
+                            disabled
+                            className="mt-1 bg-muted"
+                          />
+                        </div>
+
+                        <div>
+                          <Label className="text-sm font-medium">To</Label>
+                          <Input 
+                            value={generatedEmail.to}
+                            disabled
+                            className="mt-1 bg-muted"
+                          />
+                        </div>
+
+                        <div>
+                          <Label className="text-sm font-medium">Email Body</Label>
+                          <Textarea
+                            value={generatedEmail.body}
+                            onChange={(e) => setGeneratedEmail({ ...generatedEmail, body: e.target.value })}
+                            disabled={!isEditing}
+                            rows={12}
+                            className={`mt-1 resize-none ${!isEditing ? 'bg-white text-foreground' : ''}`}
+                          />
+                        </div>
+
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setIsEditing(!isEditing)}
+                          >
+                            {isEditing ? (
+                              <>
+                                <Check className="w-4 h-4 mr-2" />
+                                Done Editing
+                              </>
+                            ) : (
+                              <>
+                                <Pencil className="w-4 h-4 mr-2" />
+                                Edit Email
+                              </>
+                            )}
+                          </Button>
+                          
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleRegenerateEmail}
+                            disabled={isGenerating}
+                          >
+                            <RefreshCw className="w-4 h-4 mr-2" />
+                            Regenerate
+                          </Button>
+                          
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleCopyToClipboard}
+                          >
+                            <Copy className="w-4 h-4 mr-2" />
+                            Copy to Clipboard
+                          </Button>
                         </div>
                       </div>
-                      <p className="text-muted-foreground">
-                        Your personalized email will be generated here
-                      </p>
-                      <Button disabled variant="secondary" className="w-full">
-                        Generate Email
-                      </Button>
-                      <p className="text-xs text-muted-foreground">
-                        Coming soon: AI-powered personalized pitches
-                      </p>
-                    </div>
+                    )}
                   </CardContent>
                 </Card>
               </AccordionContent>
@@ -487,19 +721,15 @@ export default function BookVenueModal({
         </div>
 
         <DialogFooter className="flex-col sm:flex-row gap-2">
-          <Button variant="outline" onClick={onClose} disabled={saving}>
+          <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleSaveDraft} disabled={saving} className="w-full sm:w-auto">
-            {saving ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              "Save Draft"
-            )}
-          </Button>
+          {generatedEmail && (
+            <Button disabled className="w-full sm:w-auto">
+              <Mail className="w-4 h-4 mr-2" />
+              Save as Gmail Draft
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
