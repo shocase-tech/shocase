@@ -2,77 +2,40 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import showcaseLogo from "@/assets/newlogo.svg";
 
 const CTASection = () => {
   const navigate = useNavigate();
 
   return (
-    <>
-      {/* Existing CTA Section */}
-      <section className="pt-44 pb-24 md:pt-24 px-6 bg-gradient-to-b from-background via-background/95 to-background">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center">
-            <Card className="bg-gradient-card backdrop-blur-glass border border-glass max-w-2xl mx-auto">
-              <CardContent className="p-8">
-                <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-                  Ready to Create Your Press Kit?
-                </h2>
-                <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-                  Join thousands of artists who've already created professional press kits with our platform. 
-                  Start with our free plan and upgrade when you're ready.
-                </p>
-                
-                <div className="flex justify-center">
-                  <Button 
-                    variant="hero" 
-                    size="lg" 
-                    className="group"
-                    onClick={() => navigate("/auth")}
-                  >
-                    Start Building Now
-                    <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer Section */}
-      <footer className="bg-background border-t border-glass">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            {/* Left - Logo */}
-            <div className="flex items-center">
-              <img 
-                src={showcaseLogo} 
-                alt="Shocase" 
-                className="h-8 w-auto"
-              />
-            </div>
-
-            {/* Center - Copyright */}
-            <div className="text-center">
-              <p className="text-muted-foreground text-sm">
-                © 2025 Shocase. All rights reserved.
+    <section className="pt-44 pb-24 md:pt-24 px-6 bg-gradient-to-b from-background via-background/95 to-background">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center">
+          <Card className="bg-gradient-card backdrop-blur-glass border border-glass max-w-2xl mx-auto">
+            <CardContent className="p-8">
+              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+                Ready to Create Your Press Kit?
+              </h2>
+              <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
+                Join thousands of artists who've already created professional press kits with our platform. 
+                Start with our free plan and upgrade when you're ready.
               </p>
-            </div>
-
-            {/* Right - Contact */}
-            <div className="text-center md:text-right">
-              <a 
-                href="mailto:shocase.artists@gmail.com"
-                className="text-foreground text-sm font-medium hover:text-primary transition-colors duration-200"
-              >
-                Contact
-              </a>
-            </div>
-          </div>
+              
+              <div className="flex justify-center">
+                <Button 
+                  variant="hero" 
+                  size="lg" 
+                  className="group"
+                  onClick={() => navigate("/auth")}
+                >
+                  Start Building Now
+                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </footer>
-    </>
+      </div>
+    </section>
   );
 };
 
