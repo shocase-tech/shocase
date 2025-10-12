@@ -16,6 +16,7 @@ import appleMusicColorIcon from "@/assets/streaming/apple-music-color.svg";
 import appleMusicLightIcon from "@/assets/streaming/apple-music-light.svg";
 import tiktokIcon from "@/assets/social/tiktok-white.png";
 import instagramIcon from "@/assets/social/instagram-gradient.png";
+import shocaseIcon from "@/assets/newicon.svg";
 import PublicImage from "@/components/PublicImage";
 import Footer from "@/components/Footer";
 import { FeaturedTrackEmbed } from "@/components/FeaturedTrackEmbed";
@@ -234,11 +235,23 @@ export default function SimplePublicProfile() {
   // Check if we should show "View All Shows" button
   const shouldShowViewAllButton = allShows.length > 4;
 
-  // Helper function to truncate bio for mobile
-  const getTruncatedBio = (bio: string, wordLimit: number = 100) => {
-    const words = bio.split(' ');
-    if (words.length <= wordLimit) return bio;
-    return words.slice(0, wordLimit).join(' ') + '...';
+  // Helper function to check if bio should be truncated (1000 chars or 11 lines)
+  const shouldTruncateBio = (bio: string) => {
+    if (bio.length > 1000) return true;
+    const lines = bio.split('\n').length;
+    return lines > 11;
+  };
+
+  // Helper function to truncate bio
+  const getTruncatedBio = (bio: string) => {
+    if (bio.length > 1000) {
+      return bio.substring(0, 1000) + '...';
+    }
+    const lines = bio.split('\n');
+    if (lines.length > 11) {
+      return lines.slice(0, 11).join('\n') + '...';
+    }
+    return bio;
   };
 
   return (
@@ -279,10 +292,9 @@ export default function SimplePublicProfile() {
 
         {/* Background Image Content */}
         <div className="relative z-10 max-w-6xl mx-auto px-6 text-center">
-          {/* Decorative icons - hidden on mobile */}
+          {/* Shocase Icon - hidden on mobile */}
           <div className="hidden md:flex items-center justify-center mb-8">
-            <Music className="w-16 h-16 text-primary mr-4" />
-            <Star className="w-12 h-12 text-accent animate-pulse" />
+            <img src={shocaseIcon} alt="SHOCASE" className="w-20 h-20" />
           </div>
           
           <h1 className="text-5xl md:text-7xl font-bold gradient-text mb-6">
@@ -615,31 +627,24 @@ export default function SimplePublicProfile() {
               </section>
             )}
 
-            {/* Bio Section with Mobile Truncation */}
+            {/* Bio Section with Expandable Text */}
             {profile.bio && (
               <section className="glass-card border-glass p-4 md:p-8 rounded-xl">
                 <h2 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6">Artist Biography</h2>
                 <div className="text-muted-foreground leading-relaxed text-base md:text-lg">
-                  {/* Mobile: Truncated bio with expand/collapse */}
-                  <div className="md:hidden">
-                    <p className="mb-4">
-                      {bioExpanded ? profile.bio : getTruncatedBio(profile.bio)}
-                    </p>
-                    {profile.bio.split(' ').length > 100 && (
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => setBioExpanded(!bioExpanded)}
-                        className="text-primary hover:text-primary/80"
-                      >
-                        {bioExpanded ? 'Show Less' : 'Show More'}
-                      </Button>
-                    )}
-                  </div>
-                  {/* Desktop: Full bio */}
-                  <div className="hidden md:block">
-                    <p className="whitespace-pre-wrap">{profile.bio}</p>
-                  </div>
+                  <p className="whitespace-pre-wrap mb-4">
+                    {bioExpanded ? profile.bio : getTruncatedBio(profile.bio)}
+                  </p>
+                  {shouldTruncateBio(profile.bio) && (
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => setBioExpanded(!bioExpanded)}
+                      className="text-primary hover:text-primary/80"
+                    >
+                      {bioExpanded ? 'Show Less' : 'Show More'}
+                    </Button>
+                  )}
                 </div>
               </section>
             )}
@@ -789,24 +794,6 @@ export default function SimplePublicProfile() {
               ) : null}
             </div>
 
-            {/* Press & Reviews Section - Full Width on Desktop */}
-            {profile.press_quotes && Array.isArray(profile.press_quotes) && profile.press_quotes.length > 0 && (
-              <section className="glass-card border-glass p-4 md:p-8 rounded-xl">
-                <h2 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 flex items-center gap-3">
-                  <Quote className="w-6 md:w-8 h-6 md:h-8 text-accent" />
-                  Press & Reviews
-                </h2>
-                <div className="space-y-4 md:space-y-6">
-                  {profile.press_quotes.map((quote: any, index: number) => (
-                    <blockquote key={index} className="border-l-4 border-primary pl-4 md:pl-6 bg-white/5 p-4 md:p-6 rounded-r-lg hover:shadow-glow transition-all duration-300">
-                      <p className="italic text-lg md:text-xl mb-3 md:mb-4 leading-relaxed">"{quote.text}"</p>
-                      <cite className="text-base md:text-lg font-bold text-primary">— {quote.source}</cite>
-                    </blockquote>
-                  ))}
-                </div>
-              </section>
-            )}
-
             {/* Press Coverage Section - Mobile Only (moved to sidebar on desktop) */}
             {profile.press_mentions && Array.isArray(profile.press_mentions) && profile.press_mentions.length > 0 && (
               <section className="md:hidden glass-card border-glass p-4 rounded-xl">
@@ -831,6 +818,24 @@ export default function SimplePublicProfile() {
                         )}
                       </div>
                     </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Press & Reviews Section - Mobile Only */}
+            {profile.press_quotes && Array.isArray(profile.press_quotes) && profile.press_quotes.length > 0 && (
+              <section className="md:hidden glass-card border-glass p-4 rounded-xl">
+                <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+                  <Quote className="w-6 h-6 text-accent" />
+                  Press & Reviews
+                </h2>
+                <div className="space-y-4">
+                  {profile.press_quotes.map((quote: any, index: number) => (
+                    <blockquote key={index} className="border-l-4 border-primary pl-4 bg-white/5 p-4 rounded-r-lg hover:shadow-glow transition-all duration-300">
+                      <p className="italic text-lg mb-3 leading-relaxed">"{quote.text}"</p>
+                      <cite className="text-base font-bold text-primary">— {quote.source}</cite>
+                    </blockquote>
                   ))}
                 </div>
               </section>
@@ -1083,6 +1088,26 @@ export default function SimplePublicProfile() {
                         )}
                       </div>
                     </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Press & Reviews Section - Sidebar on Desktop */}
+            {profile.press_quotes && Array.isArray(profile.press_quotes) && profile.press_quotes.length > 0 && (
+              <Card className="glass-card border-glass">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3 text-lg">
+                    <Quote className="w-5 h-5 text-accent" />
+                    Press & Reviews
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {profile.press_quotes.map((quote: any, index: number) => (
+                    <blockquote key={index} className="border-l-4 border-primary pl-3 bg-white/5 p-3 rounded-r-lg hover:shadow-glow transition-all duration-300">
+                      <p className="italic text-sm mb-2 leading-relaxed">"{quote.text}"</p>
+                      <cite className="text-xs font-bold text-primary">— {quote.source}</cite>
+                    </blockquote>
                   ))}
                 </CardContent>
               </Card>
