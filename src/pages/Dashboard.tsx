@@ -424,23 +424,23 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/80 pb-20">
       <AppHeader />
       
-      <main className="container mx-auto px-4 py-6 pt-20">
+      <main className="container mx-auto px-4 py-4 pt-16">
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Progress Section with Publish Controls */}
           {profile && (
             <Card ref={progressCardRef} className="glass-card border-white/10 animate-slide-in-up">
-              <CardContent className="pt-4 md:pt-6">
-                  <div className="flex items-center justify-between mb-6">
+              <CardContent className="pt-4 pb-4">
+                  <div className="flex items-center justify-between mb-3">
                    <div className="flex items-center gap-2">
                      <h2 className="text-base md:text-lg font-semibold">Your kit is {completionPercentage}% complete</h2>
                    </div>
                    <div className="text-xl md:text-2xl font-bold text-primary">{completionPercentage}%</div>
                  </div>
-                <p className="text-xs md:text-sm text-muted-foreground mb-4">
+                <p className="text-xs md:text-sm text-muted-foreground mb-3">
                   {completedMilestones} of {milestones.length} milestones completed
                 </p>
-                <Progress value={completionPercentage} className="mb-4" />
-                <div className="hidden md:grid md:grid-cols-2 gap-2 mb-6">
+                <Progress value={completionPercentage} className="mb-3" />
+                <div className="hidden md:grid md:grid-cols-2 gap-2 mb-4">
                   {milestones.map((milestone, index) => (
                     <div key={index} className="flex items-center gap-2 text-sm">
                       {milestone.completed ? (
@@ -456,7 +456,7 @@ export default function Dashboard() {
                 </div>
                 
                 {/* Publish Controls */}
-                <div className="border-t border-white/10 pt-4 md:pt-6">
+                <div className="border-t border-white/10 pt-3 md:pt-4">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     {/* Hide descriptive text on mobile */}
                     <div className="hidden MD:block">
