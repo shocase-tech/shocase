@@ -157,13 +157,13 @@ const Header = () => {
         <img 
           src={newIcon} 
           alt="SHOCASE Icon" 
-          className="h-12 w-auto"
+          className="h-[3.6rem] w-auto"
           draggable={false}
         />
       </div>
 
       {/* Main Header */}
-      <header className="fixed top-0 left-0 right-0 z-40 p-6 backdrop-blur-md bg-background/20" style={{
+      <header className="fixed top-0 left-0 right-0 z-40 p-[1.8rem] backdrop-blur-md bg-background/20" style={{
         maskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
         WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)'
       }}>

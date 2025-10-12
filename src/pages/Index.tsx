@@ -6,6 +6,7 @@ import MarqueeBanner from "@/components/MarqueeBanner";
 import PricingSection from "@/components/PricingSection";
 import CTASection from "@/components/CTASection";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { useEffect } from "react";
 
 const Index = () => {
@@ -29,6 +30,7 @@ const Index = () => {
       <MarqueeBanner />
       <PricingSection />
       <CTASection />
+      <Footer />
     </main>
   );
 };

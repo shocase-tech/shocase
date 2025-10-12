@@ -129,13 +129,13 @@ const AppHeader = () => {
         WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
       }}
     >
-      <div className="container max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div className="container max-w-7xl mx-auto px-4 h-[4.8rem] flex items-center justify-between">
         {/* Left - Logo */}
         <button
           onClick={() => navigate("/")}
           className="flex items-center hover:opacity-80 transition-opacity"
         >
-          <img src={newLogo} alt="SHOCASE" className="h-8 w-auto" />
+          <img src={newLogo} alt="SHOCASE" className="h-[2.4rem] w-auto" />
         </button>
 
         {/* Center - Desktop Navigation */}
