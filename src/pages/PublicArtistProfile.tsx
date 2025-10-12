@@ -128,6 +128,21 @@ export default function PublicArtistProfile() {
 
         setProfile(data as PublicArtistProfile);
         setError(null);
+        
+        // Track profile view (only for published profiles, not owner preview)
+        if (data.is_published) {
+          try {
+            await supabase.from('profile_views').insert({
+              profile_id: data.id,
+              viewer_user_agent: navigator.userAgent
+            });
+            console.log("View tracked successfully");
+          } catch (viewError) {
+            console.error("Failed to track view:", viewError);
+            // Don't block page load if view tracking fails
+          }
+        }
+        
         return; // EXIT HERE - Profile found successfully!
 
         // If no published profile found and user is authenticated, try to get their own unpublished profile
