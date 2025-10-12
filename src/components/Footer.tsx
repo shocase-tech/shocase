@@ -1,4 +1,5 @@
 import showcaseLogo from "@/assets/newlogo.svg";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -14,11 +15,17 @@ const Footer = () => {
             />
           </div>
 
-          {/* Center - Copyright */}
+          {/* Center - Copyright & Privacy */}
           <div className="text-center">
-            <p className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground text-sm mb-1">
               © 2025 Shocase. All rights reserved.
             </p>
+            <Link 
+              to="/privacy-policy"
+              className="text-muted-foreground text-sm hover:text-primary transition-colors duration-200"
+            >
+              Privacy Policy
+            </Link>
           </div>
 
           {/* Right - Contact */}

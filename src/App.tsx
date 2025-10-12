@@ -12,6 +12,7 @@ import Venues from "./pages/Venues";
 import VenuePage from "./pages/VenuePage";
 import AccountSettings from "./pages/AccountSettings";
 import SimplePublicProfile from "./pages/SimplePublicProfile";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/venues" element={<Venues />} />
             <Route path="/venues/:slug" element={<VenuePage />} />
             <Route path="/account-settings" element={<AccountSettings />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/:identifier" element={<SimplePublicProfile />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
