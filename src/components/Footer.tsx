@@ -15,17 +15,26 @@ const Footer = () => {
             />
           </div>
 
-          {/* Center - Copyright & Privacy */}
+          {/* Center - Copyright & Legal Links */}
           <div className="text-center">
             <p className="text-muted-foreground text-sm mb-1">
               © 2025 Shocase. All rights reserved.
             </p>
-            <Link 
-              to="/privacy-policy"
-              className="text-muted-foreground text-sm hover:text-primary transition-colors duration-200"
-            >
-              Privacy Policy
-            </Link>
+            <div className="flex gap-3 justify-center">
+              <Link 
+                to="/privacy-policy"
+                className="text-muted-foreground text-sm hover:text-primary transition-colors duration-200"
+              >
+                Privacy Policy
+              </Link>
+              <span className="text-muted-foreground">•</span>
+              <Link 
+                to="/terms-and-conditions"
+                className="text-muted-foreground text-sm hover:text-primary transition-colors duration-200"
+              >
+                Terms & Conditions
+              </Link>
+            </div>
           </div>
 
           {/* Right - Contact */}

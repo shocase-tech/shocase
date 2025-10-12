@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,6 +27,7 @@ export default function Auth() {
   const [rememberMe, setRememberMe] = useState(false);
   const [showResetForm, setShowResetForm] = useState(false);
   const [activeTab, setActiveTab] = useState("signin");
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -123,6 +124,17 @@ export default function Auth() {
     e.preventDefault();
     setLoading(true);
 
+    // Validate terms agreement
+    if (!agreedToTerms) {
+      toast({
+        title: "Terms & Conditions Required",
+        description: "You must agree to the Terms & Conditions to sign up.",
+        variant: "destructive",
+      });
+      setLoading(false);
+      return;
+    }
+
     // Validate password requirements
     if (!passwordValidation.isValid) {
       toast({
@@ -199,6 +211,7 @@ export default function Auth() {
       setPhoneNumber("");
       setBirthday("");
       setLocation("");
+      setAgreedToTerms(false);
       setActiveTab("signin");
     } catch (error: any) {
       toast({
@@ -537,10 +550,38 @@ export default function Auth() {
                     )}
                   </div>
                   
+                  {/* Terms & Conditions Agreement */}
+                  <div className="flex items-start space-x-2 pt-2">
+                    <Checkbox
+                      id="terms"
+                      checked={agreedToTerms}
+                      onCheckedChange={(checked) => setAgreedToTerms(checked === true)}
+                      className="mt-1"
+                    />
+                    <Label htmlFor="terms" className="text-sm leading-relaxed cursor-pointer">
+                      I agree to the{" "}
+                      <Link 
+                        to="/terms-and-conditions" 
+                        target="_blank"
+                        className="text-primary hover:underline underline-offset-2"
+                      >
+                        Terms & Conditions
+                      </Link>
+                      {" "}and{" "}
+                      <Link 
+                        to="/privacy-policy" 
+                        target="_blank"
+                        className="text-primary hover:underline underline-offset-2"
+                      >
+                        Privacy Policy
+                      </Link>
+                    </Label>
+                  </div>
+                  
                    <Button 
                      type="submit" 
                      className="w-full transition-all duration-300 hover:shadow-glow" 
-                     disabled={loading || !passwordValidation.isValid || !passwordsMatch || !birthdayValidation.isValid || !locationValidation.isValid}
+                     disabled={loading || !agreedToTerms || !passwordValidation.isValid || !passwordsMatch || !birthdayValidation.isValid || !locationValidation.isValid}
                    >
                      {loading ? "Creating Account..." : "Create Account"}
                    </Button>
