@@ -43,6 +43,9 @@ const HeroSection = () => {
           opacity: 0.8
         }}
       />
+      
+      {/* Gradient fade to black at bottom */}
+      <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-b from-transparent to-black" />
 
       {/* Main Content - Centered */}
       <div className="relative z-10 flex flex-col items-center justify-center text-center px-6 space-y-8">
