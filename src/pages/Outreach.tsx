@@ -45,6 +45,7 @@ import AppHeader from "@/components/AppHeader";
 import BookShowModal from "@/components/venues/BookShowModal";
 import BookVenueModal from "@/components/venues/BookVenueModal";
 import Footer from "@/components/Footer";
+import { EPKViewsCard } from "@/components/EPKViewsCard";
 import {
   Dialog,
   DialogContent,
@@ -568,7 +569,7 @@ export default function Outreach() {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <Card className="bg-card/50 backdrop-blur border-white/10">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
@@ -604,6 +605,10 @@ export default function Outreach() {
                 </div>
               </CardContent>
             </Card>
+
+            {artistProfile?.id && artistProfile?.is_published && (
+              <EPKViewsCard profileId={artistProfile.id} />
+            )}
           </div>
 
           {/* Search and Sort */}

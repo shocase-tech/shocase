@@ -43,41 +43,42 @@ export function EPKViewsCard({ profileId }: EPKViewsCardProps) {
 
   if (loading) {
     return (
-      <Card className="glass-card border-glass">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">EPK Views (Last 30 Days)</CardTitle>
-          <Eye className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold animate-pulse">...</div>
+      <Card className="bg-card/50 backdrop-blur border-white/10">
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Eye className="h-5 w-5 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">EPK Views (30d)</p>
+            </div>
+          </div>
+          <div className="text-3xl font-bold animate-pulse">...</div>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="glass-card border-glass">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">EPK Views (Last 30 Days)</CardTitle>
-        <Eye className="h-4 w-4 text-muted-foreground" />
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{viewCount?.toLocaleString()}</div>
+    <Card className="bg-card/50 backdrop-blur border-white/10">
+      <CardContent className="pt-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Eye className="h-5 w-5 text-primary" />
+            <p className="text-sm text-muted-foreground">EPK Views (30d)</p>
+          </div>
+          {viewCount !== null && viewCount > 0 && (
+            <TrendingUp className="h-4 w-4 text-green-400" />
+          )}
+        </div>
+        <div className="text-3xl font-bold">{viewCount?.toLocaleString()}</div>
         <p className="text-xs text-muted-foreground mt-1">
           {viewCount === 0 ? (
             "No views yet"
           ) : viewCount === 1 ? (
-            "1 view in the last month"
+            "1 view this month"
           ) : (
-            `${viewCount} views in the last month`
+            "views this month"
           )}
         </p>
-        {viewCount !== null && viewCount > 0 && (
-          <div className="flex items-center gap-1 mt-2 text-xs text-green-400">
-            <TrendingUp className="h-3 w-3" />
-            <span>Tracking active</span>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

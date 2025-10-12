@@ -20,7 +20,7 @@ import { useScrollPosition } from "@/hooks/useScrollPosition";
 import { useTabStateManager } from "@/hooks/useTabStateManager";
 import { useDashboardStatePersistence } from "@/hooks/useDashboardStatePersistence";
 import Footer from "@/components/Footer";
-import { EPKViewsCard } from "@/components/EPKViewsCard";
+
 
 interface DashboardArtistProfile {
   id: string;
@@ -526,13 +526,6 @@ export default function Dashboard() {
                 </div>
               </CardContent>
             </Card>
-          )}
-
-          {/* EPK Views Analytics */}
-          {profile && profile.is_published && (
-            <div className="animate-slide-in-up">
-              <EPKViewsCard profileId={profile.id} />
-            </div>
           )}
 
           {/* Live Preview Editor */}
