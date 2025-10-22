@@ -94,10 +94,7 @@ export const createGmailDraft = async (params: {
     }
 
     const { data, error } = await supabase.functions.invoke('create-gmail-draft', {
-      body: {
-        ...params,
-        artist_id: user.id,
-      }
+      body: params
     });
 
     if (error) {

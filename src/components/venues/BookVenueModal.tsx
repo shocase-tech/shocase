@@ -251,7 +251,6 @@ export default function BookVenueModal({
 
       const { data, error } = await supabase.functions.invoke('generate-venue-email', {
         body: {
-          user_id: artistProfile.user_id,
           venue_id: venue.id,
           artist_name: artistProfile.artist_name,
           artist_genre: artistProfile.genre,

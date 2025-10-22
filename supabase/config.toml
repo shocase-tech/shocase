@@ -1,12 +1,6 @@
 project_id = "kaetsegwzfvkermjokmh"
 
-[functions.generate-venue-email]
-verify_jwt = false
-
 [functions.gmail-callback]
-verify_jwt = false
-
-[functions.create-gmail-draft]
 verify_jwt = false
 
 [functions.get-gmail-auth-url]

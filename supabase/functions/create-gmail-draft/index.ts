@@ -13,15 +13,33 @@ serve(async (req) => {
   }
 
   try {
+    // Authenticate user from JWT token
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ 
+        error: 'Missing authorization header' 
+      }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { to, subject, body, venue_id, artist_id, proposed_dates, proposed_bill, additional_context } = await req.json();
-
-    if (!to || !subject || !body || !venue_id || !artist_id) {
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    
+    if (authError || !user) {
       return new Response(JSON.stringify({ 
-        error: 'Missing required fields: to, subject, body, venue_id, artist_id' 
+        error: 'Unauthorized' 
+      }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    const artist_id = user.id;
+    const { to, subject, body, venue_id, proposed_dates, proposed_bill, additional_context } = await req.json();
+
+    if (!to || !subject || !body || !venue_id) {
+      return new Response(JSON.stringify({ 
+        error: 'Missing required fields: to, subject, body, venue_id' 
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
