@@ -35,16 +35,31 @@ serve(async (req) => {
     }
 
     const artist_id = user.id;
-    const { to, subject, body, venue_id, proposed_dates, proposed_bill, additional_context } = await req.json();
+    
+    // Validate input with zod
+    const draftSchema = z.object({
+      to: z.string().email({ message: "Invalid recipient email" }).max(255),
+      subject: z.string().min(1).max(300, { message: "Subject must be between 1-300 characters" }),
+      body: z.string().min(1).max(50000, { message: "Body must be between 1-50000 characters" }),
+      venue_id: z.string().uuid({ message: "Invalid venue_id format" }),
+      proposed_dates: z.string().max(500).optional(),
+      proposed_bill: z.string().max(1000).optional(),
+      additional_context: z.string().max(2000).optional()
+    });
 
-    if (!to || !subject || !body || !venue_id) {
+    let validatedData;
+    try {
+      const rawData = await req.json();
+      validatedData = draftSchema.parse(rawData);
+    } catch (validationError) {
+      console.error('Validation error:', validationError);
       return new Response(JSON.stringify({ 
-        error: 'Missing required fields: to, subject, body, venue_id' 
-      }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
+        error: 'Invalid input data',
+        details: validationError instanceof z.ZodError ? validationError.errors : 'Validation failed'
+      }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
+
+    const { to, subject, body, venue_id, proposed_dates, proposed_bill, additional_context } = validatedData;
 
     // Get user's Gmail tokens
     const { data: tokenData, error: tokenError } = await supabase

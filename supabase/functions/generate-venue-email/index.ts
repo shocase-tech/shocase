@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -35,14 +36,37 @@ serve(async (req) => {
     }
 
     const user_id = user.id;
-    const requestData = await req.json();
-    const { venue_id, artist_name, ...rest } = requestData;
     
-    if (!venue_id) {
+    // Validate input with zod
+    const requestSchema = z.object({
+      venue_id: z.string().uuid({ message: "Invalid venue_id format" }),
+      artist_name: z.string().min(1).max(200, { message: "Artist name must be between 1-200 characters" }).optional(),
+      artist_genre: z.string().max(200).optional(),
+      artist_bio: z.string().max(5000).optional(),
+      artist_location: z.string().max(200).optional(),
+      performance_type: z.string().max(200).optional(),
+      expected_draw: z.string().max(500).optional(),
+      social_proof: z.string().max(1000).optional(),
+      notable_achievements: z.array(z.string().max(500)).max(20).optional(),
+      past_shows: z.array(z.any()).max(50).optional(),
+      proposed_dates: z.string().max(500).optional(),
+      proposed_bill: z.string().max(1000).optional(),
+      additional_context: z.string().max(2000).optional()
+    });
+
+    let requestData;
+    try {
+      const rawData = await req.json();
+      requestData = requestSchema.parse(rawData);
+    } catch (validationError) {
+      console.error('Validation error:', validationError);
       return new Response(JSON.stringify({ 
-        error: 'Missing venue_id' 
+        error: 'Invalid input data',
+        details: validationError instanceof z.ZodError ? validationError.errors : 'Validation failed'
       }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
+    
+    const { venue_id, artist_name, ...rest } = requestData;
 
     // Check subscription tier and usage
     const { data: subscription, error: subError } = await supabase
