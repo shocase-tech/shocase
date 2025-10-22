@@ -591,13 +591,11 @@ export type Database = {
         Returns: {
           artist_name: string
           bio: string
-          contact_info: Json
           created_at: string
           gallery_photos: string[]
           genre: string
           hero_photo_url: string
           id: string
-          is_published: boolean
           past_shows: Json
           playlists: string[]
           press_mentions: Json
@@ -609,7 +607,6 @@ export type Database = {
           streaming_links: Json
           upcoming_shows: Json
           updated_at: string
-          url_slug: string
         }[]
       }
       is_profile_published_by_user_id: {

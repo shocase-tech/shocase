@@ -110,12 +110,41 @@ serve(async (req) => {
   }
 
   try {
-    const inputs = await req.json();
-    console.log('Bio generation request:', JSON.stringify(inputs, null, 2));
-    
-    if (!inputs.artist_name?.trim()) {
-      throw new Error('Artist name is required');
+    // Validate input with zod
+    const bioSchema = z.object({
+      artist_name: z.string().trim().min(1, { message: "Artist name is required" }).max(200, { message: "Artist name must be between 1-200 characters" }),
+      genre: z.string().max(200).optional(),
+      location: z.string().max(200).optional(),
+      influences: z.string().max(500).optional(),
+      vibe: z.string().max(100).optional(),
+      notable_performances: z.string().max(1000).optional(),
+      musical_background: z.string().max(1000).optional(),
+      existing_bio: z.string().max(5000).optional(),
+      is_remix: z.boolean().optional(),
+      is_blurb: z.boolean().optional(),
+      word_limit: z.number().int().positive().max(100).optional()
+    });
+
+    let inputs;
+    try {
+      const rawData = await req.json();
+      inputs = bioSchema.parse(rawData);
+    } catch (validationError) {
+      console.error('Validation error:', validationError);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid input data',
+          details: validationError instanceof z.ZodError ? validationError.errors : 'Validation failed',
+          retryable: false
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
+    
+    console.log('Bio generation request:', JSON.stringify(inputs, null, 2));
     
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
     if (!openAIApiKey) {
