@@ -10,12 +10,6 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -54,7 +48,6 @@ export default function BookVenueModal({
   const [proposedDates, setProposedDates] = useState("");
   const [proposedBill, setProposedBill] = useState("");
   const [additionalContext, setAdditionalContext] = useState("");
-  const [showFullBio, setShowFullBio] = useState(false);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [existingApplicationId, setExistingApplicationId] = useState<string | null>(null);
@@ -207,28 +200,6 @@ export default function BookVenueModal({
     }
   };
 
-  const getBioPreview = () => {
-    if (!artistProfile?.bio) return "No bio available";
-    if (showFullBio || artistProfile.bio.length <= 150) {
-      return artistProfile.bio;
-    }
-    return artistProfile.bio.substring(0, 150) + "...";
-  };
-
-  const getPastShows = () => {
-    if (!artistProfile?.past_shows || !Array.isArray(artistProfile.past_shows)) {
-      return [];
-    }
-    return artistProfile.past_shows.slice(0, 3);
-  };
-
-  const getGenres = () => {
-    if (!artistProfile?.genre) return "No genres listed";
-    if (Array.isArray(artistProfile.genre)) {
-      return artistProfile.genre.join(", ");
-    }
-    return artistProfile.genre;
-  };
 
   const handleGenerateEmail = async () => {
     if (!proposedDates.trim()) {
@@ -497,394 +468,220 @@ export default function BookVenueModal({
           </div>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <Accordion type="single" collapsible defaultValue="venue-details">
-            {/* Section 1: EPK Summary */}
-            <AccordionItem value="epk-summary" className="border-white/10">
-              <AccordionTrigger className="text-lg font-semibold hover:no-underline">
-                Your EPK Summary
-              </AccordionTrigger>
-              <AccordionContent>
-                <Card className="bg-card/50 border-white/10">
-                  <CardContent className="pt-6 space-y-4">
-                    <div>
-                      <h3 className="font-semibold text-lg mb-2">
-                        {artistProfile?.artist_name || "Artist Name"}
-                      </h3>
-                      <div className="flex flex-wrap gap-2 mb-2">
-                        {getGenres().split(", ").map((genre: string, i: number) => (
-                          <Badge key={i} variant="secondary">
-                            {genre}
-                          </Badge>
-                        ))}
-                      </div>
-                      {artistProfile?.location && (
-                        <p className="text-sm text-muted-foreground">
-                          📍 {artistProfile.location}
-                        </p>
-                      )}
-                    </div>
+        <div className="space-y-6">
+          {/* Venue-Specific Details */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Application Details</h3>
+            <div>
+              <Label htmlFor="proposed-dates" className="text-base">
+                Proposed Dates *
+              </Label>
+              <Textarea
+                id="proposed-dates"
+                placeholder="Example: Available Oct 15-20 or Nov 3-10"
+                value={proposedDates}
+                onChange={(e) => {
+                  if (e.target.value.length <= 500) {
+                    setProposedDates(e.target.value);
+                    if (errors.proposedDates) {
+                      setErrors({ ...errors, proposedDates: "" });
+                    }
+                  }
+                }}
+                maxLength={500}
+                rows={3}
+                className={`resize-none mt-2 ${
+                  errors.proposedDates ? "border-destructive" : ""
+                }`}
+              />
+              <div className="flex justify-between items-center mt-1">
+                <p className="text-xs text-muted-foreground">
+                  {proposedDates.length}/500 characters
+                </p>
+                {errors.proposedDates && (
+                  <p className="text-xs text-destructive">
+                    {errors.proposedDates}
+                  </p>
+                )}
+              </div>
+            </div>
 
-                    <div>
-                      <h4 className="font-medium mb-2">Bio</h4>
-                      <p className="text-sm text-muted-foreground">
-                        {getBioPreview()}
-                      </p>
-                      {artistProfile?.bio && artistProfile.bio.length > 150 && (
-                        <Button
-                          variant="link"
-                          size="sm"
-                          onClick={() => setShowFullBio(!showFullBio)}
-                          className="p-0 h-auto text-primary"
-                        >
-                          {showFullBio ? "Show less" : "Read full"}
-                        </Button>
-                      )}
-                    </div>
+            <div>
+              <Label htmlFor="proposed-bill" className="text-base">
+                Proposed Bill *
+              </Label>
+              <Textarea
+                id="proposed-bill"
+                placeholder="Example: Headlining or co-bill with similar indie rock acts"
+                value={proposedBill}
+                onChange={(e) => {
+                  if (e.target.value.length <= 500) {
+                    setProposedBill(e.target.value);
+                    if (errors.proposedBill) {
+                      setErrors({ ...errors, proposedBill: "" });
+                    }
+                  }
+                }}
+                maxLength={500}
+                rows={3}
+                className={`resize-none mt-2 ${
+                  errors.proposedBill ? "border-destructive" : ""
+                }`}
+              />
+              <div className="flex justify-between items-center mt-1">
+                <p className="text-xs text-muted-foreground">
+                  {proposedBill.length}/500 characters
+                </p>
+                {errors.proposedBill && (
+                  <p className="text-xs text-destructive">
+                    {errors.proposedBill}
+                  </p>
+                )}
+              </div>
+            </div>
 
-                    {getPastShows().length > 0 && (
+            <div>
+              <Label htmlFor="additional-context" className="text-base">
+                Additional Context (Optional)
+              </Label>
+              <Textarea
+                id="additional-context"
+                placeholder="Anything else this venue should know?"
+                value={additionalContext}
+                onChange={(e) => {
+                  if (e.target.value.length <= 500) {
+                    setAdditionalContext(e.target.value);
+                  }
+                }}
+                maxLength={500}
+                rows={3}
+                className="resize-none mt-2"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                {additionalContext.length}/500 characters
+              </p>
+            </div>
+          </div>
+
+          {/* Email Generation */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Generate Email</h3>
+            {!generatedEmail ? (
+              <div className="text-center py-8 space-y-4 bg-muted/30 rounded-lg border border-white/10">
+                <div className="flex justify-center">
+                  <div className="rounded-full bg-muted p-4">
+                    <Mail className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                </div>
+                <p className="text-muted-foreground">
+                  Your personalized email will be generated here
+                </p>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
                       <div>
-                        <h4 className="font-medium mb-2">Recent Shows</h4>
-                        <ul className="space-y-1">
-                          {getPastShows().map((show: any, i: number) => (
-                            <li key={i} className="text-sm text-muted-foreground">
-                              • {show.venue} - {show.city}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => navigate("/epk")}
-                      className="w-full"
-                    >
-                      <ExternalLink className="w-4 h-4 mr-2" />
-                      Edit EPK
-                    </Button>
-                  </CardContent>
-                </Card>
-              </AccordionContent>
-            </AccordionItem>
-
-            {/* Section 2: Outreach Components */}
-            <AccordionItem value="outreach-components" className="border-white/10">
-              <AccordionTrigger className="text-lg font-semibold hover:no-underline">
-                Outreach Components
-              </AccordionTrigger>
-              <AccordionContent>
-                <Card className="bg-card/50 border-white/10">
-                  <CardContent className="pt-6 space-y-4">
-                    {outreachComponents &&
-                    (outreachComponents.expected_draw ||
-                      outreachComponents.social_proof ||
-                      outreachComponents.notable_achievements?.length > 0) ? (
-                      <>
-                        {outreachComponents.expected_draw && (
-                          <div>
-                            <h4 className="font-medium mb-1 text-sm">Expected Draw</h4>
-                            <p className="text-sm text-muted-foreground">
-                              {outreachComponents.expected_draw}
-                            </p>
-                          </div>
-                        )}
-
-                        {outreachComponents.social_proof && (
-                          <div>
-                            <h4 className="font-medium mb-1 text-sm">Social Proof</h4>
-                            <p className="text-sm text-muted-foreground">
-                              {outreachComponents.social_proof}
-                            </p>
-                          </div>
-                        )}
-
-                        {outreachComponents.notable_achievements?.length > 0 && (
-                          <div>
-                            <h4 className="font-medium mb-1 text-sm">
-                              Notable Achievements
-                            </h4>
-                            <ul className="space-y-1">
-                              {outreachComponents.notable_achievements
-                                .slice(0, 3)
-                                .map((achievement: string, i: number) => (
-                                  <li key={i} className="text-sm text-muted-foreground">
-                                    • {achievement}
-                                  </li>
-                                ))}
-                              {outreachComponents.notable_achievements.length > 3 && (
-                                <li className="text-sm text-muted-foreground italic">
-                                  ...{outreachComponents.notable_achievements.length - 3}{" "}
-                                  more
-                                </li>
-                              )}
-                            </ul>
-                          </div>
-                        )}
-
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => navigate("/outreach?tab=settings")}
-                          className="w-full"
+                        <Button 
+                          onClick={handleGenerateEmail}
+                          disabled={!proposedDates.trim() || isGenerating}
+                          className="w-full max-w-xs"
                         >
-                          <ExternalLink className="w-4 h-4 mr-2" />
-                          Edit Outreach Settings
+                          {isGenerating ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              Generating...
+                            </>
+                          ) : (
+                            <>
+                              <Mail className="w-4 h-4 mr-2" />
+                              Generate Email
+                            </>
+                          )}
                         </Button>
+                      </div>
+                    </TooltipTrigger>
+                    {!proposedDates.trim() && (
+                      <TooltipContent>
+                        <p>Please enter proposed dates first</p>
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                </TooltipProvider>
+                {generationError && (
+                  <p className="text-sm text-destructive">{generationError}</p>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-4 p-4 bg-muted/30 rounded-lg border border-white/10">
+                <div>
+                  <Label className="text-sm font-medium">To</Label>
+                  <Input 
+                    value={generatedEmail.to}
+                    disabled
+                    className="mt-1 bg-muted"
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-sm font-medium">Subject</Label>
+                  <Input 
+                    value={generatedEmail.subject}
+                    disabled
+                    className="mt-1 bg-muted"
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-sm font-medium">Email Body</Label>
+                  <Textarea
+                    value={generatedEmail.body}
+                    onChange={(e) => setGeneratedEmail({ ...generatedEmail, body: e.target.value })}
+                    disabled={!isEditing}
+                    rows={12}
+                    className={`mt-1 resize-none ${!isEditing ? 'bg-muted' : ''}`}
+                  />
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsEditing(!isEditing)}
+                  >
+                    {isEditing ? (
+                      <>
+                        <Check className="w-4 h-4 mr-2" />
+                        Done Editing
                       </>
                     ) : (
                       <>
-                        <p className="text-sm text-muted-foreground text-center py-4">
-                          Want to strengthen your pitch? Add outreach details in
-                          settings.
-                        </p>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => navigate("/outreach?tab=settings")}
-                          className="w-full"
-                        >
-                          <ExternalLink className="w-4 h-4 mr-2" />
-                          Add Outreach Details
-                        </Button>
+                        <Pencil className="w-4 h-4 mr-2" />
+                        Edit Email
                       </>
                     )}
-                  </CardContent>
-                </Card>
-              </AccordionContent>
-            </AccordionItem>
-
-            {/* Section 3: Venue-Specific Details */}
-            <AccordionItem value="venue-details" className="border-white/10">
-              <AccordionTrigger className="text-lg font-semibold hover:no-underline">
-                Venue-Specific Details *
-              </AccordionTrigger>
-              <AccordionContent>
-                <Card className="bg-card/50 border-white/10">
-                  <CardContent className="pt-6 space-y-4">
-                    <div>
-                      <Label htmlFor="proposed-dates" className="text-base">
-                        Proposed Dates *
-                      </Label>
-                      <Textarea
-                        id="proposed-dates"
-                        placeholder="Example: Available Oct 15-20 or Nov 3-10"
-                        value={proposedDates}
-                        onChange={(e) => {
-                          if (e.target.value.length <= 500) {
-                            setProposedDates(e.target.value);
-                            if (errors.proposedDates) {
-                              setErrors({ ...errors, proposedDates: "" });
-                            }
-                          }
-                        }}
-                        maxLength={500}
-                        rows={3}
-                        className={`resize-none mt-2 ${
-                          errors.proposedDates ? "border-destructive" : ""
-                        }`}
-                      />
-                      <div className="flex justify-between items-center mt-1">
-                        <p className="text-xs text-muted-foreground">
-                          {proposedDates.length}/500 characters
-                        </p>
-                        {errors.proposedDates && (
-                          <p className="text-xs text-destructive">
-                            {errors.proposedDates}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="proposed-bill" className="text-base">
-                        Proposed Bill *
-                      </Label>
-                      <Textarea
-                        id="proposed-bill"
-                        placeholder="Example: Headlining or co-bill with similar indie rock acts"
-                        value={proposedBill}
-                        onChange={(e) => {
-                          if (e.target.value.length <= 500) {
-                            setProposedBill(e.target.value);
-                            if (errors.proposedBill) {
-                              setErrors({ ...errors, proposedBill: "" });
-                            }
-                          }
-                        }}
-                        maxLength={500}
-                        rows={3}
-                        className={`resize-none mt-2 ${
-                          errors.proposedBill ? "border-destructive" : ""
-                        }`}
-                      />
-                      <div className="flex justify-between items-center mt-1">
-                        <p className="text-xs text-muted-foreground">
-                          {proposedBill.length}/500 characters
-                        </p>
-                        {errors.proposedBill && (
-                          <p className="text-xs text-destructive">
-                            {errors.proposedBill}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="additional-context" className="text-base">
-                        Additional Context (Optional)
-                      </Label>
-                      <Textarea
-                        id="additional-context"
-                        placeholder="Anything else this venue should know?"
-                        value={additionalContext}
-                        onChange={(e) => {
-                          if (e.target.value.length <= 500) {
-                            setAdditionalContext(e.target.value);
-                          }
-                        }}
-                        maxLength={500}
-                        rows={3}
-                        className="resize-none mt-2"
-                      />
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {additionalContext.length}/500 characters
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </AccordionContent>
-            </AccordionItem>
-
-            {/* Section 4: Email Preview */}
-            <AccordionItem value="email-preview" className="border-white/10">
-              <AccordionTrigger className="text-lg font-semibold hover:no-underline">
-                Email Preview
-              </AccordionTrigger>
-              <AccordionContent>
-                <Card className="bg-card/50 border-white/10">
-                  <CardContent className="pt-6">
-                    {!generatedEmail ? (
-                      <div className="text-center py-8 space-y-4">
-                        <div className="flex justify-center">
-                          <div className="rounded-full bg-muted p-4">
-                            <Mail className="w-8 h-8 text-muted-foreground" />
-                          </div>
-                        </div>
-                        <p className="text-muted-foreground">
-                          Your personalized email will be generated here
-                        </p>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div>
-                                <Button 
-                                  onClick={handleGenerateEmail}
-                                  disabled={!proposedDates.trim() || isGenerating}
-                                  className="w-full"
-                                >
-                                  {isGenerating ? (
-                                    <>
-                                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                      Generating...
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Mail className="w-4 h-4 mr-2" />
-                                      Generate Email
-                                    </>
-                                  )}
-                                </Button>
-                              </div>
-                            </TooltipTrigger>
-                            {!proposedDates.trim() && (
-                              <TooltipContent>
-                                <p>Please enter proposed dates first</p>
-                              </TooltipContent>
-                            )}
-                          </Tooltip>
-                        </TooltipProvider>
-                        {generationError && (
-                          <p className="text-sm text-destructive">{generationError}</p>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        <div>
-                          <Label className="text-sm font-medium">Subject</Label>
-                          <Input 
-                            value={generatedEmail.subject}
-                            disabled
-                            className="mt-1 bg-muted"
-                          />
-                        </div>
-
-                        <div>
-                          <Label className="text-sm font-medium">To</Label>
-                          <Input 
-                            value={generatedEmail.to}
-                            disabled
-                            className="mt-1 bg-muted"
-                          />
-                        </div>
-
-                        <div>
-                          <Label className="text-sm font-medium">Email Body</Label>
-                          <Textarea
-                            value={generatedEmail.body}
-                            onChange={(e) => setGeneratedEmail({ ...generatedEmail, body: e.target.value })}
-                            disabled={!isEditing}
-                            rows={12}
-                            className={`mt-1 resize-none ${!isEditing ? 'bg-white text-foreground' : ''}`}
-                          />
-                        </div>
-
-                        <div className="flex flex-wrap gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setIsEditing(!isEditing)}
-                          >
-                            {isEditing ? (
-                              <>
-                                <Check className="w-4 h-4 mr-2" />
-                                Done Editing
-                              </>
-                            ) : (
-                              <>
-                                <Pencil className="w-4 h-4 mr-2" />
-                                Edit Email
-                              </>
-                            )}
-                          </Button>
-                          
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={handleRegenerateEmail}
-                            disabled={isGenerating}
-                          >
-                            <RefreshCw className="w-4 h-4 mr-2" />
-                            Regenerate
-                          </Button>
-                          
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={handleCopyToClipboard}
-                          >
-                            <Copy className="w-4 h-4 mr-2" />
-                            Copy to Clipboard
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleRegenerateEmail}
+                    disabled={isGenerating}
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Regenerate
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCopyToClipboard}
+                  >
+                    <Copy className="w-4 h-4 mr-2" />
+                    Copy
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         <DialogFooter className="flex-col sm:flex-row gap-2">
