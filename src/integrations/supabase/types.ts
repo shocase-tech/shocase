@@ -193,6 +193,39 @@ export type Database = {
           },
         ]
       }
+      riders: {
+        Row: {
+          created_at: string
+          id: string
+          is_template: boolean
+          name: string
+          sections: Json
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_template?: boolean
+          name?: string
+          sections?: Json
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_template?: boolean
+          name?: string
+          sections?: Json
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       subscription_tiers: {
         Row: {
           cooldown_days: number | null
@@ -582,33 +615,57 @@ export type Database = {
         Args: { p_artist_id: string; p_venue_id: string }
         Returns: boolean
       }
-      generate_url_slug: {
-        Args: { artist_name: string }
-        Returns: string
-      }
-      get_public_artist_profile: {
-        Args: { profile_id: string } | { profile_identifier: string }
-        Returns: {
-          artist_name: string
-          bio: string
-          created_at: string
-          gallery_photos: string[]
-          genre: string
-          hero_photo_url: string
-          id: string
-          past_shows: Json
-          playlists: string[]
-          press_mentions: Json
-          press_photos: string[]
-          press_quotes: Json
-          profile_photo_url: string
-          show_videos: string[]
-          social_links: Json
-          streaming_links: Json
-          upcoming_shows: Json
-          updated_at: string
-        }[]
-      }
+      generate_url_slug: { Args: { artist_name: string }; Returns: string }
+      get_public_artist_profile:
+        | {
+            Args: { profile_id: string }
+            Returns: {
+              artist_name: string
+              bio: string
+              created_at: string
+              gallery_photos: string[]
+              genre: string
+              hero_photo_url: string
+              id: string
+              past_shows: Json
+              playlists: string[]
+              press_mentions: Json
+              press_photos: string[]
+              press_quotes: Json
+              profile_photo_url: string
+              show_videos: string[]
+              social_links: Json
+              streaming_links: Json
+              upcoming_shows: Json
+              updated_at: string
+            }[]
+          }
+        | {
+            Args: { profile_identifier: string }
+            Returns: {
+              artist_name: string
+              bio: string
+              contact_info: Json
+              created_at: string
+              gallery_photos: string[]
+              genre: string
+              hero_photo_url: string
+              id: string
+              is_published: boolean
+              past_shows: Json
+              playlists: string[]
+              press_mentions: Json
+              press_photos: string[]
+              press_quotes: Json
+              profile_photo_url: string
+              show_videos: string[]
+              social_links: Json
+              streaming_links: Json
+              upcoming_shows: Json
+              updated_at: string
+              url_slug: string
+            }[]
+          }
       is_profile_published_by_user_id: {
         Args: { profile_user_id: string }
         Returns: boolean
