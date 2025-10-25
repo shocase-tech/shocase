@@ -175,24 +175,30 @@ export default function RiderBuilder() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-4">
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-primary/5">
+      {/* Playful Header */}
+      <div className="border-b border-border/50 bg-card/80 backdrop-blur-lg sticky top-0 z-10 shadow-lg">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-start gap-4">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate("/epk")}
+                className="mt-2"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back
               </Button>
-              <div>
-                <h1 className="text-3xl font-bold">Build Your Rider</h1>
-                <p className="text-muted-foreground">
-                  Add all the details venues need to know before your show
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-4xl">🎸</span>
+                  <h1 className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                    Rider Builder
+                  </h1>
+                </div>
+                <p className="text-muted-foreground text-lg">
+                  Tell venues what you need — it's easier than you think! ✨
                 </p>
               </div>
             </div>
@@ -203,71 +209,76 @@ export default function RiderBuilder() {
             />
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex items-center justify-between">
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowTemplates(true)}
-                className="gap-2"
-              >
-                <Wand2 className="w-4 h-4" />
-                Start from Template
-              </Button>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowPreview(true)}
-                className="gap-2"
-              >
-                <Eye className="w-4 h-4" />
-                Preview
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleShare}
-                className="gap-2"
-              >
-                <Share2 className="w-4 h-4" />
-                Share
-              </Button>
-              <Button
-                size="sm"
-                onClick={handleExportPDF}
-                className="gap-2"
-              >
-                <Download className="w-4 h-4" />
-                Download PDF
-              </Button>
-            </div>
+          {/* Simplified Action Bar */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <Button
+              onClick={() => setShowTemplates(true)}
+              className="gap-2 bg-gradient-primary hover:opacity-90 transition-opacity shadow-glow"
+              size="lg"
+            >
+              <Wand2 className="w-5 h-5" />
+              Use a Template
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setShowPreview(true)}
+              className="gap-2"
+            >
+              <Eye className="w-4 h-4" />
+              Preview
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleShare}
+              className="gap-2"
+            >
+              <Share2 className="w-4 h-4" />
+              Share
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleExportPDF}
+              className="gap-2"
+            >
+              <Download className="w-4 h-4" />
+              Export PDF
+            </Button>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
+      {/* Main Content with Fun Tabs */}
+      <div className="container mx-auto px-4 py-12">
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
-          <div className="flex items-center justify-between mb-6">
-            <TabsList className="bg-muted/50">
-              <TabsTrigger value="technical" className="gap-2">
-                🎛️ Technical Rider
-                {technicalRider.sections.length > 0 && (
-                  <span className="text-xs text-muted-foreground">
-                    ({getCompletionPercentage(technicalRider)}%)
-                  </span>
-                )}
+          <div className="flex justify-center mb-8">
+            <TabsList className="bg-card/50 backdrop-blur p-1 shadow-card h-auto">
+              <TabsTrigger 
+                value="technical" 
+                className="gap-2 px-6 py-3 text-base data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground transition-all"
+              >
+                <span className="text-2xl">🎛️</span>
+                <div className="text-left">
+                  <div className="font-semibold">Technical</div>
+                  {technicalRider.sections.length > 0 && (
+                    <div className="text-xs opacity-80">
+                      {getCompletionPercentage(technicalRider)}% complete
+                    </div>
+                  )}
+                </div>
               </TabsTrigger>
-              <TabsTrigger value="hospitality" className="gap-2">
-                🍎 Hospitality Rider
-                {hospitalityRider.sections.length > 0 && (
-                  <span className="text-xs text-muted-foreground">
-                    ({getCompletionPercentage(hospitalityRider)}%)
-                  </span>
-                )}
+              <TabsTrigger 
+                value="hospitality" 
+                className="gap-2 px-6 py-3 text-base data-[state=active]:bg-gradient-accent data-[state=active]:text-accent-foreground transition-all"
+              >
+                <span className="text-2xl">🍎</span>
+                <div className="text-left">
+                  <div className="font-semibold">Hospitality</div>
+                  {hospitalityRider.sections.length > 0 && (
+                    <div className="text-xs opacity-80">
+                      {getCompletionPercentage(hospitalityRider)}% complete
+                    </div>
+                  )}
+                </div>
               </TabsTrigger>
             </TabsList>
           </div>

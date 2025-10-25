@@ -16,7 +16,7 @@ interface Props {
 }
 
 export default function RiderSection({ section, onUpdate, onDelete }: Props) {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const renderContent = () => {
     switch (section.type) {
@@ -255,44 +255,93 @@ export default function RiderSection({ section, onUpdate, onDelete }: Props) {
     }
   };
 
+  const getSectionIcon = () => {
+    const iconMap: Record<string, string> = {
+      "stage-plot": "🎭",
+      "input-list": "🎤",
+      "backline": "🎸",
+      "monitoring": "🔊",
+      "power": "⚡",
+      "lighting": "💡",
+      "notes": "📝",
+      "food-drink": "🍽️",
+      "dressing-room": "🚪",
+      "accommodation": "🏨",
+      "transportation": "🚗",
+      "guest-list": "📋",
+      "other": "✨",
+    };
+    return iconMap[section.type] || "📝";
+  };
+
+  const isContentFilled = section.content && Object.keys(section.content).length > 0;
+
   return (
     <DragDropSection id={section.id} isDraggable>
-      <Card className="group hover:shadow-md transition-shadow">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <div className="flex items-center gap-3 flex-1">
-            <GripVertical className="w-5 h-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity cursor-grab" />
-            <Input
-              value={section.title}
-              onChange={(e) => onUpdate({ title: e.target.value })}
-              className="font-semibold text-lg border-none shadow-none px-0 focus-visible:ring-0"
-            />
+      <Card className={`group overflow-hidden border-2 transition-all duration-300 ${
+        isExpanded 
+          ? 'shadow-glow border-primary/50' 
+          : 'hover:shadow-lg hover:border-primary/30 border-border'
+      }`}>
+        <CardHeader 
+          className="flex flex-row items-center justify-between space-y-0 pb-4 cursor-pointer bg-gradient-to-r from-card via-card to-primary/5"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          <div className="flex items-center gap-4 flex-1">
+            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <GripVertical className="w-5 h-5 text-muted-foreground cursor-grab active:cursor-grabbing" />
+            </div>
+            <div className="text-3xl">{getSectionIcon()}</div>
+            <div className="flex-1">
+              <Input
+                value={section.title}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  onUpdate({ title: e.target.value });
+                }}
+                onClick={(e) => e.stopPropagation()}
+                className="font-semibold text-lg border-none shadow-none px-0 focus-visible:ring-1 focus-visible:ring-primary bg-transparent"
+              />
+              {!isExpanded && isContentFilled && (
+                <div className="text-xs text-muted-foreground mt-1">✓ Has content</div>
+              )}
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setIsExpanded(!isExpanded)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsExpanded(!isExpanded);
+              }}
+              className="hover:bg-primary/10"
             >
               {isExpanded ? (
-                <ChevronUp className="w-4 h-4" />
+                <ChevronUp className="w-5 h-5" />
               ) : (
-                <ChevronDown className="w-4 h-4" />
+                <ChevronDown className="w-5 h-5" />
               )}
             </Button>
             <Button
               variant="ghost"
               size="sm"
-              onClick={onDelete}
-              className="text-destructive hover:text-destructive"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+              className="text-destructive hover:text-destructive hover:bg-destructive/10"
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="w-5 h-5" />
             </Button>
           </div>
         </CardHeader>
 
         {isExpanded && (
-          <CardContent className="animate-accordion-down">
-            {renderContent()}
+          <CardContent className="animate-accordion-down pt-0 border-t border-border/50 bg-card/50">
+            <div className="pt-6">
+              {renderContent()}
+            </div>
           </CardContent>
         )}
       </Card>
