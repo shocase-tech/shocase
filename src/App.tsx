@@ -34,7 +34,7 @@ const App = () => (
             <Route path="/venues" element={<Venues />} />
             <Route path="/venues/:slug" element={<VenuePage />} />
             <Route path="/account-settings" element={<AccountSettings />} />
-            <Route path="/rider-builder" element={<RiderBuilder />} />
+            <Route path="/rider" element={<RiderBuilder />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
             <Route path="/:identifier" element={<SimplePublicProfile />} />

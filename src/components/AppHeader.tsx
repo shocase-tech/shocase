@@ -101,7 +101,7 @@ const AppHeader = () => {
   const navItems = [
     { label: "Venues", path: "/venues" },
     { label: "Press Kit", path: "/epk" },
-    { label: "Rider Builder", path: "/rider-builder" },
+    { label: "Rider", path: "/rider" },
     { label: "Outreach", path: "/outreach" },
   ];
 

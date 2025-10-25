@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Wand2, Eye, Download, Share2, ArrowLeft } from "lucide-react";
+import { Wand2, Eye, Download, Share2, ArrowLeft, Music2, Utensils, Settings, Sliders } from "lucide-react";
 import { toast } from "sonner";
 import RiderBuilderCanvas from "@/components/rider/RiderBuilderCanvas";
 import RiderPreview from "@/components/rider/RiderPreview";
@@ -176,10 +176,10 @@ export default function RiderBuilder() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-primary/5">
-      {/* Playful Header */}
+      {/* Header */}
       <div className="border-b border-border/50 bg-card/80 backdrop-blur-lg sticky top-0 z-10 shadow-lg">
         <div className="container mx-auto px-4 py-6">
-          <div className="flex items-start justify-between mb-4">
+          <div className="flex items-start justify-between mb-6">
             <div className="flex items-start gap-4">
               <Button
                 variant="ghost"
@@ -190,15 +190,17 @@ export default function RiderBuilder() {
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back
               </Button>
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-4xl">🎸</span>
-                  <h1 className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+              <div className="space-y-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center">
+                    <Settings className="w-6 h-6 text-primary-foreground" />
+                  </div>
+                  <h1 className="text-4xl font-bold tracking-tight">
                     Rider Builder
                   </h1>
                 </div>
-                <p className="text-muted-foreground text-lg">
-                  Tell venues what you need — it's easier than you think! ✨
+                <p className="text-muted-foreground text-base ml-[52px]">
+                  Professional technical and hospitality requirements for your shows
                 </p>
               </div>
             </div>
@@ -209,20 +211,20 @@ export default function RiderBuilder() {
             />
           </div>
 
-          {/* Simplified Action Bar */}
+          {/* Action Bar */}
           <div className="flex items-center gap-3 flex-wrap">
             <Button
               onClick={() => setShowTemplates(true)}
-              className="gap-2 bg-gradient-primary hover:opacity-90 transition-opacity shadow-glow"
-              size="lg"
+              className="gap-2 bg-gradient-primary hover:opacity-90 transition-opacity"
+              size="default"
             >
-              <Wand2 className="w-5 h-5" />
-              Use a Template
+              <Wand2 className="w-4 h-4" />
+              Use Template
             </Button>
             <Button
               variant="outline"
               onClick={() => setShowPreview(true)}
-              className="gap-2"
+              className="gap-2 border-border/50 hover:border-primary/50"
             >
               <Eye className="w-4 h-4" />
               Preview
@@ -230,7 +232,7 @@ export default function RiderBuilder() {
             <Button
               variant="outline"
               onClick={handleShare}
-              className="gap-2"
+              className="gap-2 border-border/50 hover:border-primary/50"
             >
               <Share2 className="w-4 h-4" />
               Share
@@ -238,7 +240,7 @@ export default function RiderBuilder() {
             <Button
               variant="outline"
               onClick={handleExportPDF}
-              className="gap-2"
+              className="gap-2 border-border/50 hover:border-primary/50"
             >
               <Download className="w-4 h-4" />
               Export PDF
@@ -247,20 +249,20 @@ export default function RiderBuilder() {
         </div>
       </div>
 
-      {/* Main Content with Fun Tabs */}
+      {/* Main Content */}
       <div className="container mx-auto px-4 py-12">
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
-          <div className="flex justify-center mb-8">
-            <TabsList className="bg-card/50 backdrop-blur p-1 shadow-card h-auto">
+          <div className="flex justify-center mb-10">
+            <TabsList className="bg-card/80 backdrop-blur-sm p-1.5 shadow-lg border border-border/50 h-auto">
               <TabsTrigger 
                 value="technical" 
-                className="gap-2 px-6 py-3 text-base data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground transition-all"
+                className="gap-3 px-8 py-4 text-base data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all rounded-lg"
               >
-                <span className="text-2xl">🎛️</span>
+                <Sliders className="w-5 h-5" />
                 <div className="text-left">
-                  <div className="font-semibold">Technical</div>
+                  <div className="font-semibold">Technical Rider</div>
                   {technicalRider.sections.length > 0 && (
-                    <div className="text-xs opacity-80">
+                    <div className="text-xs opacity-70 font-normal">
                       {getCompletionPercentage(technicalRider)}% complete
                     </div>
                   )}
@@ -268,13 +270,13 @@ export default function RiderBuilder() {
               </TabsTrigger>
               <TabsTrigger 
                 value="hospitality" 
-                className="gap-2 px-6 py-3 text-base data-[state=active]:bg-gradient-accent data-[state=active]:text-accent-foreground transition-all"
+                className="gap-3 px-8 py-4 text-base data-[state=active]:bg-accent data-[state=active]:text-accent-foreground transition-all rounded-lg"
               >
-                <span className="text-2xl">🍎</span>
+                <Utensils className="w-5 h-5" />
                 <div className="text-left">
-                  <div className="font-semibold">Hospitality</div>
+                  <div className="font-semibold">Hospitality Rider</div>
                   {hospitalityRider.sections.length > 0 && (
-                    <div className="text-xs opacity-80">
+                    <div className="text-xs opacity-70 font-normal">
                       {getCompletionPercentage(hospitalityRider)}% complete
                     </div>
                   )}
