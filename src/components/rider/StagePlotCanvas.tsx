@@ -33,9 +33,9 @@ export default function StagePlotCanvas({ data, onChange }: Props) {
     if (!canvasRef.current) return;
 
     const canvas = new FabricCanvas(canvasRef.current, {
-      width: 1000,
-      height: 700,
-      backgroundColor: "#fafafa",
+      width: 900,
+      height: 600,
+      backgroundColor: "#ffffff",
     });
 
     // Add stage indicators and grid first
@@ -63,8 +63,8 @@ export default function StagePlotCanvas({ data, onChange }: Props) {
   }, []);
 
   const addStageSetup = (canvas: FabricCanvas) => {
-    const width = canvas.width || 1000;
-    const height = canvas.height || 700;
+    const width = canvas.width || 900;
+    const height = canvas.height || 600;
 
     // Remove existing stage setup elements
     canvas.getObjects().forEach(obj => {
@@ -180,30 +180,28 @@ export default function StagePlotCanvas({ data, onChange }: Props) {
     if (!fabricCanvas) return;
 
     const Icon = element.icon;
-    const iconSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    iconSvg.setAttribute("width", "24");
-    iconSvg.setAttribute("height", "24");
-    iconSvg.setAttribute("viewBox", "0 0 24 24");
-    iconSvg.setAttribute("fill", "none");
-    iconSvg.setAttribute("stroke", element.color);
-    iconSvg.setAttribute("stroke-width", "2");
-    iconSvg.setAttribute("stroke-linecap", "round");
-    iconSvg.setAttribute("stroke-linejoin", "round");
+    
+    // Icon path mappings for each instrument/equipment type
+    const iconPaths: Record<string, string> = {
+      "mic": "M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z M19 10v2a7 7 0 0 1-14 0v-2 M12 19v4 M8 23h8",
+      "guitar-amp": "M11 5v4M5 8h2a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H5M14 8h2a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2 M21 15h-6 M18 12v6",
+      "bass-amp": "M11 5v4M5 8h2a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H5M14 8h2a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2 M21 15h-6 M18 12v6",
+      "drums": "M12 2v20 M2 12h20",
+      "keyboard": "M2 14h20v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6z M6 10v4 M10 10v4 M14 10v4 M18 10v4",
+      "guitar": "M8 12l-4-4 M16 4l4 4 M12 8l4 4-4 4-4-4 4-4z M7 17l-3 3",
+      "bass": "M9 18V5l12-2v13 M9 9l12-2",
+      "monitor": "M11 5L6 9l2 7 4-3-4-8z M13 5l5 4-2 7-4-3 4-8z",
+      "di-box": "M3 3h18v18H3z M9 9h6v6H9z",
+      "cable": "M8 12h8 M12 8v8"
+    };
 
-    // Create a temporary div to render the icon
-    const tempDiv = document.createElement("div");
-    tempDiv.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${element.color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>`;
+    const iconScale = element.size / 30;
+    const scaledIconPath = iconPaths[element.id] || iconPaths["mic"];
     
-    // Get icon path from Lucide
-    const iconElement = document.createElement("div");
-    iconElement.style.position = "absolute";
-    iconElement.style.left = "-9999px";
-    document.body.appendChild(iconElement);
-    
-    // Create the group with circle background and text
+    // Create the group
     const group = new Group([], {
-      left: 200,
-      top: 150,
+      left: 300 + Math.random() * 200,
+      top: 150 + Math.random() * 200,
       selectable: true,
       hasControls: true,
     });
@@ -214,30 +212,33 @@ export default function StagePlotCanvas({ data, onChange }: Props) {
        A ${element.size / 2} ${element.size / 2} 0 0 1 ${element.size / 2} ${element.size}
        A ${element.size / 2} ${element.size / 2} 0 0 1 ${element.size / 2} 0 Z`,
       {
-        fill: element.color + "20",
+        fill: element.color + "15",
         stroke: element.color,
-        strokeWidth: 2,
+        strokeWidth: 2.5,
       }
     );
 
-    // Icon path (centered)
-    const iconPath = new Path(
-      `M ${element.size / 2 - 6} ${element.size / 2 - 6} l 4 0 l 0 8 l -4 0 Z M ${element.size / 2 + 2} ${element.size / 2 - 6} l 4 0 l 0 8 l -4 0 Z`,
-      {
-        fill: element.color,
-        stroke: element.color,
-        strokeWidth: 1,
-      }
-    );
+    // Create icon using path
+    const iconPath = new Path(scaledIconPath, {
+      fill: "none",
+      stroke: element.color,
+      strokeWidth: 2,
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      scaleX: iconScale,
+      scaleY: iconScale,
+      left: element.size / 2 - 12 * iconScale,
+      top: element.size / 2 - 12 * iconScale,
+    });
 
     // Label below
     const label = new FabricText(element.label, {
-      fontSize: 11,
+      fontSize: 12,
       fontFamily: "Inter, system-ui, sans-serif",
       fill: "#1e293b",
-      fontWeight: "500",
+      fontWeight: "600",
       left: element.size / 2,
-      top: element.size + 5,
+      top: element.size + 8,
       originX: "center",
     });
 
@@ -248,14 +249,13 @@ export default function StagePlotCanvas({ data, onChange }: Props) {
     fabricCanvas.add(group);
     fabricCanvas.renderAll();
     
-    document.body.removeChild(iconElement);
     toast.success(`Added ${element.label}`);
   };
 
   const clearCanvas = () => {
     if (!fabricCanvas) return;
     fabricCanvas.clear();
-    fabricCanvas.backgroundColor = "#fafafa";
+    fabricCanvas.backgroundColor = "#ffffff";
     addStageSetup(fabricCanvas);
     fabricCanvas.renderAll();
     onChange({ ...data, canvasData: null });
@@ -311,7 +311,9 @@ export default function StagePlotCanvas({ data, onChange }: Props) {
     <div className="space-y-6">
       {/* Canvas */}
       <Card className="p-6 bg-gradient-to-br from-background to-muted/20 border-2">
-        <canvas ref={canvasRef} className="w-full rounded-lg shadow-lg bg-white" />
+        <div className="flex justify-center">
+          <canvas ref={canvasRef} className="rounded-lg shadow-lg border border-border" />
+        </div>
       </Card>
 
       {/* Element Library */}
