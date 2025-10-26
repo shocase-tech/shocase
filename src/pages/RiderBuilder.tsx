@@ -11,6 +11,8 @@ import RiderPreview from "@/components/rider/RiderPreview";
 import RiderTemplates from "@/components/rider/RiderTemplates";
 import SaveIndicator from "@/components/SaveIndicator";
 import { useAutoSave } from "@/hooks/useAutoSave";
+import AppHeader from "@/components/AppHeader";
+import Footer from "@/components/Footer";
 
 export interface RiderSection {
   id: string;
@@ -175,9 +177,11 @@ export default function RiderBuilder() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-primary/5">
-      {/* Header */}
-      <div className="border-b border-border/50 bg-card/80 backdrop-blur-lg sticky top-0 z-10 shadow-lg">
+    <>
+      <AppHeader />
+      <div className="min-h-screen bg-gradient-to-b from-background via-background to-primary/5">
+        {/* Header */}
+        <div className="border-b border-border/50 bg-card/80 backdrop-blur-lg sticky top-0 z-10 shadow-lg">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-start justify-between mb-6">
             <div className="flex items-start gap-4">
@@ -322,6 +326,8 @@ export default function RiderBuilder() {
           toast.success("Template applied!");
         }}
       />
-    </div>
+      </div>
+      <Footer />
+    </>
   );
 }
