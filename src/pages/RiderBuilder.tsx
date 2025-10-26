@@ -4,15 +4,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Wand2, Eye, Download, Share2, ArrowLeft, Music2, Utensils, Settings, Sliders } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Wand2, Eye, Download, Share2, ArrowLeft, Settings, Theater, Mic, Speaker, Zap, Lightbulb, FileText, UtensilsCrossed, DoorOpen, Hotel, Car, ClipboardList } from "lucide-react";
 import { toast } from "sonner";
-import RiderBuilderCanvas from "@/components/rider/RiderBuilderCanvas";
+import StagePlotEditor from "@/components/rider/StagePlotEditor";
 import RiderPreview from "@/components/rider/RiderPreview";
 import RiderTemplates from "@/components/rider/RiderTemplates";
 import SaveIndicator from "@/components/SaveIndicator";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import AppHeader from "@/components/AppHeader";
 import Footer from "@/components/Footer";
+import RiderSection from "@/components/rider/RiderSection";
 
 export interface RiderSection {
   id: string;
@@ -254,53 +256,200 @@ export default function RiderBuilder() {
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-12 max-w-5xl">
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
-          <div className="flex justify-center mb-10">
-            <TabsList className="bg-card/80 backdrop-blur-sm p-1.5 shadow-lg border border-border/50 h-auto">
+          <div className="flex justify-center mb-12">
+            <TabsList className="bg-card/90 backdrop-blur-sm p-2 shadow-xl border-2 border-border/30 h-auto gap-2">
               <TabsTrigger 
                 value="technical" 
-                className="gap-3 px-8 py-4 text-base data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all rounded-lg"
+                className="gap-3 px-10 py-5 text-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg transition-all rounded-lg"
               >
-                <Sliders className="w-5 h-5" />
+                <Settings className="w-6 h-6" />
                 <div className="text-left">
-                  <div className="font-semibold">Technical Rider</div>
-                  {technicalRider.sections.length > 0 && (
-                    <div className="text-xs opacity-70 font-normal">
-                      {getCompletionPercentage(technicalRider)}% complete
-                    </div>
-                  )}
+                  <div className="font-bold">Technical Rider</div>
+                  <div className="text-xs opacity-80 font-normal">Stage & Equipment</div>
                 </div>
               </TabsTrigger>
               <TabsTrigger 
                 value="hospitality" 
-                className="gap-3 px-8 py-4 text-base data-[state=active]:bg-accent data-[state=active]:text-accent-foreground transition-all rounded-lg"
+                className="gap-3 px-10 py-5 text-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-accent data-[state=active]:to-accent/80 data-[state=active]:text-accent-foreground data-[state=active]:shadow-lg transition-all rounded-lg"
               >
-                <Utensils className="w-5 h-5" />
+                <UtensilsCrossed className="w-6 h-6" />
                 <div className="text-left">
-                  <div className="font-semibold">Hospitality Rider</div>
-                  {hospitalityRider.sections.length > 0 && (
-                    <div className="text-xs opacity-70 font-normal">
-                      {getCompletionPercentage(hospitalityRider)}% complete
-                    </div>
-                  )}
+                  <div className="font-bold">Hospitality Rider</div>
+                  <div className="text-xs opacity-80 font-normal">Catering & Amenities</div>
                 </div>
               </TabsTrigger>
             </TabsList>
           </div>
 
-          <TabsContent value="technical" className="animate-fade-in">
-            <RiderBuilderCanvas
-              rider={technicalRider}
-              onChange={setTechnicalRider}
-            />
+          <TabsContent value="technical" className="space-y-6">
+            <Accordion type="multiple" defaultValue={["stage-plot"]} className="space-y-4">
+              <AccordionItem value="stage-plot" className="border-2 rounded-xl overflow-hidden bg-card shadow-sm">
+                <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Theater className="w-5 h-5 text-primary" />
+                    </div>
+                    <div className="text-left">
+                      <div className="font-semibold text-base">Stage Plot</div>
+                      <div className="text-xs text-muted-foreground">Visual layout of your stage setup</div>
+                    </div>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-6 py-6">
+                  <StagePlotEditor
+                    data={technicalRider.sections.find(s => s.type === "stage-plot")?.content || {}}
+                    onChange={(content) => {
+                      const existingSection = technicalRider.sections.find(s => s.type === "stage-plot");
+                      if (existingSection) {
+                        setTechnicalRider({
+                          ...technicalRider,
+                          sections: technicalRider.sections.map(s =>
+                            s.type === "stage-plot" ? { ...s, content } : s
+                          ),
+                        });
+                      } else {
+                        const newSection: RiderSection = {
+                          id: crypto.randomUUID(),
+                          title: "Stage Plot",
+                          type: "stage-plot",
+                          content,
+                        };
+                        setTechnicalRider({
+                          ...technicalRider,
+                          sections: [...technicalRider.sections, newSection],
+                        });
+                      }
+                    }}
+                  />
+                </AccordionContent>
+              </AccordionItem>
+
+              {[
+                { type: "input-list", icon: Mic, title: "Input List", description: "Channels and microphones needed" },
+                { type: "monitoring", icon: Speaker, title: "Monitoring", description: "Monitor mixes and stage sound" },
+                { type: "power", icon: Zap, title: "Power Requirements", description: "Electrical and power needs" },
+                { type: "lighting", icon: Lightbulb, title: "Lighting", description: "Lighting requirements and cues" },
+                { type: "notes", icon: FileText, title: "Additional Notes", description: "Any other technical requirements" },
+              ].map((sectionConfig) => {
+                const section = technicalRider.sections.find(s => s.type === sectionConfig.type);
+                const defaultSection: RiderSection = {
+                  id: crypto.randomUUID(),
+                  title: sectionConfig.title,
+                  type: sectionConfig.type,
+                  content: {},
+                };
+                const Icon = sectionConfig.icon;
+                return (
+                  <AccordionItem key={sectionConfig.type} value={sectionConfig.type} className="border-2 rounded-xl overflow-hidden bg-card shadow-sm">
+                    <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-muted/50 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                          <Icon className="w-5 h-5 text-primary" />
+                        </div>
+                        <div className="text-left">
+                          <div className="font-semibold text-base">{sectionConfig.title}</div>
+                          <div className="text-xs text-muted-foreground">{sectionConfig.description}</div>
+                        </div>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="px-6 py-6">
+                      <RiderSection
+                        section={section || defaultSection}
+                        onUpdate={(updates) => {
+                          if (section) {
+                            setTechnicalRider({
+                              ...technicalRider,
+                              sections: technicalRider.sections.map(s =>
+                                s.id === section.id ? { ...s, ...updates } : s
+                              ),
+                            });
+                          } else {
+                            setTechnicalRider({
+                              ...technicalRider,
+                              sections: [...technicalRider.sections, { ...defaultSection, ...updates }],
+                            });
+                          }
+                        }}
+                        onDelete={() => {
+                          if (section) {
+                            setTechnicalRider({
+                              ...technicalRider,
+                              sections: technicalRider.sections.filter(s => s.id !== section.id),
+                            });
+                          }
+                        }}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+                );
+              })}
+            </Accordion>
           </TabsContent>
 
-          <TabsContent value="hospitality" className="animate-fade-in">
-            <RiderBuilderCanvas
-              rider={hospitalityRider}
-              onChange={setHospitalityRider}
-            />
+          <TabsContent value="hospitality" className="space-y-6">
+            <Accordion type="multiple" className="space-y-4">
+              {[
+                { type: "catering", icon: UtensilsCrossed, title: "Catering", description: "Food and beverage requirements" },
+                { type: "green-room", icon: DoorOpen, title: "Green Room", description: "Backstage amenities" },
+                { type: "accommodation", icon: Hotel, title: "Accommodation", description: "Hotel and lodging needs" },
+                { type: "transportation", icon: Car, title: "Transportation", description: "Travel and parking" },
+                { type: "misc", icon: ClipboardList, title: "Miscellaneous", description: "Other hospitality needs" },
+              ].map((sectionConfig) => {
+                const section = hospitalityRider.sections.find(s => s.type === sectionConfig.type);
+                const defaultSection: RiderSection = {
+                  id: crypto.randomUUID(),
+                  title: sectionConfig.title,
+                  type: sectionConfig.type,
+                  content: {},
+                };
+                const Icon = sectionConfig.icon;
+                return (
+                  <AccordionItem key={sectionConfig.type} value={sectionConfig.type} className="border-2 rounded-xl overflow-hidden bg-card shadow-sm">
+                    <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-muted/50 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center">
+                          <Icon className="w-5 h-5 text-accent-foreground" />
+                        </div>
+                        <div className="text-left">
+                          <div className="font-semibold text-base">{sectionConfig.title}</div>
+                          <div className="text-xs text-muted-foreground">{sectionConfig.description}</div>
+                        </div>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="px-6 py-6">
+                      <RiderSection
+                        section={section || defaultSection}
+                        onUpdate={(updates) => {
+                          if (section) {
+                            setHospitalityRider({
+                              ...hospitalityRider,
+                              sections: hospitalityRider.sections.map(s =>
+                                s.id === section.id ? { ...s, ...updates } : s
+                              ),
+                            });
+                          } else {
+                            setHospitalityRider({
+                              ...hospitalityRider,
+                              sections: [...hospitalityRider.sections, { ...defaultSection, ...updates }],
+                            });
+                          }
+                        }}
+                        onDelete={() => {
+                          if (section) {
+                            setHospitalityRider({
+                              ...hospitalityRider,
+                              sections: hospitalityRider.sections.filter(s => s.id !== section.id),
+                            });
+                          }
+                        }}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+                );
+              })}
+            </Accordion>
           </TabsContent>
         </Tabs>
       </div>
