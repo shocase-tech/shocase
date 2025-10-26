@@ -1,9 +1,38 @@
 import { useEffect, useRef, useState } from "react";
-import { Canvas as FabricCanvas, Group, Path, Text as FabricText, FabricObject, Line } from "fabric";
+import { Canvas as FabricCanvas, Group, Path, Text as FabricText, FabricObject, Line, FabricImage } from "fabric";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Trash2, Download, Undo, Redo, Mic, Guitar, Music, Disc3, Piano, Volume2, Speaker, Repeat, Cable, Square } from "lucide-react";
+import { Trash2, Download, Undo, Redo } from "lucide-react";
 import { toast } from "sonner";
+
+// Import SVG assets
+import StandingMicSVG from "@/assets/stage-equipment/Standing Mic.svg";
+import GuitarAmpSVG from "@/assets/stage-equipment/Guitar Amp.svg";
+import BassAmpSVG from "@/assets/stage-equipment/Bass Amp.svg";
+import DrumsSVG from "@/assets/stage-equipment/Drums.svg";
+import MIDIKeyboardSVG from "@/assets/stage-equipment/MIDI Keyboard.svg";
+import ElectricPianoSVG from "@/assets/stage-equipment/Electric Piano.svg";
+import SynthSVG from "@/assets/stage-equipment/Synth.svg";
+import GuitarASVG from "@/assets/stage-equipment/Guitar A.svg";
+import GuitarBSVG from "@/assets/stage-equipment/Guitar B.svg";
+import BassGuitarSVG from "@/assets/stage-equipment/Bass Guitar.svg";
+import FoldbackSpeakerSVG from "@/assets/stage-equipment/Foldback Speaker.svg";
+import DJDecksSVG from "@/assets/stage-equipment/DJ Decks.svg";
+import DrumMachineSVG from "@/assets/stage-equipment/Drum Machine.svg";
+import PedalBoardSVG from "@/assets/stage-equipment/Pedal Board.svg";
+import DIMonoSVG from "@/assets/stage-equipment/DI Mono.svg";
+import DIStereoSVG from "@/assets/stage-equipment/DI Stereo.svg";
+import BoomMicLeftSVG from "@/assets/stage-equipment/Boom Mic Left.svg";
+import BoomMicRightSVG from "@/assets/stage-equipment/Boom Mic Right.svg";
+import PersonASVG from "@/assets/stage-equipment/Person A.svg";
+import PersonBSVG from "@/assets/stage-equipment/Person B.svg";
+import PersonCSVG from "@/assets/stage-equipment/Person C.svg";
+import LaptopSVG from "@/assets/stage-equipment/Laptop.svg";
+import SoundcardSVG from "@/assets/stage-equipment/Soundcard.svg";
+import RiserSVG from "@/assets/stage-equipment/Riser.svg";
+import StandSVG from "@/assets/stage-equipment/Stand.svg";
+import KeyboardStandSVG from "@/assets/stage-equipment/Keyboard Stand.svg";
+import GuitarStandSVG from "@/assets/stage-equipment/Guitar Stand.svg";
 
 interface Props {
   data: any;
@@ -11,16 +40,33 @@ interface Props {
 }
 
 const STAGE_ELEMENTS = [
-  { id: "mic", label: "Vocal Mic", icon: Mic, color: "#8b5cf6", size: 50 },
-  { id: "guitar-amp", label: "Guitar Amp", icon: Volume2, color: "#ef4444", size: 60 },
-  { id: "bass-amp", label: "Bass Amp", icon: Volume2, color: "#dc2626", size: 60 },
-  { id: "drums", label: "Drum Kit", icon: Disc3, color: "#f59e0b", size: 80 },
-  { id: "keyboard", label: "Keyboard", icon: Piano, color: "#a855f7", size: 70 },
-  { id: "guitar", label: "Guitar", icon: Guitar, color: "#ec4899", size: 50 },
-  { id: "bass", label: "Bass", icon: Music, color: "#be123c", size: 50 },
-  { id: "monitor", label: "Floor Monitor", icon: Speaker, color: "#14b8a6", size: 45 },
-  { id: "di-box", label: "DI Box", icon: Square, color: "#64748b", size: 35 },
-  { id: "cable", label: "Cable Run", icon: Cable, color: "#475569", size: 40 },
+  { id: "standing-mic", label: "Standing Mic", svg: StandingMicSVG, scale: 0.8 },
+  { id: "boom-mic-left", label: "Boom Mic Left", svg: BoomMicLeftSVG, scale: 0.8 },
+  { id: "boom-mic-right", label: "Boom Mic Right", svg: BoomMicRightSVG, scale: 0.8 },
+  { id: "guitar-amp", label: "Guitar Amp", svg: GuitarAmpSVG, scale: 0.6 },
+  { id: "bass-amp", label: "Bass Amp", svg: BassAmpSVG, scale: 0.6 },
+  { id: "drums", label: "Drum Kit", svg: DrumsSVG, scale: 0.5 },
+  { id: "midi-keyboard", label: "MIDI Keyboard", svg: MIDIKeyboardSVG, scale: 0.5 },
+  { id: "electric-piano", label: "Electric Piano", svg: ElectricPianoSVG, scale: 0.5 },
+  { id: "synth", label: "Synth", svg: SynthSVG, scale: 0.5 },
+  { id: "guitar-a", label: "Guitar A", svg: GuitarASVG, scale: 0.6 },
+  { id: "guitar-b", label: "Guitar B", svg: GuitarBSVG, scale: 0.6 },
+  { id: "bass-guitar", label: "Bass Guitar", svg: BassGuitarSVG, scale: 0.6 },
+  { id: "foldback-speaker", label: "Floor Monitor", svg: FoldbackSpeakerSVG, scale: 0.6 },
+  { id: "dj-decks", label: "DJ Decks", svg: DJDecksSVG, scale: 0.5 },
+  { id: "drum-machine", label: "Drum Machine", svg: DrumMachineSVG, scale: 0.6 },
+  { id: "pedal-board", label: "Pedal Board", svg: PedalBoardSVG, scale: 0.7 },
+  { id: "di-mono", label: "DI Box Mono", svg: DIMonoSVG, scale: 0.8 },
+  { id: "di-stereo", label: "DI Box Stereo", svg: DIStereoSVG, scale: 0.8 },
+  { id: "person-a", label: "Person A", svg: PersonASVG, scale: 0.5 },
+  { id: "person-b", label: "Person B", svg: PersonBSVG, scale: 0.5 },
+  { id: "person-c", label: "Person C", svg: PersonCSVG, scale: 0.5 },
+  { id: "laptop", label: "Laptop", svg: LaptopSVG, scale: 0.7 },
+  { id: "soundcard", label: "Audio Interface", svg: SoundcardSVG, scale: 0.6 },
+  { id: "riser", label: "Riser", svg: RiserSVG, scale: 0.4 },
+  { id: "stand", label: "Stand", svg: StandSVG, scale: 0.8 },
+  { id: "keyboard-stand", label: "Keyboard Stand", svg: KeyboardStandSVG, scale: 0.5 },
+  { id: "guitar-stand", label: "Guitar Stand", svg: GuitarStandSVG, scale: 0.7 },
 ];
 
 export default function StagePlotCanvas({ data, onChange }: Props) {
@@ -176,80 +222,51 @@ export default function StagePlotCanvas({ data, onChange }: Props) {
     setHistoryStep(newHistory.length - 1);
   };
 
-  const addElement = (element: typeof STAGE_ELEMENTS[0]) => {
+  const addElement = async (element: typeof STAGE_ELEMENTS[0]) => {
     if (!fabricCanvas) return;
 
-    const Icon = element.icon;
-    
-    // Icon path mappings for each instrument/equipment type
-    const iconPaths: Record<string, string> = {
-      "mic": "M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z M19 10v2a7 7 0 0 1-14 0v-2 M12 19v4 M8 23h8",
-      "guitar-amp": "M11 5v4M5 8h2a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H5M14 8h2a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2 M21 15h-6 M18 12v6",
-      "bass-amp": "M11 5v4M5 8h2a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H5M14 8h2a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2 M21 15h-6 M18 12v6",
-      "drums": "M12 2v20 M2 12h20",
-      "keyboard": "M2 14h20v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6z M6 10v4 M10 10v4 M14 10v4 M18 10v4",
-      "guitar": "M8 12l-4-4 M16 4l4 4 M12 8l4 4-4 4-4-4 4-4z M7 17l-3 3",
-      "bass": "M9 18V5l12-2v13 M9 9l12-2",
-      "monitor": "M11 5L6 9l2 7 4-3-4-8z M13 5l5 4-2 7-4-3 4-8z",
-      "di-box": "M3 3h18v18H3z M9 9h6v6H9z",
-      "cable": "M8 12h8 M12 8v8"
-    };
+    try {
+      // Load the SVG image
+      const imgElement = await FabricImage.fromURL(element.svg, {
+        crossOrigin: 'anonymous'
+      });
 
-    const iconScale = element.size / 30;
-    const scaledIconPath = iconPaths[element.id] || iconPaths["mic"];
-    
-    // Create the group
-    const group = new Group([], {
-      left: 300 + Math.random() * 200,
-      top: 150 + Math.random() * 200,
-      selectable: true,
-      hasControls: true,
-    });
+      // Create a group to hold the image and label
+      const group = new Group([], {
+        left: 300 + Math.random() * 200,
+        top: 150 + Math.random() * 200,
+        selectable: true,
+        hasControls: true,
+      });
 
-    // Background circle
-    const bgCircle = new Path(
-      `M ${element.size / 2} 0 
-       A ${element.size / 2} ${element.size / 2} 0 0 1 ${element.size / 2} ${element.size}
-       A ${element.size / 2} ${element.size / 2} 0 0 1 ${element.size / 2} 0 Z`,
-      {
-        fill: element.color + "15",
-        stroke: element.color,
-        strokeWidth: 2.5,
-      }
-    );
+      // Scale the image
+      imgElement.scale(element.scale);
 
-    // Create icon using path
-    const iconPath = new Path(scaledIconPath, {
-      fill: "none",
-      stroke: element.color,
-      strokeWidth: 2,
-      strokeLinecap: "round",
-      strokeLinejoin: "round",
-      scaleX: iconScale,
-      scaleY: iconScale,
-      left: element.size / 2 - 12 * iconScale,
-      top: element.size / 2 - 12 * iconScale,
-    });
+      // Label below the image
+      const imgWidth = (imgElement.width || 100) * element.scale;
+      const imgHeight = (imgElement.height || 100) * element.scale;
+      
+      const label = new FabricText(element.label, {
+        fontSize: 11,
+        fontFamily: "Inter, system-ui, sans-serif",
+        fill: "#1e293b",
+        fontWeight: "600",
+        left: imgWidth / 2,
+        top: imgHeight + 5,
+        originX: "center",
+      });
 
-    // Label below
-    const label = new FabricText(element.label, {
-      fontSize: 12,
-      fontFamily: "Inter, system-ui, sans-serif",
-      fill: "#1e293b",
-      fontWeight: "600",
-      left: element.size / 2,
-      top: element.size + 8,
-      originX: "center",
-    });
+      group.add(imgElement);
+      group.add(label);
 
-    group.add(bgCircle);
-    group.add(iconPath);
-    group.add(label);
-
-    fabricCanvas.add(group);
-    fabricCanvas.renderAll();
-    
-    toast.success(`Added ${element.label}`);
+      fabricCanvas.add(group);
+      fabricCanvas.renderAll();
+      
+      toast.success(`Added ${element.label}`);
+    } catch (error) {
+      console.error("Error loading SVG:", error);
+      toast.error(`Failed to add ${element.label}`);
+    }
   };
 
   const clearCanvas = () => {
@@ -321,17 +338,16 @@ export default function StagePlotCanvas({ data, onChange }: Props) {
         <h4 className="text-sm font-semibold text-foreground">Add Stage Elements</h4>
         <div className="grid grid-cols-5 gap-3">
           {STAGE_ELEMENTS.map((element) => {
-            const Icon = element.icon;
             return (
               <Button
                 key={element.id}
                 variant="outline"
                 size="lg"
                 onClick={() => addElement(element)}
-                className="h-auto py-4 flex flex-col items-center gap-2 hover:scale-105 transition-transform border-2 hover:border-primary"
+                className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-transform border-2 hover:border-primary"
               >
-                <Icon className="w-6 h-6" style={{ color: element.color }} />
-                <span className="text-xs font-medium text-center">{element.label}</span>
+                <img src={element.svg} alt={element.label} className="w-10 h-10 object-contain" />
+                <span className="text-xs font-medium text-center leading-tight">{element.label}</span>
               </Button>
             );
           })}
