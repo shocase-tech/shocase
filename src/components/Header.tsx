@@ -174,21 +174,21 @@ const Header = () => {
           {/* Center Navigation - Desktop */}
           <nav className="hidden md:flex items-center gap-2">
             <Button 
-              variant="pill" 
+              variant="ghost-pill" 
               onClick={() => navigate("/venues")}
               className="text-white/80 hover:text-white"
             >
               Venues
             </Button>
             <Button 
-              variant="pill" 
+              variant="ghost-pill" 
               onClick={() => user ? navigate("/epk") : navigate("/auth")}
               className="text-white/80 hover:text-white"
             >
               Press Kit
             </Button>
             <Button 
-              variant="pill" 
+              variant="ghost-pill" 
               onClick={() => user ? navigate("/outreach") : navigate("/auth")}
               className="text-white/80 hover:text-white"
             >
@@ -196,7 +196,7 @@ const Header = () => {
             </Button>
             {isLandingPage && (
               <Button 
-                variant="pill" 
+                variant="ghost-pill" 
                 onClick={scrollToPricing}
                 className="text-white/80 hover:text-white"
               >

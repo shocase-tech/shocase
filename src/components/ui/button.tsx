@@ -22,6 +22,7 @@ const buttonVariants = cva(
         glass: "bg-glass backdrop-blur-glass border border-glass text-foreground hover:bg-glass/80 hover:shadow-accent transition-all duration-300",
         pill: "rounded-full bg-glass backdrop-blur-glass border border-glass text-foreground hover:bg-glass/80 hover:shadow-accent transition-all duration-300",
         "pill-hero": "rounded-full bg-gradient-primary text-primary-foreground hover:shadow-glow hover:scale-105 transform transition-all duration-300 shadow-lg border border-primary/20",
+        "ghost-pill": "rounded-full bg-transparent border border-transparent text-foreground transition-all duration-300 hover:bg-glass hover:backdrop-blur-glass hover:border-glass hover:shadow-accent",
         minimal: "text-foreground/70 hover:text-foreground hover:scale-110 transition-all duration-200 bg-transparent border-0",
         "text-arrow": "text-foreground/80 hover:text-foreground hover:gap-3 transition-all duration-300 bg-transparent border-0 group",
       },
