@@ -216,13 +216,13 @@ const Venues = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="relative md:col-span-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input placeholder="Search venues..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10 bg-gray-800/50 border-gray-700 text-white rounded-xl" />
+                <Input placeholder="Search venues..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10 bg-gray-800/50 border-gray-700 text-white rounded-xl text-center" />
               </div>
               
               {/* Sort Controls */}
               <Button 
                 variant="outline" 
-                className={`w-full justify-start rounded-xl ${sortByProximity ? 'bg-primary/20 border-primary' : 'bg-gray-800/50 border-gray-700'} text-white hover:bg-gray-700`}
+                className={`w-full justify-center rounded-xl ${sortByProximity ? 'bg-primary/20 border-primary' : 'bg-gray-800/50 border-gray-700'} text-white hover:bg-gray-700`}
                 onClick={getUserLocation}
               >
                 <Navigation className="h-4 w-4 mr-2" />
@@ -230,7 +230,7 @@ const Venues = () => {
               </Button>
 
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="bg-gray-800/50 border-gray-700 text-white rounded-xl">
+                <SelectTrigger className="bg-gray-800/50 border-gray-700 text-white rounded-xl text-center">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl">
@@ -249,7 +249,7 @@ const Venues = () => {
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               {/* Boroughs */}
               <Select value={selectedCity} onValueChange={setSelectedCity}>
-                <SelectTrigger className="bg-gray-800/50 border-gray-700 text-white rounded-xl">
+                <SelectTrigger className="bg-gray-800/50 border-gray-700 text-white rounded-xl text-center">
                   <MapPin className="h-4 w-4 mr-2" />
                   <SelectValue placeholder="All Boroughs" />
                 </SelectTrigger>
@@ -264,7 +264,7 @@ const Venues = () => {
 
               {/* Venue Type */}
               <Select value={selectedVenueType} onValueChange={setSelectedVenueType}>
-                <SelectTrigger className="bg-gray-800/50 border-gray-700 text-white rounded-xl">
+                <SelectTrigger className="bg-gray-800/50 border-gray-700 text-white rounded-xl text-center">
                   <SelectValue placeholder="All Types" />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl">
@@ -275,7 +275,7 @@ const Venues = () => {
 
               {/* Genre */}
               <div className="relative">
-                <Button variant="outline" className="w-full justify-start bg-gray-800/50 border-gray-700 text-white hover:bg-gray-700 rounded-xl" onClick={() => setGenreDropdownOpen(!genreDropdownOpen)}>
+                <Button variant="outline" className="w-full justify-center bg-gray-800/50 border-gray-700 text-white hover:bg-gray-700 rounded-xl" onClick={() => setGenreDropdownOpen(!genreDropdownOpen)}>
                   Genres {selectedGenres.length > 0 && `(${selectedGenres.length})`}
                 </Button>
                 {genreDropdownOpen && allGenres.length > 0 && <div className="absolute top-full mt-2 w-full bg-gray-800 border border-gray-700 rounded-xl p-3 z-10 max-h-64 overflow-y-auto">
@@ -290,7 +290,7 @@ const Venues = () => {
               {/* My Venues */}
               <Button 
                 variant="outline" 
-                className={`w-full justify-start rounded-xl ${showMyVenues ? 'bg-primary/20 border-primary' : 'bg-gray-800/50 border-gray-700'} text-white hover:bg-gray-700`}
+                className={`w-full justify-center rounded-xl ${showMyVenues ? 'bg-primary/20 border-primary' : 'bg-gray-800/50 border-gray-700'} text-white hover:bg-gray-700`}
                 onClick={() => setShowMyVenues(!showMyVenues)}
               >
                 <Heart className="h-4 w-4 mr-2" />
