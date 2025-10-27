@@ -29,7 +29,6 @@ export default function FloatingProgressIndicator({
   const [displayMode, setDisplayMode] = useState<DisplayMode>('corner');
   const positionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isMobile = useIsMobile();
-  const incompleteMilestones = milestones.filter(m => !m.completed).slice(0, 2);
   const completedCount = milestones.filter(m => m.completed).length;
 
   // Calculate safe corner areas
@@ -275,15 +274,11 @@ export default function FloatingProgressIndicator({
                 <ProgressRing size={36} strokeWidth={3} percentage={completionPercentage} />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-foreground truncate">
-                    EPK Progress ({completedCount}/{milestones.length})
+                    EPK Progress
                   </p>
-                  {completionPercentage === 100 ? (
-                    <p className="text-xs text-green-600">Complete!</p>
-                  ) : (
-                    <p className="text-xs text-muted-foreground truncate">
-                      Next: {incompleteMilestones[0]?.label || 'Keep going!'}
-                    </p>
-                  )}
+                  <p className="text-xs text-muted-foreground truncate">
+                    {completedCount}/{milestones.length} complete
+                  </p>
                 </div>
               </div>
 
