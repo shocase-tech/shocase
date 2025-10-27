@@ -467,7 +467,7 @@ export default function ShowsEditor({ profile, user, onSave, onCancel, onFormDat
         )}
         
         <div className={cn("flex items-center justify-between", isMobile && "flex-col gap-4")}>
-          <h3 className={cn("font-semibold", isMobile ? "text-xl w-full text-center" : "text-lg")}>Shows Management</h3>
+          <h3 className={cn("font-semibold gradient-text", isMobile ? "text-xl w-full text-center" : "text-lg")}>Shows Management</h3>
           <div className={cn("flex gap-2", isMobile && "w-full justify-center")}>
             {/* Hide sort button on mobile since we auto-sort */}
             {!isMobile && shows.length > 1 && (

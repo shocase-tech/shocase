@@ -228,15 +228,11 @@ export default function MentionsEditor({ profile, user, onSave, onCancel, onForm
           </div>
         )}
         
-        <h3 className="text-lg font-semibold">Press Coverage</h3>
+        <h3 className="text-lg font-semibold gradient-text">Press Coverage</h3>
 
 
         {/* Press Mentions Section */}
         <div className="space-y-4">
-          <div>
-            <h4 className="text-md font-medium mb-2">Press Mentions</h4>
-            <p className="text-sm text-muted-foreground">Add links to articles, reviews, and media coverage</p>
-          </div>
 
           <div className="space-y-2">
             <Label htmlFor="mention-url">Add Press Mention URL</Label>
