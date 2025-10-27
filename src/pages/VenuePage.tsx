@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, MapPin, Users, ExternalLink, Instagram, Globe, Check, Lock, Facebook } from "lucide-react";
+import { ArrowLeft, ArrowRight, MapPin, Users, ExternalLink, Instagram, Globe, Check, Lock, Facebook } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import AppHeader from "@/components/AppHeader";
 import BookVenueModal from "@/components/venues/BookVenueModal";
@@ -215,15 +215,6 @@ const VenuePage = () => {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
-
-          {/* Book Button */}
-          <Button
-            onClick={handleBookVenue}
-            size="lg"
-            className="absolute bottom-8 right-8 h-16 w-16 rounded-full bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all p-0 text-xs font-semibold"
-          >
-            Book
-          </Button>
           
           {/* Hero Content */}
           <div className="absolute bottom-0 left-0 right-0 p-8">
@@ -239,7 +230,7 @@ const VenuePage = () => {
                 ))}
               </div>
               <h1 className="text-5xl font-bold text-white mb-4">{venue.name}</h1>
-              <div className="flex flex-wrap gap-4 text-gray-300 items-center">
+              <div className="flex flex-wrap gap-4 text-gray-300 items-center mb-6">
                 <div className="flex items-center gap-2">
                   <MapPin className="h-5 w-5" />
                   <span>{fullLocation}</span>
@@ -283,6 +274,19 @@ const VenuePage = () => {
                     </a>
                   )}
                 </div>
+              </div>
+              
+              {/* Book Now Button */}
+              <div className="flex justify-end">
+                <button
+                  onClick={handleBookVenue}
+                  className="group flex items-center gap-2 text-white font-medium transition-all hover:scale-105"
+                >
+                  <span className="group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-accent group-hover:bg-clip-text group-hover:text-transparent transition-all">
+                    Book Now
+                  </span>
+                  <ArrowRight className="h-5 w-5 group-hover:text-primary transition-colors" />
+                </button>
               </div>
             </div>
           </div>
