@@ -204,73 +204,74 @@ export default function RiderBuilder() {
       <div className="min-h-screen bg-gradient-to-b from-background via-background to-primary/5">
         {/* Header */}
         <div className="border-b border-border/50 bg-card/80 backdrop-blur-lg sticky top-0 z-10 shadow-lg">
-          <div className="container mx-auto px-4 py-6">
-            <div className="flex items-start justify-between mb-6">
-              <div className="flex items-start gap-4">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between gap-6">
+              <div className="flex items-center gap-4">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => navigate("/epk")}
-                  className="mt-2"
                 >
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back
                 </Button>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center">
-                      <Settings className="w-6 h-6 text-primary-foreground" />
-                    </div>
-                    <h1 className="text-4xl font-bold tracking-tight">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center">
+                    <Settings className="w-6 h-6 text-primary-foreground" />
+                  </div>
+                  <div>
+                    <h1 className="text-2xl font-bold tracking-tight">
                       Rider Builder
                     </h1>
+                    <p className="text-muted-foreground text-sm">
+                      Professional technical and hospitality requirements
+                    </p>
                   </div>
-                  <p className="text-muted-foreground text-base ml-[52px]">
-                    Professional technical and hospitality requirements for your shows
-                  </p>
                 </div>
               </div>
-              <SaveIndicator
-                isSaving={isSaving}
-                lastSaved={lastSaved}
-                hasUnsavedChanges={hasUnsavedChanges}
-              />
-            </div>
 
-            {/* Action Bar */}
-            <div className="flex items-center gap-3 flex-wrap">
-              <Button
-                onClick={() => setShowTemplates(true)}
-                className="gap-2 bg-gradient-primary hover:opacity-90 transition-opacity"
-                size="default"
-              >
-                <Wand2 className="w-4 h-4" />
-                Use Template
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setShowPreview(true)}
-                className="gap-2 border-border/50 hover:border-primary/50"
-              >
-                <Eye className="w-4 h-4" />
-                Preview
-              </Button>
-              <Button
-                variant="outline"
-                onClick={handleShare}
-                className="gap-2 border-border/50 hover:border-primary/50"
-              >
-                <Share2 className="w-4 h-4" />
-                Share
-              </Button>
-              <Button
-                variant="outline"
-                onClick={handleExportPDF}
-                className="gap-2 border-border/50 hover:border-primary/50"
-              >
-                <Download className="w-4 h-4" />
-                Export PDF
-              </Button>
+              <div className="flex items-center gap-3">
+                <Button
+                  onClick={() => setShowTemplates(true)}
+                  className="gap-2 bg-gradient-primary hover:opacity-90 transition-opacity"
+                  size="sm"
+                >
+                  <Wand2 className="w-4 h-4" />
+                  Use Template
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowPreview(true)}
+                  className="gap-2 border-border/50 hover:border-primary/50"
+                  size="sm"
+                >
+                  <Eye className="w-4 h-4" />
+                  Preview
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleShare}
+                  className="gap-2 border-border/50 hover:border-primary/50"
+                  size="sm"
+                >
+                  <Share2 className="w-4 h-4" />
+                  Share
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleExportPDF}
+                  className="gap-2 border-border/50 hover:border-primary/50"
+                  size="sm"
+                >
+                  <Download className="w-4 h-4" />
+                  Export PDF
+                </Button>
+                <SaveIndicator
+                  isSaving={isSaving}
+                  lastSaved={lastSaved}
+                  hasUnsavedChanges={hasUnsavedChanges}
+                />
+              </div>
             </div>
           </div>
         </div>
