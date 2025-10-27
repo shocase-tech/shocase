@@ -39,11 +39,6 @@ const INSTRUMENT_OPTIONS = [
   "Keyboards/Piano",
   "Synthesizer",
   "DJ Equipment",
-  "Saxophone",
-  "Trumpet",
-  "Trombone",
-  "Violin",
-  "Cello",
   "Other",
 ];
 
