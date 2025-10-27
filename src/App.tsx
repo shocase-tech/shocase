@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Outreach from "./pages/Outreach";
+import Shows from "./pages/Shows";
 import Venues from "./pages/Venues";
 import VenuePage from "./pages/VenuePage";
 import AccountSettings from "./pages/AccountSettings";
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/epk" element={<Dashboard />} />
             <Route path="/outreach" element={<Outreach />} />
+            <Route path="/shows" element={<Shows />} />
             <Route path="/venues" element={<Venues />} />
             <Route path="/venues/:slug" element={<VenuePage />} />
             <Route path="/account-settings" element={<AccountSettings />} />
