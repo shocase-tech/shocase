@@ -15,6 +15,7 @@ import Footer from "@/components/Footer";
 export default function AccountSettings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [savingEmail, setSavingEmail] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -36,6 +37,48 @@ export default function AccountSettings() {
 
     checkAuth();
   }, [navigate]);
+
+  const handleUpdateEmail = async () => {
+    if (!email || !email.includes('@')) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (email === user?.email) {
+      toast({
+        title: "No change",
+        description: "This is already your current email",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSavingEmail(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        email: email,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Email update initiated",
+        description: "Please check both your old and new email for confirmation links",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setSavingEmail(false);
+    }
+  };
 
   const handleUpdatePassword = async () => {
     if (newPassword !== confirmPassword) {
@@ -99,7 +142,7 @@ export default function AccountSettings() {
 
       <AppHeader />
 
-      <div className="min-h-screen bg-gradient-dark pb-20 pt-16">
+      <div className="min-h-screen bg-gradient-dark pb-20 pt-6">
         <div className="container max-w-4xl mx-auto px-4 py-8">
           <div className="mb-8">
             <h1 className="text-3xl font-bold mb-2">Account Settings</h1>
@@ -127,23 +170,28 @@ export default function AccountSettings() {
                     id="email"
                     type="email"
                     value={email}
-                    disabled
-                    className="bg-muted/50"
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter new email"
                   />
                   <p className="text-xs text-muted-foreground">
-                    Email address cannot be changed at this time
+                    You'll need to confirm the change in both your old and new email
                   </p>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="user-id">User ID</Label>
-                  <Input
-                    id="user-id"
-                    value={user?.id || ""}
-                    disabled
-                    className="bg-muted/50 font-mono text-xs"
-                  />
-                </div>
+                <Button
+                  onClick={handleUpdateEmail}
+                  disabled={!email || email === user?.email || savingEmail}
+                  className="w-full"
+                >
+                  {savingEmail ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Updating...
+                    </>
+                  ) : (
+                    "Update Email"
+                  )}
+                </Button>
               </CardContent>
             </Card>
 

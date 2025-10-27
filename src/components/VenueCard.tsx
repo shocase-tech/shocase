@@ -259,7 +259,7 @@ const VenueCard = ({ venue }: VenueCardProps) => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => navigate("/account-settings")}>
+            <AlertDialogAction onClick={() => navigate("/account")}>
               View Subscription Plans
             </AlertDialogAction>
           </AlertDialogFooter>
