@@ -440,20 +440,6 @@ export default function Dashboard() {
                   {completedMilestones} of {milestones.length} milestones completed
                 </p>
                 <Progress value={completionPercentage} className="mb-3" />
-                <div className="hidden md:grid md:grid-cols-2 gap-2 mb-4">
-                  {milestones.map((milestone, index) => (
-                    <div key={index} className="flex items-center gap-2 text-sm">
-                      {milestone.completed ? (
-                        <CheckCircle className="w-4 h-4 text-green-500" />
-                      ) : (
-                        <Circle className="w-4 h-4 text-muted-foreground" />
-                      )}
-                      <span className={milestone.completed ? "text-foreground" : "text-muted-foreground"}>
-                        {milestone.label}
-                      </span>
-                    </div>
-                  ))}
-                </div>
                 
                 {/* Publish Controls */}
                 <div className="border-t border-white/10 pt-3 md:pt-4">
