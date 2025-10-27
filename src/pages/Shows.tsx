@@ -11,6 +11,10 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, MapPin, Ticket, Plus, Sparkles, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { ShowManagementModal } from "@/components/shows/ShowManagementModal";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Show {
   venue: string;
@@ -26,6 +30,15 @@ export default function Shows() {
   const [selectedShow, setSelectedShow] = useState<Show | null>(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [newShow, setNewShow] = useState<Show>({
+    venue: "",
+    city: "",
+    date: "",
+    ticket_link: "",
+    is_highlighted: false,
+  });
+  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -63,6 +76,52 @@ export default function Shows() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCreateShow = async () => {
+    if (!newShow.venue || !newShow.city || !newShow.date) {
+      toast({
+        title: "Missing information",
+        description: "Please fill in venue, city, and date",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const updatedShows = [...upcomingShows, newShow];
+      
+      const { error } = await supabase
+        .from("artist_profiles")
+        .update({ upcoming_shows: updatedShows as any })
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+
+      setUpcomingShows(updatedShows);
+      setIsCreateModalOpen(false);
+      setNewShow({
+        venue: "",
+        city: "",
+        date: "",
+        ticket_link: "",
+        is_highlighted: false,
+      });
+      
+      toast({
+        title: "Show created",
+        description: "Your new show has been added",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error creating show",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -136,13 +195,19 @@ export default function Shows() {
         <AppHeader />
         
         <main className="container mx-auto px-4 py-8 max-w-7xl">
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Your Shows
-            </h1>
-            <p className="text-muted-foreground text-lg">
-              Manage your shows and create AI-powered marketing content
-            </p>
+          <div className="mb-8 flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                Your Shows
+              </h1>
+              <p className="text-muted-foreground text-lg">
+                Manage your shows and create AI-powered marketing content
+              </p>
+            </div>
+            <Button onClick={() => setIsCreateModalOpen(true)} size="lg">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Show
+            </Button>
           </div>
 
           <Tabs defaultValue="upcoming" className="w-full">
@@ -209,6 +274,88 @@ export default function Shows() {
           onOpenChange={(open) => !open && setSelectedShow(null)}
         />
       )}
+
+      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Show</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="venue">Venue *</Label>
+              <Input
+                id="venue"
+                value={newShow.venue}
+                onChange={(e) => setNewShow({ ...newShow, venue: e.target.value })}
+                placeholder="Enter venue name"
+              />
+            </div>
+            <div>
+              <Label htmlFor="city">City *</Label>
+              <Input
+                id="city"
+                value={newShow.city}
+                onChange={(e) => setNewShow({ ...newShow, city: e.target.value })}
+                placeholder="Enter city"
+              />
+            </div>
+            <div>
+              <Label htmlFor="date">Date *</Label>
+              <Input
+                id="date"
+                type="date"
+                value={newShow.date}
+                onChange={(e) => setNewShow({ ...newShow, date: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="ticket_link">Ticket Link</Label>
+              <Input
+                id="ticket_link"
+                value={newShow.ticket_link}
+                onChange={(e) => setNewShow({ ...newShow, ticket_link: e.target.value })}
+                placeholder="https://..."
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="highlighted"
+                checked={newShow.is_highlighted}
+                onCheckedChange={(checked) => 
+                  setNewShow({ ...newShow, is_highlighted: checked as boolean })
+                }
+              />
+              <Label htmlFor="highlighted" className="cursor-pointer">
+                Feature this show
+              </Label>
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => setIsCreateModalOpen(false)}
+                className="flex-1"
+                disabled={isSaving}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCreateShow}
+                className="flex-1"
+                disabled={isSaving}
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  "Create Show"
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
