@@ -37,7 +37,17 @@ import GuitarStandSVG from "@/assets/stage-equipment/Guitar Stand.svg";
 interface Props {
   data: any;
   onChange: (data: any) => void;
+  onAddElement?: (element: typeof STAGE_ELEMENTS[0]) => void;
+  onUndo?: () => void;
+  onRedo?: () => void;
+  onDeleteSelected?: () => void;
+  onClear?: () => void;
+  onDownload?: () => void;
+  canUndo?: boolean;
+  canRedo?: boolean;
 }
+
+export { STAGE_ELEMENTS };
 
 const STAGE_ELEMENTS = [
   { id: "standing-mic", label: "Standing Mic", svg: StandingMicSVG, scale: 0.8 },
@@ -69,7 +79,18 @@ const STAGE_ELEMENTS = [
   { id: "guitar-stand", label: "Guitar Stand", svg: GuitarStandSVG, scale: 0.7 },
 ];
 
-export default function StagePlotCanvas({ data, onChange }: Props) {
+export default function StagePlotCanvas({ 
+  data, 
+  onChange,
+  onAddElement,
+  onUndo,
+  onRedo,
+  onDeleteSelected,
+  onClear,
+  onDownload,
+  canUndo,
+  canRedo,
+}: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
   const [history, setHistory] = useState<string[]>([]);
@@ -203,6 +224,11 @@ export default function StagePlotCanvas({ data, onChange }: Props) {
   };
 
   const addElement = async (element: typeof STAGE_ELEMENTS[0]) => {
+    onAddElement?.(element);
+    await addElementToCanvas(element);
+  };
+
+  const addElementToCanvas = async (element: typeof STAGE_ELEMENTS[0]) => {
     if (!fabricCanvas) return;
 
     try {
@@ -257,6 +283,7 @@ export default function StagePlotCanvas({ data, onChange }: Props) {
     fabricCanvas.renderAll();
     onChange({ ...data, canvasData: null });
     toast.success("Canvas cleared");
+    onClear?.();
   };
 
   const deleteSelected = () => {
@@ -270,6 +297,7 @@ export default function StagePlotCanvas({ data, onChange }: Props) {
     fabricCanvas.discardActiveObject();
     fabricCanvas.renderAll();
     toast.success("Deleted selected objects");
+    onDeleteSelected?.();
   };
 
   const undo = () => {
@@ -278,6 +306,7 @@ export default function StagePlotCanvas({ data, onChange }: Props) {
       fabricCanvas.loadFromJSON(history[historyStep - 1], () => {
         fabricCanvas.renderAll();
       });
+      onUndo?.();
     }
   };
 
@@ -287,6 +316,7 @@ export default function StagePlotCanvas({ data, onChange }: Props) {
       fabricCanvas.loadFromJSON(history[historyStep + 1], () => {
         fabricCanvas.renderAll();
       });
+      onRedo?.();
     }
   };
 
@@ -302,68 +332,12 @@ export default function StagePlotCanvas({ data, onChange }: Props) {
     link.href = dataURL;
     link.click();
     toast.success("Stage plot downloaded!");
+    onDownload?.();
   };
 
   return (
-    <div className="flex gap-6">
-      {/* Sidebar with draggable elements */}
-      <div className="w-64 flex-shrink-0 space-y-4">
-        <div>
-          <h4 className="text-sm font-semibold text-foreground mb-3">Stage Elements</h4>
-          <p className="text-xs text-muted-foreground mb-4">
-            Click to add elements to the canvas
-          </p>
-        </div>
-        
-        <div className="space-y-2 max-h-[600px] overflow-y-auto pr-2">
-          {STAGE_ELEMENTS.map((element) => (
-            <Button
-              key={element.id}
-              variant="outline"
-              size="sm"
-              onClick={() => addElement(element)}
-              className="w-full h-auto py-2 flex items-center gap-3 hover:scale-102 transition-transform border hover:border-primary justify-start"
-            >
-              <img src={element.svg} alt={element.label} className="w-8 h-8 object-contain flex-shrink-0" />
-              <span className="text-xs font-medium text-left">{element.label}</span>
-            </Button>
-          ))}
-        </div>
-
-        {/* Controls */}
-        <div className="space-y-2 pt-4 border-t">
-          <Button variant="outline" size="sm" onClick={undo} disabled={historyStep <= 0} className="w-full">
-            <Undo className="w-4 h-4 mr-2" />
-            Undo
-          </Button>
-          <Button variant="outline" size="sm" onClick={redo} disabled={historyStep >= history.length - 1} className="w-full">
-            <Redo className="w-4 h-4 mr-2" />
-            Redo
-          </Button>
-          <Button variant="outline" size="sm" onClick={deleteSelected} className="w-full">
-            <Trash2 className="w-4 h-4 mr-2" />
-            Delete Selected
-          </Button>
-          <Button variant="outline" size="sm" onClick={downloadCanvas} className="w-full">
-            <Download className="w-4 h-4 mr-2" />
-            Export
-          </Button>
-          <Button variant="destructive" size="sm" onClick={clearCanvas} className="w-full">
-            Clear All
-          </Button>
-        </div>
-
-        <p className="text-xs text-muted-foreground border-l-2 border-primary pl-2">
-          Click elements to add. Drag to move, use corners to resize. Press Delete to remove selected items.
-        </p>
-      </div>
-
-      {/* Canvas */}
-      <div className="flex-1">
-        <Card className="p-6 bg-gradient-to-br from-background to-muted/20 border-2">
-          <canvas ref={canvasRef} className="rounded-lg shadow-lg border border-border w-full" />
-        </Card>
-      </div>
-    </div>
+    <Card className="p-6 bg-gradient-to-br from-background to-muted/20 border-2">
+      <canvas ref={canvasRef} className="rounded-lg shadow-lg border border-border w-full" />
+    </Card>
   );
 }

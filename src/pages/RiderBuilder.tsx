@@ -3,9 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Wand2, Eye, Download, Share2, ArrowLeft, Settings, Theater, Mic, Speaker, Zap, Lightbulb, FileText, UtensilsCrossed, DoorOpen, Hotel, Car, ClipboardList, Check } from "lucide-react";
+import { Wand2, Eye, Download, Share2, ArrowLeft, Settings, Theater, Mic, Speaker, Zap, Lightbulb, FileText, UtensilsCrossed, DoorOpen, Hotel, Car, ClipboardList, Check, Undo, Redo, Trash2, Layers, List } from "lucide-react";
 import { toast } from "sonner";
 import StagePlotEditor from "@/components/rider/StagePlotEditor";
+import { STAGE_ELEMENTS } from "@/components/rider/StagePlotCanvas";
 import RiderPreview from "@/components/rider/RiderPreview";
 import RiderTemplates from "@/components/rider/RiderTemplates";
 import SaveIndicator from "@/components/SaveIndicator";
@@ -63,6 +64,9 @@ export default function RiderBuilder() {
   const [showPreview, setShowPreview] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [sidebarView, setSidebarView] = useState<"sections" | "elements">("sections");
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
 
   const currentRider = riderType === "technical" ? technicalRider : hospitalityRider;
   const setCurrentRider = riderType === "technical" ? setTechnicalRider : setHospitalityRider;
@@ -188,6 +192,25 @@ export default function RiderBuilder() {
   const handleRiderTypeChange = (type: "technical" | "hospitality") => {
     setRiderType(type);
     setActiveSection(type === "technical" ? "stage-plot" : "catering");
+    setSidebarView("sections");
+  };
+
+  const handleSectionChange = (sectionType: string) => {
+    setActiveSection(sectionType);
+    setSidebarView("sections");
+  };
+
+  const stagePlotControls = {
+    onAddElement: (element: typeof STAGE_ELEMENTS[0]) => {
+      // Element added callback
+    },
+    onUndo: () => setCanUndo(false),
+    onRedo: () => setCanRedo(false),
+    onDeleteSelected: () => {},
+    onClear: () => {},
+    onDownload: () => {},
+    canUndo,
+    canRedo,
   };
 
   if (loading) {
@@ -308,53 +331,160 @@ export default function RiderBuilder() {
               </div>
             </div>
 
-            {/* Section Navigation */}
-            <nav className="p-4 space-y-1">
-              {sections.map((section) => {
-                const Icon = section.icon;
-                const isActive = activeSection === section.type;
-                const isComplete = isSectionComplete(section.type);
-                
-                return (
-                  <button
-                    key={section.type}
-                    onClick={() => setActiveSection(section.type)}
-                    className={cn(
-                      "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-left group",
-                      isActive
-                        ? "bg-primary/10 text-primary shadow-sm"
-                        : "hover:bg-muted/50 text-muted-foreground hover:text-foreground"
-                    )}
+            {/* Stage Plot View Toggle (only when in stage-plot section) */}
+            {activeSection === "stage-plot" && (
+              <div className="p-4 border-b border-border/50">
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => setSidebarView("sections")}
+                    variant={sidebarView === "sections" ? "default" : "outline"}
+                    size="sm"
+                    className="flex-1 gap-2"
                   >
-                    <div className={cn(
-                      "w-9 h-9 rounded-lg flex items-center justify-center transition-colors",
-                      isActive 
-                        ? "bg-primary/20" 
-                        : "bg-muted group-hover:bg-muted/80"
-                    )}>
-                      <Icon className={cn(
-                        "w-5 h-5",
-                        isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
-                      )} />
-                    </div>
-                    <div className="flex-1 min-w-0">
+                    <List className="w-4 h-4" />
+                    Sections
+                  </Button>
+                  <Button
+                    onClick={() => setSidebarView("elements")}
+                    variant={sidebarView === "elements" ? "default" : "outline"}
+                    size="sm"
+                    className="flex-1 gap-2"
+                  >
+                    <Layers className="w-4 h-4" />
+                    Elements
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Conditional Sidebar Content */}
+            {activeSection === "stage-plot" && sidebarView === "elements" ? (
+              <div className="p-4 space-y-4">
+                <div>
+                  <h4 className="text-sm font-semibold text-foreground mb-2">Stage Elements</h4>
+                  <p className="text-xs text-muted-foreground mb-4">
+                    Click to add to canvas
+                  </p>
+                </div>
+                
+                <div className="space-y-2 max-h-[calc(100vh-450px)] overflow-y-auto pr-2">
+                  {STAGE_ELEMENTS.map((element) => (
+                    <Button
+                      key={element.id}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => stagePlotControls.onAddElement?.(element)}
+                      className="w-full h-auto py-2 flex items-center gap-3 hover:scale-102 transition-transform border hover:border-primary justify-start"
+                    >
+                      <img src={element.svg} alt={element.label} className="w-8 h-8 object-contain flex-shrink-0" />
+                      <span className="text-xs font-medium text-left">{element.label}</span>
+                    </Button>
+                  ))}
+                </div>
+
+                {/* Canvas Controls */}
+                <div className="space-y-2 pt-4 border-t">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={stagePlotControls.onUndo} 
+                    disabled={!canUndo} 
+                    className="w-full"
+                  >
+                    <Undo className="w-4 h-4 mr-2" />
+                    Undo
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={stagePlotControls.onRedo} 
+                    disabled={!canRedo} 
+                    className="w-full"
+                  >
+                    <Redo className="w-4 h-4 mr-2" />
+                    Redo
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={stagePlotControls.onDeleteSelected} 
+                    className="w-full"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={stagePlotControls.onDownload} 
+                    className="w-full"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Export
+                  </Button>
+                  <Button 
+                    variant="destructive" 
+                    size="sm" 
+                    onClick={stagePlotControls.onClear} 
+                    className="w-full"
+                  >
+                    Clear All
+                  </Button>
+                </div>
+
+                <p className="text-xs text-muted-foreground border-l-2 border-primary pl-2">
+                  Click elements to add. Drag to move, resize with corners. Press Delete key to remove.
+                </p>
+              </div>
+            ) : (
+              /* Section Navigation */
+              <nav className="p-4 space-y-1">
+                {sections.map((section) => {
+                  const Icon = section.icon;
+                  const isActive = activeSection === section.type;
+                  const isComplete = isSectionComplete(section.type);
+                  
+                  return (
+                    <button
+                      key={section.type}
+                      onClick={() => handleSectionChange(section.type)}
+                      className={cn(
+                        "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-left group",
+                        isActive
+                          ? "bg-primary/10 text-primary shadow-sm"
+                          : "hover:bg-muted/50 text-muted-foreground hover:text-foreground"
+                      )}
+                    >
                       <div className={cn(
-                        "font-medium text-sm",
-                        isActive && "font-semibold"
+                        "w-9 h-9 rounded-lg flex items-center justify-center transition-colors",
+                        isActive 
+                          ? "bg-primary/20" 
+                          : "bg-muted group-hover:bg-muted/80"
                       )}>
-                        {section.title}
+                        <Icon className={cn(
+                          "w-5 h-5",
+                          isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                        )} />
                       </div>
-                      <div className="text-xs text-muted-foreground truncate">
-                        {section.description}
+                      <div className="flex-1 min-w-0">
+                        <div className={cn(
+                          "font-medium text-sm",
+                          isActive && "font-semibold"
+                        )}>
+                          {section.title}
+                        </div>
+                        <div className="text-xs text-muted-foreground truncate">
+                          {section.description}
+                        </div>
                       </div>
-                    </div>
-                    {isComplete && (
-                      <Check className="w-4 h-4 text-primary flex-shrink-0" />
-                    )}
-                  </button>
-                );
-              })}
-            </nav>
+                      {isComplete && (
+                        <Check className="w-4 h-4 text-primary flex-shrink-0" />
+                      )}
+                    </button>
+                  );
+                })}
+              </nav>
+            )}
           </div>
 
           {/* Main Content Area */}
@@ -408,6 +538,7 @@ export default function RiderBuilder() {
                           });
                         }
                       }}
+                      canvasControls={stagePlotControls}
                     />
                   ) : (
                     <RiderSection
