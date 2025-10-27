@@ -28,6 +28,17 @@ export interface Rider {
   name: string;
   type: "technical" | "hospitality";
   sections: RiderSection[];
+  stagePlotData?: {
+    elements: Array<{
+      id: string;
+      type: string;
+      x: number;
+      y: number;
+      rotation: number;
+      scaleX: number;
+      scaleY: number;
+    }>;
+  };
 }
 
 const TECHNICAL_SECTIONS = [
@@ -574,11 +585,34 @@ export default function RiderBuilder() {
         onComplete={(template) => {
           if (template.type === "technical") {
             setTechnicalRider(template);
+            
+            // Load stage plot if available
+            if (template.stagePlotData && stagePlotRef.current) {
+              // Clear canvas first
+              stagePlotRef.current.clearCanvas();
+              
+              // Add each element from the generated stage plot
+              setTimeout(() => {
+                template.stagePlotData?.elements.forEach((element: any) => {
+                  // Find matching element from STAGE_ELEMENTS by label
+                  const stageElement = STAGE_ELEMENTS.find(
+                    (se) => se.label === element.type || se.id === element.type.toLowerCase().replace(/\s+/g, '-')
+                  );
+                  
+                  if (stageElement) {
+                    stagePlotRef.current?.addElement(stageElement);
+                  }
+                });
+                toast.success("Rider and stage plot generated from template!");
+              }, 100);
+            } else {
+              toast.success("Rider generated from template!");
+            }
           } else {
             setHospitalityRider(template);
+            toast.success("Rider generated from template!");
           }
           setShowWizard(false);
-          toast.success("Rider generated from template!");
         }}
       />
       <Footer />

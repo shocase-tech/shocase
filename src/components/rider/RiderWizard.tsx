@@ -24,7 +24,7 @@ interface Props {
 interface BandMember {
   id: string;
   name: string;
-  instrument: string;
+  instruments: string[];
   needsMonitor: boolean;
   needsDI: boolean;
 }
@@ -58,7 +58,7 @@ export default function RiderWizard({ open, onOpenChange, onComplete, riderType 
     const newMembers = Array.from({ length: size }, (_, i) => ({
       id: crypto.randomUUID(),
       name: `Member ${i + 1}`,
-      instrument: "",
+      instruments: [],
       needsMonitor: true,
       needsDI: false,
     }));
@@ -71,34 +71,76 @@ export default function RiderWizard({ open, onOpenChange, onComplete, riderType 
     );
   };
 
-  const generateRider = (): Rider => {
+  const generateRider = (): Rider & { stagePlotData?: any } => {
     const sections: any[] = [];
+    const stagePlotData: any = { elements: [] };
 
     if (riderType === "technical") {
+      // Generate Stage Plot Data
+      let xOffset = 100;
+      const yPosition = 300;
+      
+      members.forEach((member) => {
+        member.instruments.forEach((instrument) => {
+          const inst = instrument.toLowerCase();
+          let elementType = "Standing Mic";
+          
+          if (inst.includes("drum") && !inst.includes("machine")) {
+            elementType = "Drum Kit";
+          } else if (inst.includes("keyboard") || inst.includes("piano")) {
+            elementType = "Keyboard Stand";
+          } else if (inst.includes("guitar") && !inst.includes("bass")) {
+            elementType = "Guitar Stand";
+          } else if (inst.includes("bass")) {
+            elementType = "Bass Amp";
+          } else if (inst.includes("dj")) {
+            elementType = "DJ Decks";
+          } else if (inst.includes("vocal")) {
+            elementType = "Standing Mic";
+          } else if (inst.includes("synth")) {
+            elementType = "Synth";
+          }
+          
+          stagePlotData.elements.push({
+            id: crypto.randomUUID(),
+            type: elementType,
+            x: xOffset,
+            y: yPosition,
+            rotation: 0,
+            scaleX: 1,
+            scaleY: 1,
+          });
+          
+          xOffset += 150;
+        });
+      });
+
       // Generate Input List
-      const inputRows = members.flatMap((member, idx) => {
-        const baseInput = {
-          id: crypto.randomUUID(),
-          instrument: member.instrument || "Unknown",
-          mic: getMicRecommendation(member.instrument),
-          notes: member.needsDI ? "DI Box required" : "",
-        };
+      const inputRows = members.flatMap((member) => {
+        return member.instruments.flatMap((instrument) => {
+          const baseInput = {
+            id: crypto.randomUUID(),
+            instrument: instrument || "Unknown",
+            mic: getMicRecommendation(instrument),
+            notes: member.needsDI ? "DI Box required" : "",
+          };
 
-        // Add drum inputs if drummer
-        if (member.instrument.toLowerCase().includes("drum")) {
-          return [
-            { ...baseInput, instrument: "Kick Drum", mic: "Beta 52 or equivalent", notes: "" },
-            { ...baseInput, instrument: "Snare", mic: "SM57", notes: "" },
-            { ...baseInput, instrument: "Hi-Hat", mic: "Condenser", notes: "" },
-            { ...baseInput, instrument: "Tom 1", mic: "Sennheiser e604", notes: "" },
-            { ...baseInput, instrument: "Tom 2", mic: "Sennheiser e604", notes: "" },
-            { ...baseInput, instrument: "Floor Tom", mic: "Sennheiser e604", notes: "" },
-            { ...baseInput, instrument: "Overhead L", mic: "Condenser", notes: "" },
-            { ...baseInput, instrument: "Overhead R", mic: "Condenser", notes: "" },
-          ];
-        }
+          // Add drum inputs if drummer
+          if (instrument.toLowerCase().includes("drum")) {
+            return [
+              { ...baseInput, instrument: "Kick Drum", mic: "Beta 52 or equivalent", notes: "" },
+              { ...baseInput, instrument: "Snare", mic: "SM57", notes: "" },
+              { ...baseInput, instrument: "Hi-Hat", mic: "Condenser", notes: "" },
+              { ...baseInput, instrument: "Tom 1", mic: "Sennheiser e604", notes: "" },
+              { ...baseInput, instrument: "Tom 2", mic: "Sennheiser e604", notes: "" },
+              { ...baseInput, instrument: "Floor Tom", mic: "Sennheiser e604", notes: "" },
+              { ...baseInput, instrument: "Overhead L", mic: "Condenser", notes: "" },
+              { ...baseInput, instrument: "Overhead R", mic: "Condenser", notes: "" },
+            ];
+          }
 
-        return [baseInput];
+          return [baseInput];
+        });
       });
 
       sections.push({
@@ -114,16 +156,18 @@ export default function RiderWizard({ open, onOpenChange, onComplete, riderType 
         const artistBrings: string[] = [];
 
         members.forEach((m) => {
-          const inst = m.instrument.toLowerCase();
-          if (inst.includes("drum")) {
-            venueProvides.push("Full drum kit with hardware");
-          } else if (inst.includes("bass")) {
-            venueProvides.push("Bass amp (Ampeg or equivalent, 300W+)");
-          } else if (inst.includes("guitar") && inst.includes("electric")) {
-            venueProvides.push("Guitar amp (Marshall or Fender equivalent)");
-          } else if (inst.includes("keyboard") || inst.includes("piano")) {
-            venueProvides.push("Keyboard stands and power");
-          }
+          m.instruments.forEach((instrument) => {
+            const inst = instrument.toLowerCase();
+            if (inst.includes("drum")) {
+              venueProvides.push("Full drum kit with hardware");
+            } else if (inst.includes("bass")) {
+              venueProvides.push("Bass amp (Ampeg or equivalent, 300W+)");
+            } else if (inst.includes("guitar") && inst.includes("electric")) {
+              venueProvides.push("Guitar amp (Marshall or Fender equivalent)");
+            } else if (inst.includes("keyboard") || inst.includes("piano")) {
+              venueProvides.push("Keyboard stands and power");
+            }
+          });
         });
 
         artistBrings.push("All instruments, cables, and personal equipment");
@@ -149,7 +193,7 @@ export default function RiderWizard({ open, onOpenChange, onComplete, riderType 
         content: {
           requirements: `${monitorCount} x Floor monitors (wedges)\nMix preferences:\n${members
             .filter((m) => m.needsMonitor)
-            .map((m) => `- ${m.instrument}: ${m.instrument} + vocals in mix`)
+            .map((m) => `- ${m.name}: ${m.instruments.join(", ")} in mix`)
             .join("\n")}`,
         },
       });
@@ -222,6 +266,7 @@ export default function RiderWizard({ open, onOpenChange, onComplete, riderType 
       name: `${riderType === "technical" ? "Technical" : "Hospitality"} Rider - ${bandSize} Members`,
       type: riderType,
       sections,
+      stagePlotData,
     };
   };
 
@@ -265,9 +310,23 @@ export default function RiderWizard({ open, onOpenChange, onComplete, riderType 
     onOpenChange(false);
   };
 
+  const toggleInstrument = (memberId: string, instrument: string) => {
+    setMembers((prev) =>
+      prev.map((m) => {
+        if (m.id === memberId) {
+          const instruments = m.instruments.includes(instrument)
+            ? m.instruments.filter((i) => i !== instrument)
+            : [...m.instruments, instrument];
+          return { ...m, instruments };
+        }
+        return m;
+      })
+    );
+  };
+
   const canProceed = () => {
     if (step === 1) return bandSize > 0;
-    if (step === 2) return members.every((m) => m.instrument);
+    if (step === 2) return members.every((m) => m.instruments.length > 0 && m.name.trim());
     return true;
   };
 
@@ -309,12 +368,12 @@ export default function RiderWizard({ open, onOpenChange, onComplete, riderType 
             </div>
           )}
 
-          {/* Step 2: Instrument Mapping */}
+          {/* Step 2: Band Member Mapping */}
           {step === 2 && (
             <div className="space-y-4">
               <div>
                 <h3 className="text-base font-semibold mb-4">
-                  What instrument does each member play?
+                  Tell us about each band member
                 </h3>
                 <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
                   {members.map((member, idx) => (
@@ -324,26 +383,39 @@ export default function RiderWizard({ open, onOpenChange, onComplete, riderType 
                           {idx + 1}
                         </div>
                         <div className="flex-1">
-                          <Label htmlFor={`instrument-${member.id}`}>Instrument</Label>
-                          <Select
-                            value={member.instrument}
-                            onValueChange={(value) => updateMember(member.id, "instrument", value)}
-                          >
-                            <SelectTrigger id={`instrument-${member.id}`}>
-                              <SelectValue placeholder="Select instrument" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-background">
-                              {INSTRUMENT_OPTIONS.map((inst) => (
-                                <SelectItem key={inst} value={inst}>
-                                  {inst}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          <Label htmlFor={`name-${member.id}`}>Band Member Name</Label>
+                          <Input
+                            id={`name-${member.id}`}
+                            value={member.name}
+                            onChange={(e) => updateMember(member.id, "name", e.target.value)}
+                            placeholder="e.g., John Smith"
+                          />
                         </div>
                       </div>
-                      {riderType === "technical" && (
-                        <div className="flex items-center gap-4 pl-11">
+                      
+                      <div className="pl-11 space-y-2">
+                        <Label>Instruments (select all that apply)</Label>
+                        <div className="grid grid-cols-2 gap-2">
+                          {INSTRUMENT_OPTIONS.map((inst) => (
+                            <div key={inst} className="flex items-center gap-2">
+                              <Checkbox
+                                id={`${member.id}-${inst}`}
+                                checked={member.instruments.includes(inst)}
+                                onCheckedChange={() => toggleInstrument(member.id, inst)}
+                              />
+                              <label
+                                htmlFor={`${member.id}-${inst}`}
+                                className="text-sm cursor-pointer"
+                              >
+                                {inst}
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {riderType === "technical" && member.instruments.length > 0 && (
+                        <div className="flex items-center gap-4 pl-11 pt-2 border-t">
                           <div className="flex items-center gap-2">
                             <Checkbox
                               id={`monitor-${member.id}`}
