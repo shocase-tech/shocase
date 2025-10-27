@@ -3,7 +3,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FloatingLabelInput } from "@/components/ui/floating-label-input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -414,10 +413,10 @@ const saveSection = async (sectionData: any) => {
           <TabsContent value="basic" className="space-y-6">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <FloatingLabelInput
+                <div className="space-y-2">
+                  <Label htmlFor="artist_name">Artist Name *</Label>
+                  <Input
                     id="artist_name"
-                    label="Artist Name *"
                     value={formData.artist_name}
                     onChange={(e) => setFormData({ ...formData, artist_name: e.target.value })}
                     required
