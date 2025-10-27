@@ -6,7 +6,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { FloatingLabelInput } from "@/components/ui/floating-label-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
@@ -542,37 +541,40 @@ const handleGalleryUpload = async (file: File) => {
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <FloatingLabelInput
+          <Label htmlFor="artist_name">Artist Name</Label>
+          <Input
             id="artist_name"
-            label="Artist Name"
             value={formData.artist_name}
             onChange={(e) => setFormData({ ...formData, artist_name: e.target.value })}
+            placeholder="Your artist name"
           />
         </div>
         
         <div>
-          <FloatingLabelInput
+          <Label htmlFor="email">Contact Email</Label>
+          <Input
             id="email"
-            label="Contact Email"
             type="email"
             value={formData.contact_info?.email || ''}
             onChange={(e) => setFormData({
               ...formData,
               contact_info: { ...formData.contact_info, email: e.target.value }
             })}
+            placeholder="your@email.com"
           />
         </div>
 
         <div>
-          <FloatingLabelInput
+          <Label htmlFor="phone">Phone Number</Label>
+          <Input
             id="phone"
-            label="Phone Number"
             type="tel"
             value={formData.contact_info?.phone || ''}
             onChange={(e) => setFormData({
               ...formData,
               contact_info: { ...formData.contact_info, phone: e.target.value }
             })}
+            placeholder="+1 (555) 123-4567"
           />
         </div>
 
@@ -594,11 +596,12 @@ const handleGalleryUpload = async (file: File) => {
         </div>
 
         <div>
-          <FloatingLabelInput
+          <Label htmlFor="location">Location</Label>
+          <Input
             id="location"
-            label="Location"
             value={formData.location || ''}
             onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+            placeholder="City, State/Country"
           />
         </div>
 
