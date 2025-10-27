@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Users, X, Navigation } from "lucide-react";
+import { Search, MapPin, Users, X, Navigation, Heart } from "lucide-react";
 import VenueCard from "@/components/VenueCard";
 import AppHeader from "@/components/AppHeader";
 import { Helmet } from "react-helmet-async";
@@ -34,8 +34,10 @@ const Venues = () => {
   const [selectedCity, setSelectedCity] = useState<string>("all");
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [selectedVenueType, setSelectedVenueType] = useState<string>("all");
-  const [capacityRange, setCapacityRange] = useState<number[]>([0, 1000]);
+  const [capacityRange, setCapacityRange] = useState<number[]>([0, 250]);
   const [sortBy, setSortBy] = useState<string>("name-asc");
+  const [showMyVenues, setShowMyVenues] = useState(false);
+  const [likedVenueIds, setLikedVenueIds] = useState<string[]>([]);
   const [genreDropdownOpen, setGenreDropdownOpen] = useState(false);
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
   const [sortByProximity, setSortByProximity] = useState(false);
@@ -44,6 +46,7 @@ const Venues = () => {
   
   useEffect(() => {
     fetchVenues();
+    fetchLikedVenues();
   }, []);
   const fetchVenues = async () => {
     try {
@@ -57,6 +60,23 @@ const Venues = () => {
       console.error("Error fetching venues:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchLikedVenues = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('venue_likes')
+        .select('venue_id')
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+      setLikedVenueIds(data?.map(like => like.venue_id) || []);
+    } catch (error) {
+      console.error("Error fetching liked venues:", error);
     }
   };
 
@@ -124,8 +144,16 @@ const Venues = () => {
       const matchesCity = selectedCity === "all" || venue.city === selectedCity;
       const matchesGenres = selectedGenres.length === 0 || venue.genres && venue.genres.some(g => selectedGenres.includes(g));
       const matchesVenueType = selectedVenueType === "all" || venue.venue_type === selectedVenueType;
-      const matchesCapacity = !venue.capacity || venue.capacity >= capacityRange[0] && venue.capacity <= capacityRange[1];
-      return matchesSearch && matchesCity && matchesGenres && matchesVenueType && matchesCapacity;
+      
+      // Handle capacity range - if max is 250, include all venues >= 250
+      const matchesCapacity = !venue.capacity || 
+        (capacityRange[1] >= 250 
+          ? venue.capacity >= capacityRange[0] 
+          : venue.capacity >= capacityRange[0] && venue.capacity <= capacityRange[1]);
+      
+      const matchesLiked = !showMyVenues || likedVenueIds.includes(venue.id);
+      
+      return matchesSearch && matchesCity && matchesGenres && matchesVenueType && matchesCapacity && matchesLiked;
     });
     filtered.sort((a, b) => {
       switch (sortBy) {
@@ -151,7 +179,7 @@ const Venues = () => {
       }
     });
     return filtered;
-  }, [venues, searchQuery, selectedCity, selectedGenres, capacityRange, sortBy, userLocation]);
+  }, [venues, searchQuery, selectedCity, selectedGenres, capacityRange, sortBy, userLocation, showMyVenues, likedVenueIds]);
   const toggleGenre = (genre: string) => {
     setSelectedGenres(prev => prev.includes(genre) ? prev.filter(g => g !== genre) : [...prev, genre]);
   };
@@ -160,10 +188,11 @@ const Venues = () => {
     setSelectedCity("all");
     setSelectedGenres([]);
     setSelectedVenueType("all");
-    setCapacityRange([0, 1000]);
+    setCapacityRange([0, 250]);
     setSortBy("name-asc");
     setSortByProximity(false);
     setUserLocation(null);
+    setShowMyVenues(false);
   };
   return <>
       <Helmet>
@@ -189,8 +218,10 @@ const Venues = () => {
               <Input placeholder="Search venues..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10 bg-gray-800 border-gray-700 text-white" />
             </div>
 
-            {/* Filter Row */}
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            {/* Filters Section */}
+            <div>
+              <h3 className="text-sm font-semibold text-gray-400 mb-3">Filters</h3>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               {/* City */}
               <Select value={selectedCity} onValueChange={setSelectedCity}>
                 <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
@@ -228,29 +259,46 @@ const Venues = () => {
                   </div>}
               </div>
 
-              {/* Proximity */}
+              {/* My Venues */}
               <Button 
                 variant="outline" 
-                className={`w-full justify-start ${sortByProximity ? 'bg-primary/20 border-primary' : 'bg-gray-800 border-gray-700'} text-white hover:bg-gray-700`}
-                onClick={getUserLocation}
+                className={`w-full justify-start ${showMyVenues ? 'bg-primary/20 border-primary' : 'bg-gray-800 border-gray-700'} text-white hover:bg-gray-700`}
+                onClick={() => setShowMyVenues(!showMyVenues)}
               >
-                <Navigation className="h-4 w-4 mr-2" />
-                Near Me {sortByProximity && '✓'}
+                <Heart className="h-4 w-4 mr-2" />
+                My Venues {showMyVenues && '✓'}
               </Button>
+            </div>
+            </div>
 
-              {/* Sort */}
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="name-asc">Name (A-Z)</SelectItem>
-                  <SelectItem value="name-desc">Name (Z-A)</SelectItem>
-                  <SelectItem value="capacity-asc">Capacity (Low-High)</SelectItem>
-                  <SelectItem value="capacity-desc">Capacity (High-Low)</SelectItem>
-                  {userLocation && <SelectItem value="proximity">Distance</SelectItem>}
-                </SelectContent>
-              </Select>
+            {/* Sort Section */}
+            <div>
+              <h3 className="text-sm font-semibold text-gray-400 mb-3">Sort By</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Proximity */}
+                <Button 
+                  variant="outline" 
+                  className={`w-full justify-start ${sortByProximity ? 'bg-primary/20 border-primary' : 'bg-gray-800 border-gray-700'} text-white hover:bg-gray-700`}
+                  onClick={getUserLocation}
+                >
+                  <Navigation className="h-4 w-4 mr-2" />
+                  Near Me {sortByProximity && '✓'}
+                </Button>
+
+                {/* Sort Dropdown */}
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="name-asc">Name (A-Z)</SelectItem>
+                    <SelectItem value="name-desc">Name (Z-A)</SelectItem>
+                    <SelectItem value="capacity-asc">Capacity (Low-High)</SelectItem>
+                    <SelectItem value="capacity-desc">Capacity (High-Low)</SelectItem>
+                    {userLocation && <SelectItem value="proximity">Distance</SelectItem>}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             {/* Capacity Slider */}
@@ -260,9 +308,9 @@ const Venues = () => {
                   <Users className="h-4 w-4" />
                   Capacity Range
                 </span>
-                <span>{capacityRange[0]} - {capacityRange[1]}</span>
+                <span>{capacityRange[0]} - {capacityRange[1] >= 250 ? '250+' : capacityRange[1]}</span>
               </div>
-              <Slider min={0} max={1000} step={50} value={capacityRange} onValueChange={setCapacityRange} className="w-full" />
+              <Slider min={0} max={250} step={25} value={capacityRange} onValueChange={setCapacityRange} className="w-full" />
             </div>
 
             {/* Selected Genres */}
@@ -274,7 +322,7 @@ const Venues = () => {
               </div>}
 
             {/* Reset Button */}
-            {(searchQuery || selectedCity !== "all" || selectedGenres.length > 0 || selectedVenueType !== "all") && <Button variant="ghost" size="sm" onClick={resetFilters} className="text-gray-400 hover:text-white">
+            {(searchQuery || selectedCity !== "all" || selectedGenres.length > 0 || selectedVenueType !== "all" || showMyVenues) && <Button variant="ghost" size="sm" onClick={resetFilters} className="text-gray-400 hover:text-white">
                 Reset Filters
               </Button>}
           </div>

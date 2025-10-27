@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, Users, Lock } from "lucide-react";
+import { MapPin, Users, Lock, Heart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -38,12 +38,15 @@ const VenueCard = ({ venue }: VenueCardProps) => {
   const [userTier, setUserTier] = useState<string | null>(null);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isLiked, setIsLiked] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
   const displayGenres = venue.genres?.slice(0, 3) || [];
   const remainingGenres = (venue.genres?.length || 0) - 3;
 
   useEffect(() => {
     checkUserTier();
+    checkIfLiked();
   }, []);
 
   const checkUserTier = async () => {
@@ -55,6 +58,8 @@ const VenueCard = ({ venue }: VenueCardProps) => {
         setLoading(false);
         return;
       }
+
+      setUserId(user.id);
 
       const { data: subscription } = await supabase
         .from('user_subscriptions')
@@ -70,6 +75,70 @@ const VenueCard = ({ venue }: VenueCardProps) => {
       console.error("Error checking user tier:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkIfLiked = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data } = await supabase
+        .from('venue_likes')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('venue_id', venue.id)
+        .maybeSingle();
+
+      setIsLiked(!!data);
+    } catch (error) {
+      console.error("Error checking if venue is liked:", error);
+    }
+  };
+
+  const toggleLike = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!userId) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to like venues",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      if (isLiked) {
+        await supabase
+          .from('venue_likes')
+          .delete()
+          .eq('user_id', userId)
+          .eq('venue_id', venue.id);
+        
+        setIsLiked(false);
+        toast({
+          title: "Removed from favorites",
+          description: `${venue.name} has been removed from your favorites`,
+        });
+      } else {
+        await supabase
+          .from('venue_likes')
+          .insert({ user_id: userId, venue_id: venue.id });
+        
+        setIsLiked(true);
+        toast({
+          title: "Added to favorites",
+          description: `${venue.name} has been added to your favorites`,
+        });
+      }
+    } catch (error) {
+      console.error("Error toggling like:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update favorites",
+        variant: "destructive",
+      });
     }
   };
 
@@ -101,6 +170,17 @@ const VenueCard = ({ venue }: VenueCardProps) => {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/50 to-transparent" />
         
+        {/* Like Button */}
+        <button
+          onClick={toggleLike}
+          className="absolute top-3 left-3 p-2 rounded-full bg-black/60 backdrop-blur-sm hover:bg-black/80 transition-all z-10"
+          aria-label={isLiked ? "Unlike venue" : "Like venue"}
+        >
+          <Heart
+            className={`h-5 w-5 ${isLiked ? 'fill-red-500 text-red-500' : 'text-white'}`}
+          />
+        </button>
+
         {/* Venue Type Badge */}
         {venue.venue_type && (
           <Badge className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm text-white">
