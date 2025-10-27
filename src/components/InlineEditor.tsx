@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { AutoSaveInput, AutoSaveTextarea } from "@/components/ui/auto-save-input";
 import { Input } from "@/components/ui/input";
+import { FloatingLabelInput } from "@/components/ui/floating-label-input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -541,9 +542,9 @@ const handleGalleryUpload = async (file: File) => {
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="artist_name">Artist Name</Label>
-          <Input
+          <FloatingLabelInput
             id="artist_name"
+            label="Artist Name"
             value={formData.artist_name}
             onChange={(e) => setFormData({ ...formData, artist_name: e.target.value })}
             placeholder="Your artist name"
@@ -551,9 +552,9 @@ const handleGalleryUpload = async (file: File) => {
         </div>
         
         <div>
-          <Label htmlFor="email">Contact Email</Label>
-          <Input
+          <FloatingLabelInput
             id="email"
+            label="Contact Email"
             type="email"
             value={formData.contact_info?.email || ''}
             onChange={(e) => setFormData({
@@ -565,9 +566,9 @@ const handleGalleryUpload = async (file: File) => {
         </div>
 
         <div>
-          <Label htmlFor="phone">Phone Number</Label>
-          <Input
+          <FloatingLabelInput
             id="phone"
+            label="Phone Number"
             type="tel"
             value={formData.contact_info?.phone || ''}
             onChange={(e) => setFormData({
@@ -596,9 +597,9 @@ const handleGalleryUpload = async (file: File) => {
         </div>
 
         <div>
-          <Label htmlFor="location">Location</Label>
-          <Input
+          <FloatingLabelInput
             id="location"
+            label="Location"
             value={formData.location || ''}
             onChange={(e) => setFormData({ ...formData, location: e.target.value })}
             placeholder="City, State/Country"
