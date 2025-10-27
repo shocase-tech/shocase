@@ -1,12 +1,12 @@
-import { useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Trash2, ChevronDown, ChevronUp, Theater, Mic, Speaker, Zap, Lightbulb, FileText, UtensilsCrossed, DoorOpen, Hotel, Car, ClipboardList, Sparkles, Guitar } from "lucide-react";
+import { Trash2, Theater, Mic, Speaker, Zap, Lightbulb, FileText, UtensilsCrossed, DoorOpen, Hotel, Car, ClipboardList, Sparkles, Guitar } from "lucide-react";
 import { RiderSection as RiderSectionType } from "@/pages/RiderBuilder";
 import StagePlotEditor from "./StagePlotEditor";
+import InputListTable from "./InputListTable";
 
 interface Props {
   section: RiderSectionType;
@@ -15,8 +15,6 @@ interface Props {
 }
 
 export default function RiderSection({ section, onUpdate, onDelete }: Props) {
-  const [isExpanded, setIsExpanded] = useState(false);
-
   const renderContent = () => {
     switch (section.type) {
       case "stage-plot":
@@ -30,18 +28,12 @@ export default function RiderSection({ section, onUpdate, onDelete }: Props) {
       case "input-list":
         return (
           <div className="space-y-4">
-            <div>
-              <Label>Input List (one per line)</Label>
-              <Textarea
-                value={section.content.inputs || ""}
-                onChange={(e) => onUpdate({
-                  content: { ...section.content, inputs: e.target.value }
-                })}
-                placeholder="1. Lead Vocals - Shure SM58&#10;2. Acoustic Guitar - DI Box&#10;3. Electric Guitar - Marshall Amp (mic'd)&#10;..."
-                rows={8}
-                className="font-mono text-sm"
-              />
-            </div>
+            <InputListTable
+              data={section.content.inputs || []}
+              onChange={(inputs) => onUpdate({
+                content: { ...section.content, inputs }
+              })}
+            />
           </div>
         );
 
@@ -277,20 +269,11 @@ export default function RiderSection({ section, onUpdate, onDelete }: Props) {
   const SectionIcon = getSectionIcon();
 
   return (
-    <Card className={`overflow-hidden border transition-all duration-300 ${
-      isExpanded 
-        ? 'shadow-xl border-primary/50 bg-card' 
-        : 'hover:shadow-lg hover:border-primary/30 border-border/50 bg-card/80'
-    }`}>
-      <CardHeader 
-        className="flex flex-row items-center justify-between space-y-0 pb-4 cursor-pointer hover:bg-muted/30 transition-colors"
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
+    <Card className="overflow-hidden border border-border/50 bg-card shadow-lg">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <div className="flex items-center gap-4 flex-1">
-          <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
-            isExpanded ? 'bg-primary/20' : 'bg-muted'
-          }`}>
-            <SectionIcon className={`w-5 h-5 ${isExpanded ? 'text-primary' : 'text-muted-foreground'}`} />
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-primary/20">
+            <SectionIcon className="w-5 h-5 text-primary" />
           </div>
           <div className="flex-1">
             <Input
@@ -302,7 +285,7 @@ export default function RiderSection({ section, onUpdate, onDelete }: Props) {
               onClick={(e) => e.stopPropagation()}
               className="font-semibold text-base border-none shadow-none px-0 focus-visible:ring-1 focus-visible:ring-primary bg-transparent h-auto py-0"
             />
-            {!isExpanded && isContentFilled && (
+            {isContentFilled && (
               <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
                 <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
                 Content added
@@ -310,43 +293,24 @@ export default function RiderSection({ section, onUpdate, onDelete }: Props) {
             )}
           </div>
         </div>
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsExpanded(!isExpanded);
-            }}
-            className="hover:bg-muted"
-          >
-            {isExpanded ? (
-              <ChevronUp className="w-4 h-4" />
-            ) : (
-              <ChevronDown className="w-4 h-4" />
-            )}
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete();
-            }}
-            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
-        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+        >
+          <Trash2 className="w-4 h-4" />
+        </Button>
       </CardHeader>
 
-      {isExpanded && (
-        <CardContent className="animate-accordion-down pt-0 border-t border-border/50">
-          <div className="pt-6">
-            {renderContent()}
-          </div>
-        </CardContent>
-      )}
+      <CardContent className="pt-0 border-t border-border/50">
+        <div className="pt-6">
+          {renderContent()}
+        </div>
+      </CardContent>
     </Card>
   );
 }
