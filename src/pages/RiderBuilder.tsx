@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import StagePlotEditor from "@/components/rider/StagePlotEditor";
 import { STAGE_ELEMENTS } from "@/components/rider/StagePlotCanvas";
 import RiderPreview from "@/components/rider/RiderPreview";
-import RiderTemplates from "@/components/rider/RiderTemplates";
+import RiderWizard from "@/components/rider/RiderWizard";
 import SaveIndicator from "@/components/SaveIndicator";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import AppHeader from "@/components/AppHeader";
@@ -62,7 +62,7 @@ export default function RiderBuilder() {
     sections: [],
   });
   const [showPreview, setShowPreview] = useState(false);
-  const [showTemplates, setShowTemplates] = useState(false);
+  const [showWizard, setShowWizard] = useState(false);
   const [loading, setLoading] = useState(true);
   const [sidebarView, setSidebarView] = useState<"sections" | "elements">("sections");
   const [canUndo, setCanUndo] = useState(false);
@@ -255,7 +255,7 @@ export default function RiderBuilder() {
 
               <div className="flex items-center gap-3">
                 <Button
-                  onClick={() => setShowTemplates(true)}
+                  onClick={() => setShowWizard(true)}
                   className="gap-2 bg-gradient-primary hover:opacity-90 transition-opacity"
                   size="sm"
                 >
@@ -583,17 +583,18 @@ export default function RiderBuilder() {
         hospitalityRider={hospitalityRider}
       />
 
-      <RiderTemplates
-        open={showTemplates}
-        onOpenChange={setShowTemplates}
-        onSelectTemplate={(template) => {
+      <RiderWizard
+        open={showWizard}
+        onOpenChange={setShowWizard}
+        riderType={riderType}
+        onComplete={(template) => {
           if (template.type === "technical") {
             setTechnicalRider(template);
           } else {
             setHospitalityRider(template);
           }
-          setShowTemplates(false);
-          toast.success("Template applied!");
+          setShowWizard(false);
+          toast.success("Rider generated from template!");
         }}
       />
       <Footer />
