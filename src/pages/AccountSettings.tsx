@@ -84,7 +84,7 @@ export default function AccountSettings() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-dark flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
@@ -99,7 +99,7 @@ export default function AccountSettings() {
 
       <AppHeader />
 
-      <div className="min-h-screen bg-gradient-dark pb-20 pt-16">
+      <div className="min-h-screen bg-black pb-20 pt-16">
         <div className="container max-w-4xl mx-auto px-4 py-8">
           <div className="mb-8">
             <h1 className="text-3xl font-bold mb-2">Account Settings</h1>

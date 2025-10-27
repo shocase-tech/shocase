@@ -421,7 +421,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/80">
+    <div className="min-h-screen bg-black">
       <AppHeader />
       
       <main className="container mx-auto px-4 py-4 pt-16">

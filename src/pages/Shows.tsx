@@ -132,7 +132,7 @@ export default function Shows() {
         <meta name="description" content="Manage your shows and create marketing content with AI" />
       </Helmet>
 
-      <div className="min-h-screen bg-gradient-to-b from-background to-background/95">
+      <div className="min-h-screen bg-black">
         <AppHeader />
         
         <main className="container mx-auto px-4 py-8 max-w-7xl">

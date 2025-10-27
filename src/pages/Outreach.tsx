@@ -559,7 +559,7 @@ export default function Outreach() {
 
       <AppHeader />
 
-      <div className="min-h-screen bg-gradient-dark pb-20 pt-16">
+      <div className="min-h-screen bg-black pb-20 pt-16">
         <div className="container max-w-6xl mx-auto px-4 py-8">
           <div className="mb-8">
             <h1 className="text-3xl font-bold mb-2">Outreach Tracker</h1>
