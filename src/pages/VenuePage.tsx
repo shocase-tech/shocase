@@ -230,54 +230,54 @@ const VenuePage = () => {
                 ))}
               </div>
               <h1 className="text-5xl font-bold text-white mb-4">{venue.name}</h1>
-              <div className="flex flex-wrap gap-4 text-gray-300 items-center mb-6">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5" />
-                  <span>{fullLocation}</span>
-                </div>
-                {venue.capacity && (
+              <div className="flex flex-wrap gap-4 text-gray-300 items-center justify-between mb-6">
+                <div className="flex flex-wrap gap-4 items-center">
                   <div className="flex items-center gap-2">
-                    <Users className="h-5 w-5" />
-                    <span>Capacity: {venue.capacity}</span>
+                    <MapPin className="h-5 w-5" />
+                    <span>{fullLocation}</span>
                   </div>
-                )}
-                {/* Social Links */}
-                <div className="flex items-center gap-3 ml-2">
-                  {venue.website_url && (
-                    <a
-                      href={venue.website_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-gray-300 hover:text-white transition-colors"
-                    >
-                      <Globe className="h-5 w-5" />
-                    </a>
+                  {venue.capacity && (
+                    <div className="flex items-center gap-2">
+                      <Users className="h-5 w-5" />
+                      <span>Capacity: {venue.capacity}</span>
+                    </div>
                   )}
-                  {venue.instagram_handle && (
-                    <a
-                      href={`https://instagram.com/${venue.instagram_handle.replace('@', '')}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-gray-300 hover:text-white transition-colors"
-                    >
-                      <Instagram className="h-5 w-5" />
-                    </a>
-                  )}
-                  {venue.facebook_url && (
-                    <a
-                      href={venue.facebook_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-gray-300 hover:text-white transition-colors"
-                    >
-                      <Facebook className="h-5 w-5" />
-                    </a>
-                  )}
+                  {/* Social Links */}
+                  <div className="flex items-center gap-3 ml-2">
+                    {venue.website_url && (
+                      <a
+                        href={venue.website_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-gray-300 hover:text-white transition-colors"
+                      >
+                        <Globe className="h-5 w-5" />
+                      </a>
+                    )}
+                    {venue.instagram_handle && (
+                      <a
+                        href={`https://instagram.com/${venue.instagram_handle.replace('@', '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-gray-300 hover:text-white transition-colors"
+                      >
+                        <Instagram className="h-5 w-5" />
+                      </a>
+                    )}
+                    {venue.facebook_url && (
+                      <a
+                        href={venue.facebook_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-gray-300 hover:text-white transition-colors"
+                      >
+                        <Facebook className="h-5 w-5" />
+                      </a>
+                    )}
+                  </div>
                 </div>
-              </div>
-              
-              {/* Book Now Button */}
-              <div className="flex justify-end">
+                
+                {/* Book Now Button */}
                 <button
                   onClick={handleBookVenue}
                   className="group flex items-center gap-2 text-white font-medium transition-all hover:scale-105"
