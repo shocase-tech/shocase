@@ -123,7 +123,7 @@ const AppHeader = () => {
 
   return (
     <header 
-      className="sticky top-0 z-50 w-full bg-background/20 backdrop-blur-md font-raleway"
+      className="sticky top-0 z-50 w-full bg-background/20 backdrop-blur-md"
       style={{
         maskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
         WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
