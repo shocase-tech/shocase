@@ -202,7 +202,7 @@ const Venues = () => {
       
       <AppHeader />
 
-      <div className="min-h-screen bg-gray-950 pt-20">
+      <div className="min-h-screen bg-gray-950 pt-6">
         <div className="max-w-7xl mx-auto px-4 py-6">
           {/* Header */}
           <div className="mb-6">
