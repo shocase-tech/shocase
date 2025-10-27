@@ -24,16 +24,21 @@ interface Props {
 }
 
 export default function InputListTable({ data, onChange }: Props) {
-  const [rows, setRows] = useState<InputRow[]>(
-    data.length > 0
-      ? data
-      : Array.from({ length: 8 }, (_, i) => ({
-          id: crypto.randomUUID(),
-          instrument: "",
-          mic: "",
-          notes: "",
-        }))
-  );
+  // Initialize rows, ensuring data is always an array
+  const initializeRows = () => {
+    // Handle case where data might not be an array (backward compatibility)
+    if (!Array.isArray(data) || data.length === 0) {
+      return Array.from({ length: 8 }, (_, i) => ({
+        id: crypto.randomUUID(),
+        instrument: "",
+        mic: "",
+        notes: "",
+      }));
+    }
+    return data;
+  };
+
+  const [rows, setRows] = useState<InputRow[]>(initializeRows());
 
   const updateRow = (id: string, field: keyof InputRow, value: string) => {
     const updated = rows.map((row) =>

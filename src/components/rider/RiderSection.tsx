@@ -29,7 +29,7 @@ export default function RiderSection({ section, onUpdate, onDelete }: Props) {
         return (
           <div className="space-y-4">
             <InputListTable
-              data={section.content.inputs || []}
+              data={Array.isArray(section.content.inputs) ? section.content.inputs : []}
               onChange={(inputs) => onUpdate({
                 content: { ...section.content, inputs }
               })}
