@@ -253,35 +253,16 @@ const StagePlotCanvas = forwardRef<StagePlotCanvasRef, Props>(({
         crossOrigin: 'anonymous'
       });
 
-      // Create a group to hold the image and label
-      const group = new Group([], {
+      // Scale and position the image
+      imgElement.scale(element.scale);
+      imgElement.set({
         left: 300 + Math.random() * 200,
         top: 150 + Math.random() * 200,
         selectable: true,
         hasControls: true,
       });
 
-      // Scale the image
-      imgElement.scale(element.scale);
-
-      // Label below the image
-      const imgWidth = (imgElement.width || 100) * element.scale;
-      const imgHeight = (imgElement.height || 100) * element.scale;
-      
-      const label = new FabricText(element.label, {
-        fontSize: 11,
-        fontFamily: "Inter, system-ui, sans-serif",
-        fill: "#1e293b",
-        fontWeight: "600",
-        left: imgWidth / 2,
-        top: imgHeight + 5,
-        originX: "center",
-      });
-
-      group.add(imgElement);
-      group.add(label);
-
-      fabricCanvas.add(group);
+      fabricCanvas.add(imgElement);
       fabricCanvas.renderAll();
       
       toast.success(`Added ${element.label}`);
