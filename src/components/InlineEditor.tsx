@@ -537,7 +537,7 @@ const handleGalleryUpload = async (file: File) => {
 
   const renderBasicSection = () => (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Artist Details</h3>
+      <h3 className="text-lg font-semibold gradient-text">Artist Details</h3>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -673,7 +673,7 @@ const handleGalleryUpload = async (file: File) => {
     <div className="space-y-6">
       {/* Section Header */}
       <div>
-        <h3 className="text-lg font-semibold flex items-center gap-2">
+        <h3 className="text-lg font-semibold gradient-text flex items-center gap-2">
           Artist Bio
           <Lightbulb className="w-4 h-4 text-primary" />
         </h3>
@@ -916,7 +916,7 @@ const handleGalleryUpload = async (file: File) => {
 
   const renderSocialSection = () => (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Social Links</h3>
+      <h3 className="text-lg font-semibold gradient-text">Social Links</h3>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">        
         <div>
@@ -963,7 +963,7 @@ const handleGalleryUpload = async (file: File) => {
 
   const renderBackgroundImageSection = () => (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Background Image</h3>
+      <h3 className="text-lg font-semibold gradient-text">Background Image</h3>
       {formData.hero_photo_url ? (
         <div className="relative inline-block">
           <PrivateImage
@@ -1016,7 +1016,7 @@ const handleGalleryUpload = async (file: File) => {
 
   const renderVideosSection = () => (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Videos (Max 3)</h3>
+      <h3 className="text-lg font-semibold gradient-text">Videos (Max 3)</h3>
       
       <div className="space-y-2">
         {(formData.show_videos || []).map((video: string, index: number) => (
@@ -1065,7 +1065,7 @@ const handleGalleryUpload = async (file: File) => {
 
   const renderStreamingSection = () => (
     <div className="space-y-6">
-      <h3 className="text-lg font-semibold">Streaming & Music Links</h3>
+      <h3 className="text-lg font-semibold gradient-text">Streaming & Music Links</h3>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
