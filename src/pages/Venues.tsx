@@ -230,7 +230,7 @@ const Venues = () => {
               </Button>
 
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="bg-gray-800/50 border-gray-700 text-white rounded-xl text-center">
+                <SelectTrigger className="bg-gray-800/50 border-gray-700 text-white rounded-xl justify-center [&>span]:flex [&>span]:justify-center [&>span]:w-full">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl">
@@ -264,7 +264,7 @@ const Venues = () => {
 
               {/* Venue Type */}
               <Select value={selectedVenueType} onValueChange={setSelectedVenueType}>
-                <SelectTrigger className="bg-gray-800/50 border-gray-700 text-white rounded-xl text-center">
+                <SelectTrigger className="bg-gray-800/50 border-gray-700 text-white rounded-xl justify-center [&>span]:flex [&>span]:justify-center [&>span]:w-full">
                   <SelectValue placeholder="All Types" />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl">
