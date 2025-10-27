@@ -357,7 +357,7 @@ export default function RiderBuilder() {
           </div>
 
           {/* Main Content Area */}
-          <div className="flex-1 p-8 max-w-4xl">
+          <div className="flex-1 p-8 max-w-7xl">
             {sections.map((sectionConfig) => {
               if (activeSection !== sectionConfig.type) return null;
 

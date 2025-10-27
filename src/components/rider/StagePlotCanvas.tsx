@@ -103,7 +103,25 @@ export default function StagePlotCanvas({ data, onChange }: Props) {
     canvas.on("object:added", () => saveCanvasState(canvas));
     canvas.on("object:removed", () => saveCanvasState(canvas));
 
+    // Add keyboard event listener for Delete key
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.key === "Delete" || e.key === "Backspace") && canvas.getActiveObjects().length > 0) {
+        const activeObjects = canvas.getActiveObjects();
+        activeObjects.forEach((obj) => {
+          if (!(obj as any).isStageSetup) {
+            canvas.remove(obj);
+          }
+        });
+        canvas.discardActiveObject();
+        canvas.renderAll();
+        toast.success("Deleted selected elements");
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
     return () => {
+      window.removeEventListener("keydown", handleKeyDown);
       canvas.dispose();
     };
   }, []);
@@ -119,44 +137,6 @@ export default function StagePlotCanvas({ data, onChange }: Props) {
       }
     });
 
-    // Add subtle grid
-    const gridSize = 40;
-    for (let i = 0; i < width / gridSize; i++) {
-      const line = new Line([i * gridSize, 0, i * gridSize, height], {
-        stroke: "#e5e5e5",
-        strokeWidth: 1,
-        selectable: false,
-        evented: false,
-      });
-      (line as any).isStageSetup = true;
-      canvas.add(line);
-    }
-
-    for (let i = 0; i < height / gridSize; i++) {
-      const line = new Line([0, i * gridSize, width, i * gridSize], {
-        stroke: "#e5e5e5",
-        strokeWidth: 1,
-        selectable: false,
-        evented: false,
-      });
-      (line as any).isStageSetup = true;
-      canvas.add(line);
-    }
-
-    // Stage platform outline
-    const stagePath = new Path(
-      `M 150 ${height - 150} L ${width - 150} ${height - 150} L ${width - 100} ${height - 50} L 100 ${height - 50} Z`,
-      {
-        fill: "rgba(139, 92, 246, 0.05)",
-        stroke: "#8b5cf6",
-        strokeWidth: 3,
-        selectable: false,
-        evented: false,
-      }
-    );
-    (stagePath as any).isStageSetup = true;
-    canvas.add(stagePath);
-
     // Position labels
     const labelStyle = {
       fontSize: 14,
@@ -167,13 +147,14 @@ export default function StagePlotCanvas({ data, onChange }: Props) {
       fontWeight: "500",
     };
 
-    const upstageLeft = new FabricText("Upstage Left", {
+    // Swapped: "Upstage Right" on the left, "Upstage Left" on the right
+    const upstageRight = new FabricText("Upstage Right", {
       ...labelStyle,
       left: 120,
       top: 30,
     });
-    (upstageLeft as any).isStageSetup = true;
-    canvas.add(upstageLeft);
+    (upstageRight as any).isStageSetup = true;
+    canvas.add(upstageRight);
 
     const upstageCenter = new FabricText("Upstage Center", {
       ...labelStyle,
@@ -183,13 +164,13 @@ export default function StagePlotCanvas({ data, onChange }: Props) {
     (upstageCenter as any).isStageSetup = true;
     canvas.add(upstageCenter);
 
-    const upstageRight = new FabricText("Upstage Right", {
+    const upstageLeft = new FabricText("Upstage Left", {
       ...labelStyle,
       left: width - 220,
       top: 30,
     });
-    (upstageRight as any).isStageSetup = true;
-    canvas.add(upstageRight);
+    (upstageLeft as any).isStageSetup = true;
+    canvas.add(upstageLeft);
 
     const audience = new FabricText("Audience", {
       ...labelStyle,
@@ -202,10 +183,9 @@ export default function StagePlotCanvas({ data, onChange }: Props) {
     canvas.add(audience);
 
     canvas.sendObjectToBack(audience);
-    canvas.sendObjectToBack(upstageRight);
-    canvas.sendObjectToBack(upstageCenter);
     canvas.sendObjectToBack(upstageLeft);
-    canvas.sendObjectToBack(stagePath);
+    canvas.sendObjectToBack(upstageCenter);
+    canvas.sendObjectToBack(upstageRight);
   };
 
   const saveCanvasState = (canvas: FabricCanvas) => {
@@ -325,61 +305,65 @@ export default function StagePlotCanvas({ data, onChange }: Props) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex gap-6">
+      {/* Sidebar with draggable elements */}
+      <div className="w-64 flex-shrink-0 space-y-4">
+        <div>
+          <h4 className="text-sm font-semibold text-foreground mb-3">Stage Elements</h4>
+          <p className="text-xs text-muted-foreground mb-4">
+            Click to add elements to the canvas
+          </p>
+        </div>
+        
+        <div className="space-y-2 max-h-[600px] overflow-y-auto pr-2">
+          {STAGE_ELEMENTS.map((element) => (
+            <Button
+              key={element.id}
+              variant="outline"
+              size="sm"
+              onClick={() => addElement(element)}
+              className="w-full h-auto py-2 flex items-center gap-3 hover:scale-102 transition-transform border hover:border-primary justify-start"
+            >
+              <img src={element.svg} alt={element.label} className="w-8 h-8 object-contain flex-shrink-0" />
+              <span className="text-xs font-medium text-left">{element.label}</span>
+            </Button>
+          ))}
+        </div>
+
+        {/* Controls */}
+        <div className="space-y-2 pt-4 border-t">
+          <Button variant="outline" size="sm" onClick={undo} disabled={historyStep <= 0} className="w-full">
+            <Undo className="w-4 h-4 mr-2" />
+            Undo
+          </Button>
+          <Button variant="outline" size="sm" onClick={redo} disabled={historyStep >= history.length - 1} className="w-full">
+            <Redo className="w-4 h-4 mr-2" />
+            Redo
+          </Button>
+          <Button variant="outline" size="sm" onClick={deleteSelected} className="w-full">
+            <Trash2 className="w-4 h-4 mr-2" />
+            Delete Selected
+          </Button>
+          <Button variant="outline" size="sm" onClick={downloadCanvas} className="w-full">
+            <Download className="w-4 h-4 mr-2" />
+            Export
+          </Button>
+          <Button variant="destructive" size="sm" onClick={clearCanvas} className="w-full">
+            Clear All
+          </Button>
+        </div>
+
+        <p className="text-xs text-muted-foreground border-l-2 border-primary pl-2">
+          Click elements to add. Drag to move, use corners to resize. Press Delete to remove selected items.
+        </p>
+      </div>
+
       {/* Canvas */}
-      <Card className="p-6 bg-gradient-to-br from-background to-muted/20 border-2">
-        <div className="flex justify-center">
-          <canvas ref={canvasRef} className="rounded-lg shadow-lg border border-border" />
-        </div>
-      </Card>
-
-      {/* Element Library */}
-      <div className="space-y-3">
-        <h4 className="text-sm font-semibold text-foreground">Add Stage Elements</h4>
-        <div className="grid grid-cols-5 gap-3">
-          {STAGE_ELEMENTS.map((element) => {
-            return (
-              <Button
-                key={element.id}
-                variant="outline"
-                size="lg"
-                onClick={() => addElement(element)}
-                className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-transform border-2 hover:border-primary"
-              >
-                <img src={element.svg} alt={element.label} className="w-10 h-10 object-contain" />
-                <span className="text-xs font-medium text-center leading-tight">{element.label}</span>
-              </Button>
-            );
-          })}
-        </div>
+      <div className="flex-1">
+        <Card className="p-6 bg-gradient-to-br from-background to-muted/20 border-2">
+          <canvas ref={canvasRef} className="rounded-lg shadow-lg border border-border w-full" />
+        </Card>
       </div>
-
-      {/* Canvas Controls */}
-      <div className="flex gap-2 flex-wrap">
-        <Button variant="outline" size="sm" onClick={undo} disabled={historyStep <= 0}>
-          <Undo className="w-4 h-4 mr-1" />
-          Undo
-        </Button>
-        <Button variant="outline" size="sm" onClick={redo} disabled={historyStep >= history.length - 1}>
-          <Redo className="w-4 h-4 mr-1" />
-          Redo
-        </Button>
-        <Button variant="outline" size="sm" onClick={deleteSelected}>
-          <Trash2 className="w-4 h-4 mr-1" />
-          Delete Selected
-        </Button>
-        <Button variant="outline" size="sm" onClick={downloadCanvas}>
-          <Download className="w-4 h-4 mr-1" />
-          Export as Image
-        </Button>
-        <Button variant="destructive" size="sm" onClick={clearCanvas} className="ml-auto">
-          Clear All
-        </Button>
-      </div>
-
-      <p className="text-sm text-muted-foreground border-l-2 border-primary pl-3">
-        Click elements above to add them to your stage plot. Drag to reposition, and use corners to resize. Select items and click "Delete Selected" to remove them.
-      </p>
     </div>
   );
 }
