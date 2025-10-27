@@ -11,9 +11,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Rider } from "@/pages/RiderBuilder";
-import { ChevronLeft, ChevronRight, Check, Users } from "lucide-react";
+import { ChevronLeft, ChevronRight, Check, Users, Plus, Trash2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { generateStageLayout } from "@/lib/stagePositioning";
+import { Badge } from "@/components/ui/badge";
 
 interface Props {
   open: boolean;
@@ -45,20 +46,35 @@ const INSTRUMENT_OPTIONS = [
 
 export default function RiderWizard({ open, onOpenChange, onComplete, riderType }: Props) {
   const [step, setStep] = useState(1);
-  const [bandSize, setBandSize] = useState<number>(1);
-  const [members, setMembers] = useState<BandMember[]>([]);
-  const [needsBackline, setNeedsBackline] = useState(true);
-  const [needsLighting, setNeedsLighting] = useState(false);
-
-  const initializeMembers = (size: number) => {
-    const newMembers = Array.from({ length: size }, (_, i) => ({
+  const [members, setMembers] = useState<BandMember[]>([
+    {
       id: crypto.randomUUID(),
-      name: `Member ${i + 1}`,
+      name: "Member 1",
       instruments: [],
       needsMonitor: true,
       needsDI: false,
-    }));
-    setMembers(newMembers);
+    },
+  ]);
+  const [needsBackline, setNeedsBackline] = useState(true);
+  const [needsLighting, setNeedsLighting] = useState(false);
+
+  const addMember = () => {
+    setMembers((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        name: `Member ${prev.length + 1}`,
+        instruments: [],
+        needsMonitor: true,
+        needsDI: false,
+      },
+    ]);
+  };
+
+  const removeMember = (id: string) => {
+    if (members.length > 1) {
+      setMembers((prev) => prev.filter((m) => m.id !== id));
+    }
   };
 
   const updateMember = (id: string, field: keyof BandMember, value: any) => {
@@ -70,6 +86,7 @@ export default function RiderWizard({ open, onOpenChange, onComplete, riderType 
   const generateRider = (): Rider & { stagePlotData?: any } => {
     const sections: any[] = [];
     const stagePlotData: any = { elements: [] };
+    const bandSize = members.length;
 
     if (riderType === "technical") {
       // Generate Stage Plot Data using smart positioning
@@ -256,19 +273,16 @@ export default function RiderWizard({ open, onOpenChange, onComplete, riderType 
   };
 
   const handleNext = () => {
-    if (step === 1 && bandSize > 0) {
-      initializeMembers(bandSize);
-      setStep(2);
-    } else if (step === 2) {
+    if (step === 1) {
       if (riderType === "technical") {
-        setStep(3);
+        setStep(2);
       } else {
         // Skip to generation for hospitality
         const rider = generateRider();
         onComplete(rider);
         resetWizard();
       }
-    } else if (step === 3) {
+    } else if (step === 2) {
       const rider = generateRider();
       onComplete(rider);
       resetWizard();
@@ -277,8 +291,15 @@ export default function RiderWizard({ open, onOpenChange, onComplete, riderType 
 
   const resetWizard = () => {
     setStep(1);
-    setBandSize(1);
-    setMembers([]);
+    setMembers([
+      {
+        id: crypto.randomUUID(),
+        name: "Member 1",
+        instruments: [],
+        needsMonitor: true,
+        needsDI: false,
+      },
+    ]);
     setNeedsBackline(true);
     setNeedsLighting(false);
     onOpenChange(false);
@@ -298,9 +319,19 @@ export default function RiderWizard({ open, onOpenChange, onComplete, riderType 
     );
   };
 
+  const removeInstrument = (memberId: string, instrument: string) => {
+    setMembers((prev) =>
+      prev.map((m) => {
+        if (m.id === memberId) {
+          return { ...m, instruments: m.instruments.filter((i) => i !== instrument) };
+        }
+        return m;
+      })
+    );
+  };
+
   const canProceed = () => {
-    if (step === 1) return bandSize > 0;
-    if (step === 2) return members.every((m) => m.instruments.length > 0 && m.name.trim());
+    if (step === 1) return members.every((m) => m.instruments.length > 0 && m.name.trim());
     return true;
   };
 
@@ -313,155 +344,171 @@ export default function RiderWizard({ open, onOpenChange, onComplete, riderType 
             Create Your {riderType === "technical" ? "Technical" : "Hospitality"} Rider
           </DialogTitle>
           <DialogDescription>
-            Step {step} of {riderType === "technical" ? 3 : 2} - Let's build a customized rider for your band
+            Step {step} of {riderType === "technical" ? 2 : 1} - Let's build a customized rider for your band
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          {/* Step 1: Band Size */}
+          {/* Step 1: Band Member Mapping */}
           {step === 1 && (
             <div className="space-y-4">
-              <div>
-                <Label htmlFor="bandSize" className="text-base font-semibold">
-                  How many people are in your band?
-                </Label>
-                <p className="text-sm text-muted-foreground mt-1 mb-4">
-                  Include all performers who will be on stage
-                </p>
-                <Input
-                  id="bandSize"
-                  type="number"
-                  min="1"
-                  max="20"
-                  value={bandSize || ""}
-                  onChange={(e) => setBandSize(parseInt(e.target.value) || 0)}
-                  placeholder="e.g., 4"
-                  className="text-lg h-12"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Step 2: Band Member Mapping */}
-          {step === 2 && (
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-base font-semibold mb-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-base font-semibold">
                   Tell us about each band member
                 </h3>
-                <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
-                  {members.map((member, idx) => (
-                    <div key={member.id} className="border rounded-lg p-4 space-y-3 bg-card">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold">
-                          {idx + 1}
-                        </div>
-                        <div className="flex-1">
-                          <Label htmlFor={`name-${member.id}`}>Band Member Name</Label>
-                          <Input
-                            id={`name-${member.id}`}
-                            value={member.name}
-                            onChange={(e) => updateMember(member.id, "name", e.target.value)}
-                            placeholder="e.g., John Smith"
-                          />
-                        </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addMember}
+                  className="gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Member
+                </Button>
+              </div>
+              <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
+                {members.map((member, idx) => (
+                  <div key={member.id} className="border rounded-lg p-4 space-y-3 bg-card">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold">
+                        {idx + 1}
                       </div>
-                      
-                      <div className="pl-11 space-y-2">
-                        <Label>Instruments (select all that apply)</Label>
-                        <div className="grid grid-cols-2 gap-2">
+                      <div className="flex-1">
+                        <Label htmlFor={`name-${member.id}`}>Band Member Name</Label>
+                        <Input
+                          id={`name-${member.id}`}
+                          value={member.name}
+                          onChange={(e) => updateMember(member.id, "name", e.target.value)}
+                          placeholder="e.g., John Smith"
+                        />
+                      </div>
+                      {members.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeMember(member.id)}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                    
+                    <div className="pl-11 space-y-2">
+                      <Label>Instruments</Label>
+                      <Select
+                        onValueChange={(value) => toggleInstrument(member.id, value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select instruments..." />
+                        </SelectTrigger>
+                        <SelectContent>
                           {INSTRUMENT_OPTIONS.map((inst) => (
-                            <div key={inst} className="flex items-center gap-2">
-                              <Checkbox
-                                id={`${member.id}-${inst}`}
-                                checked={member.instruments.includes(inst)}
-                                onCheckedChange={() => toggleInstrument(member.id, inst)}
-                              />
-                              <label
-                                htmlFor={`${member.id}-${inst}`}
-                                className="text-sm cursor-pointer"
-                              >
-                                {inst}
-                              </label>
-                            </div>
+                            <SelectItem key={inst} value={inst}>
+                              {inst}
+                            </SelectItem>
                           ))}
-                        </div>
-                      </div>
-
-                      {riderType === "technical" && member.instruments.length > 0 && (
-                        <div className="flex items-center gap-4 pl-11 pt-2 border-t">
-                          <div className="flex items-center gap-2">
-                            <Checkbox
-                              id={`monitor-${member.id}`}
-                              checked={member.needsMonitor}
-                              onCheckedChange={(checked) =>
-                                updateMember(member.id, "needsMonitor", checked)
-                              }
-                            />
-                            <label
-                              htmlFor={`monitor-${member.id}`}
-                              className="text-sm cursor-pointer"
+                        </SelectContent>
+                      </Select>
+                      {member.instruments.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {member.instruments.map((inst) => (
+                            <Badge
+                              key={inst}
+                              variant="secondary"
+                              className="gap-1 pr-1"
                             >
-                              Needs monitor
-                            </label>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Checkbox
-                              id={`di-${member.id}`}
-                              checked={member.needsDI}
-                              onCheckedChange={(checked) =>
-                                updateMember(member.id, "needsDI", checked)
-                              }
-                            />
-                            <label htmlFor={`di-${member.id}`} className="text-sm cursor-pointer">
-                              Needs DI
-                            </label>
-                          </div>
+                              {inst}
+                              <button
+                                type="button"
+                                onClick={() => removeInstrument(member.id, inst)}
+                                className="ml-1 hover:bg-destructive/20 rounded-full p-0.5"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            </Badge>
+                          ))}
                         </div>
                       )}
                     </div>
-                  ))}
-                </div>
+
+                    {riderType === "technical" && member.instruments.length > 0 && (
+                      <div className="flex items-center gap-4 pl-11 pt-2 border-t">
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            id={`monitor-${member.id}`}
+                            checked={member.needsMonitor}
+                            onCheckedChange={(checked) =>
+                              updateMember(member.id, "needsMonitor", checked)
+                            }
+                          />
+                          <label
+                            htmlFor={`monitor-${member.id}`}
+                            className="text-sm cursor-pointer"
+                          >
+                            Needs monitor
+                          </label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            id={`di-${member.id}`}
+                            checked={member.needsDI}
+                            onCheckedChange={(checked) =>
+                              updateMember(member.id, "needsDI", checked)
+                            }
+                          />
+                          <label htmlFor={`di-${member.id}`} className="text-sm cursor-pointer">
+                            Needs DI
+                          </label>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           )}
 
-          {/* Step 3: Additional Options (Technical only) */}
-          {step === 3 && (
+          {/* Step 2: Additional Options (Technical only) */}
+          {step === 2 && (
             <div className="space-y-4">
               <div>
                 <h3 className="text-base font-semibold mb-4">Additional Requirements</h3>
                 <div className="space-y-3">
-                  <div className="flex items-start gap-3 p-4 border rounded-lg">
+                  <label className="flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
                     <Checkbox
                       id="backline"
                       checked={needsBackline}
                       onCheckedChange={(checked) => setNeedsBackline(checked as boolean)}
+                      className="mt-1"
                     />
                     <div className="flex-1">
-                      <label htmlFor="backline" className="font-medium cursor-pointer">
+                      <div className="font-medium mb-1">
                         Include Backline Section
-                      </label>
+                      </div>
                       <p className="text-sm text-muted-foreground">
                         Specify equipment venue should provide (amps, drums, etc.)
                       </p>
                     </div>
-                  </div>
-                  <div className="flex items-start gap-3 p-4 border rounded-lg">
+                  </label>
+                  <label className="flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
                     <Checkbox
                       id="lighting"
                       checked={needsLighting}
                       onCheckedChange={(checked) => setNeedsLighting(checked as boolean)}
+                      className="mt-1"
                     />
                     <div className="flex-1">
-                      <label htmlFor="lighting" className="font-medium cursor-pointer">
+                      <div className="font-medium mb-1">
                         Include Lighting Requirements
-                      </label>
+                      </div>
                       <p className="text-sm text-muted-foreground">
                         Add basic lighting preferences to your rider
                       </p>
                     </div>
-                  </div>
+                  </label>
                 </div>
               </div>
             </div>
@@ -469,7 +516,7 @@ export default function RiderWizard({ open, onOpenChange, onComplete, riderType 
 
           {/* Navigation */}
           <div className="flex items-center justify-between pt-4 border-t">
-            {step > 1 ? (
+            {step > 1 && riderType === "technical" ? (
               <Button variant="outline" onClick={() => setStep(step - 1)}>
                 <ChevronLeft className="w-4 h-4 mr-2" />
                 Back
@@ -477,17 +524,18 @@ export default function RiderWizard({ open, onOpenChange, onComplete, riderType 
             ) : (
               <div />
             )}
-            <Button onClick={handleNext} disabled={!canProceed()}>
-              {step === (riderType === "technical" ? 3 : 2) ? (
-                <>
-                  <Check className="w-4 h-4 mr-2" />
-                  Generate Rider
-                </>
+            <Button
+              onClick={handleNext}
+              disabled={!canProceed()}
+              className="gap-2 bg-gradient-primary"
+            >
+              {step === 1 && riderType === "technical"
+                ? "Next: Additional Options"
+                : "Generate Rider"}
+              {step === 2 || riderType === "hospitality" ? (
+                <Check className="w-4 h-4" />
               ) : (
-                <>
-                  Next
-                  <ChevronRight className="w-4 h-4 ml-2" />
-                </>
+                <ChevronRight className="w-4 h-4" />
               )}
             </Button>
           </div>

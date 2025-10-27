@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Wand2, Eye, Download, Share2, ArrowLeft, Settings, Theater, Mic, Speaker, Zap, Lightbulb, FileText, UtensilsCrossed, DoorOpen, Hotel, Car, ClipboardList, Check, Undo, Redo, Trash2, Layers, List } from "lucide-react";
+import { Wand2, Eye, Download, Share2, ArrowLeft, Settings, Theater, Mic, Speaker, Zap, Lightbulb, FileText, UtensilsCrossed, DoorOpen, Hotel, Car, ClipboardList, Check, Undo, Redo, Trash2, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import StagePlotEditor from "@/components/rider/StagePlotEditor";
 import { STAGE_ELEMENTS, StagePlotCanvasRef } from "@/components/rider/StagePlotCanvas";
@@ -76,7 +76,7 @@ export default function RiderBuilder() {
   const [showPreview, setShowPreview] = useState(false);
   const [showWizard, setShowWizard] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [sidebarView, setSidebarView] = useState<"sections" | "elements">("sections");
+  const [showStagePlotElements, setShowStagePlotElements] = useState(false);
 
   const currentRider = riderType === "technical" ? technicalRider : hospitalityRider;
   const setCurrentRider = riderType === "technical" ? setTechnicalRider : setHospitalityRider;
@@ -202,12 +202,12 @@ export default function RiderBuilder() {
   const handleRiderTypeChange = (type: "technical" | "hospitality") => {
     setRiderType(type);
     setActiveSection(type === "technical" ? "stage-plot" : "catering");
-    setSidebarView("sections");
+    setShowStagePlotElements(false);
   };
 
   const handleSectionChange = (sectionType: string) => {
     setActiveSection(sectionType);
-    setSidebarView("sections");
+    setShowStagePlotElements(false);
   };
 
   if (loading) {
@@ -262,29 +262,26 @@ export default function RiderBuilder() {
                 <Button
                   variant="outline"
                   onClick={() => setShowPreview(true)}
-                  className="gap-2 border-border/50 hover:border-primary/50"
-                  size="sm"
+                  className="border-border/50 hover:border-primary/50"
+                  size="icon"
                 >
                   <Eye className="w-4 h-4" />
-                  Preview
                 </Button>
                 <Button
                   variant="outline"
                   onClick={handleShare}
-                  className="gap-2 border-border/50 hover:border-primary/50"
-                  size="sm"
+                  className="border-border/50 hover:border-primary/50"
+                  size="icon"
                 >
                   <Share2 className="w-4 h-4" />
-                  Share
                 </Button>
                 <Button
                   variant="outline"
                   onClick={handleExportPDF}
-                  className="gap-2 border-border/50 hover:border-primary/50"
-                  size="sm"
+                  className="border-border/50 hover:border-primary/50"
+                  size="icon"
                 >
                   <Download className="w-4 h-4" />
-                  Export PDF
                 </Button>
                 <SaveIndicator
                   isSaving={isSaving}
@@ -329,33 +326,22 @@ export default function RiderBuilder() {
             </div>
 
             {/* Stage Plot View Toggle (only when in stage-plot section) */}
-            {activeSection === "stage-plot" && (
+            {showStagePlotElements && activeSection === "stage-plot" && (
               <div className="p-4 border-b border-border/50">
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => setSidebarView("sections")}
-                    variant={sidebarView === "sections" ? "default" : "outline"}
-                    size="sm"
-                    className="flex-1 gap-2"
-                  >
-                    <List className="w-4 h-4" />
-                    Sections
-                  </Button>
-                  <Button
-                    onClick={() => setSidebarView("elements")}
-                    variant={sidebarView === "elements" ? "default" : "outline"}
-                    size="sm"
-                    className="flex-1 gap-2"
-                  >
-                    <Layers className="w-4 h-4" />
-                    Elements
-                  </Button>
-                </div>
+                <Button
+                  onClick={() => setShowStagePlotElements(false)}
+                  variant="outline"
+                  size="sm"
+                  className="w-full gap-2"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Back to Sections
+                </Button>
               </div>
             )}
 
             {/* Conditional Sidebar Content */}
-            {activeSection === "stage-plot" && sidebarView === "elements" ? (
+            {showStagePlotElements && activeSection === "stage-plot" ? (
               <div className="p-4 space-y-4">
                 <div>
                   <h4 className="text-sm font-semibold text-foreground mb-2">Stage Elements</h4>
@@ -379,54 +365,6 @@ export default function RiderBuilder() {
                   ))}
                 </div>
 
-                {/* Canvas Controls */}
-                <div className="space-y-2 pt-4 border-t">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => stagePlotRef.current?.undo()} 
-                    className="w-full"
-                  >
-                    <Undo className="w-4 h-4 mr-2" />
-                    Undo
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => stagePlotRef.current?.redo()} 
-                    className="w-full"
-                  >
-                    <Redo className="w-4 h-4 mr-2" />
-                    Redo
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => stagePlotRef.current?.deleteSelected()} 
-                    className="w-full"
-                  >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Delete
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => stagePlotRef.current?.downloadCanvas()} 
-                    className="w-full"
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    Export
-                  </Button>
-                  <Button 
-                    variant="destructive" 
-                    size="sm" 
-                    onClick={() => stagePlotRef.current?.clearCanvas()} 
-                    className="w-full"
-                  >
-                    Clear All
-                  </Button>
-                </div>
-
                 <p className="text-xs text-muted-foreground border-l-2 border-primary pl-2">
                   Click elements to add. Drag to move, resize with corners. Press Delete key to remove.
                 </p>
@@ -438,11 +376,18 @@ export default function RiderBuilder() {
                   const Icon = section.icon;
                   const isActive = activeSection === section.type;
                   const isComplete = isSectionComplete(section.type);
+                  const isStagePlot = section.type === "stage-plot";
                   
                   return (
                     <button
                       key={section.type}
-                      onClick={() => handleSectionChange(section.type)}
+                      onClick={() => {
+                        if (isStagePlot && isActive) {
+                          setShowStagePlotElements(true);
+                        } else {
+                          handleSectionChange(section.type);
+                        }
+                      }}
                       className={cn(
                         "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-left group",
                         isActive
@@ -474,6 +419,9 @@ export default function RiderBuilder() {
                       </div>
                       {isComplete && (
                         <Check className="w-4 h-4 text-primary flex-shrink-0" />
+                      )}
+                      {isStagePlot && isActive && riderType === "technical" && (
+                        <ChevronRight className="w-4 h-4 text-primary flex-shrink-0" />
                       )}
                     </button>
                   );
