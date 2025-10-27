@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Wand2, Eye, Download, Share2, ArrowLeft, Settings, Theater, Mic, Speaker, Zap, Lightbulb, FileText, UtensilsCrossed, DoorOpen, Hotel, Car, ClipboardList, Check, Undo, Redo, Trash2, Layers, List } from "lucide-react";
 import { toast } from "sonner";
 import StagePlotEditor from "@/components/rider/StagePlotEditor";
-import { STAGE_ELEMENTS } from "@/components/rider/StagePlotCanvas";
+import { STAGE_ELEMENTS, StagePlotCanvasRef } from "@/components/rider/StagePlotCanvas";
 import RiderPreview from "@/components/rider/RiderPreview";
 import RiderWizard from "@/components/rider/RiderWizard";
 import SaveIndicator from "@/components/SaveIndicator";
@@ -49,6 +49,7 @@ const HOSPITALITY_SECTIONS = [
 
 export default function RiderBuilder() {
   const navigate = useNavigate();
+  const stagePlotRef = useRef<StagePlotCanvasRef>(null);
   const [riderType, setRiderType] = useState<"technical" | "hospitality">("technical");
   const [activeSection, setActiveSection] = useState<string>("stage-plot");
   const [technicalRider, setTechnicalRider] = useState<Rider>({
@@ -65,8 +66,6 @@ export default function RiderBuilder() {
   const [showWizard, setShowWizard] = useState(false);
   const [loading, setLoading] = useState(true);
   const [sidebarView, setSidebarView] = useState<"sections" | "elements">("sections");
-  const [canUndo, setCanUndo] = useState(false);
-  const [canRedo, setCanRedo] = useState(false);
 
   const currentRider = riderType === "technical" ? technicalRider : hospitalityRider;
   const setCurrentRider = riderType === "technical" ? setTechnicalRider : setHospitalityRider;
@@ -198,19 +197,6 @@ export default function RiderBuilder() {
   const handleSectionChange = (sectionType: string) => {
     setActiveSection(sectionType);
     setSidebarView("sections");
-  };
-
-  const stagePlotControls = {
-    onAddElement: (element: typeof STAGE_ELEMENTS[0]) => {
-      // Element added callback
-    },
-    onUndo: () => setCanUndo(false),
-    onRedo: () => setCanRedo(false),
-    onDeleteSelected: () => {},
-    onClear: () => {},
-    onDownload: () => {},
-    canUndo,
-    canRedo,
   };
 
   if (loading) {
@@ -373,7 +359,7 @@ export default function RiderBuilder() {
                       key={element.id}
                       variant="outline"
                       size="sm"
-                      onClick={() => stagePlotControls.onAddElement?.(element)}
+                      onClick={() => stagePlotRef.current?.addElement(element)}
                       className="w-full h-auto py-2 flex items-center gap-3 hover:scale-102 transition-transform border hover:border-primary justify-start"
                     >
                       <img src={element.svg} alt={element.label} className="w-8 h-8 object-contain flex-shrink-0" />
@@ -387,8 +373,7 @@ export default function RiderBuilder() {
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    onClick={stagePlotControls.onUndo} 
-                    disabled={!canUndo} 
+                    onClick={() => stagePlotRef.current?.undo()} 
                     className="w-full"
                   >
                     <Undo className="w-4 h-4 mr-2" />
@@ -397,8 +382,7 @@ export default function RiderBuilder() {
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    onClick={stagePlotControls.onRedo} 
-                    disabled={!canRedo} 
+                    onClick={() => stagePlotRef.current?.redo()} 
                     className="w-full"
                   >
                     <Redo className="w-4 h-4 mr-2" />
@@ -407,7 +391,7 @@ export default function RiderBuilder() {
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    onClick={stagePlotControls.onDeleteSelected} 
+                    onClick={() => stagePlotRef.current?.deleteSelected()} 
                     className="w-full"
                   >
                     <Trash2 className="w-4 h-4 mr-2" />
@@ -416,7 +400,7 @@ export default function RiderBuilder() {
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    onClick={stagePlotControls.onDownload} 
+                    onClick={() => stagePlotRef.current?.downloadCanvas()} 
                     className="w-full"
                   >
                     <Download className="w-4 h-4 mr-2" />
@@ -425,7 +409,7 @@ export default function RiderBuilder() {
                   <Button 
                     variant="destructive" 
                     size="sm" 
-                    onClick={stagePlotControls.onClear} 
+                    onClick={() => stagePlotRef.current?.clearCanvas()} 
                     className="w-full"
                   >
                     Clear All
@@ -516,6 +500,7 @@ export default function RiderBuilder() {
 
                   {sectionConfig.type === "stage-plot" ? (
                     <StagePlotEditor
+                      ref={stagePlotRef}
                       data={section?.content || {}}
                       onChange={(content) => {
                         if (section) {
@@ -538,7 +523,6 @@ export default function RiderBuilder() {
                           });
                         }
                       }}
-                      canvasControls={stagePlotControls}
                     />
                   ) : (
                     <RiderSection

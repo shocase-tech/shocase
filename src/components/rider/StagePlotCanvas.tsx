@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useImperativeHandle, forwardRef } from "react";
 import { Canvas as FabricCanvas, Group, Path, Text as FabricText, FabricObject, Line, FabricImage } from "fabric";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -37,7 +37,6 @@ import GuitarStandSVG from "@/assets/stage-equipment/Guitar Stand.svg";
 interface Props {
   data: any;
   onChange: (data: any) => void;
-  onAddElement?: (element: typeof STAGE_ELEMENTS[0]) => void;
   onUndo?: () => void;
   onRedo?: () => void;
   onDeleteSelected?: () => void;
@@ -45,6 +44,15 @@ interface Props {
   onDownload?: () => void;
   canUndo?: boolean;
   canRedo?: boolean;
+}
+
+export interface StagePlotCanvasRef {
+  addElement: (element: typeof STAGE_ELEMENTS[0]) => void;
+  clearCanvas: () => void;
+  deleteSelected: () => void;
+  undo: () => void;
+  redo: () => void;
+  downloadCanvas: () => void;
 }
 
 export { STAGE_ELEMENTS };
@@ -79,10 +87,9 @@ const STAGE_ELEMENTS = [
   { id: "guitar-stand", label: "Guitar Stand", svg: GuitarStandSVG, scale: 0.7 },
 ];
 
-export default function StagePlotCanvas({ 
+const StagePlotCanvas = forwardRef<StagePlotCanvasRef, Props>(({ 
   data, 
   onChange,
-  onAddElement,
   onUndo,
   onRedo,
   onDeleteSelected,
@@ -90,7 +97,7 @@ export default function StagePlotCanvas({
   onDownload,
   canUndo,
   canRedo,
-}: Props) {
+}, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
   const [history, setHistory] = useState<string[]>([]);
@@ -224,9 +231,18 @@ export default function StagePlotCanvas({
   };
 
   const addElement = async (element: typeof STAGE_ELEMENTS[0]) => {
-    onAddElement?.(element);
     await addElementToCanvas(element);
   };
+
+  // Expose methods to parent via ref
+  useImperativeHandle(ref, () => ({
+    addElement,
+    clearCanvas,
+    deleteSelected,
+    undo,
+    redo,
+    downloadCanvas,
+  }));
 
   const addElementToCanvas = async (element: typeof STAGE_ELEMENTS[0]) => {
     if (!fabricCanvas) return;
@@ -340,4 +356,8 @@ export default function StagePlotCanvas({
       <canvas ref={canvasRef} className="rounded-lg shadow-lg border border-border w-full" />
     </Card>
   );
-}
+});
+
+StagePlotCanvas.displayName = "StagePlotCanvas";
+
+export default StagePlotCanvas;
