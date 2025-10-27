@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Circle, Eye, EyeOff } from "lucide-react";
+import { CheckCircle, Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -346,18 +346,6 @@ export default function FloatingProgressIndicator({
             </p>
           </div>
         </div>
-
-        {incompleteMilestones.length > 0 && (
-          <div className="space-y-1.5 mb-3">
-            <p className="text-xs text-muted-foreground">Next steps:</p>
-            {incompleteMilestones.map((milestone, index) => (
-              <div key={index} className="flex items-center gap-2 text-xs">
-                <Circle className="w-3 h-3 text-muted-foreground/60 flex-shrink-0" />
-                <span className="text-muted-foreground truncate">{milestone.label}</span>
-              </div>
-            ))}
-          </div>
-        )}
 
         {completionPercentage === 100 && (
           <div className="flex items-center gap-2 text-xs text-accent mb-3">

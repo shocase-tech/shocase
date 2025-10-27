@@ -11,13 +11,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { User } from "@supabase/supabase-js";
-import { Save, X, Plus, Calendar as CalendarIcon, MapPin, Ticket, GripVertical, ArrowUpDown, Loader2, Star } from "lucide-react";
+import { Save, X, Plus, Calendar as CalendarIcon, MapPin, Ticket, ArrowUpDown, Loader2, Star } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { ValidationAlertModal } from "@/components/ValidationAlertModal";
 
@@ -51,24 +47,6 @@ function SortableShow({ show, index, onDelete, onEdit, onToggleHighlight, initia
     show.date ? new Date(show.date + 'T00:00:00') : undefined
   );
 
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ 
-    id: `show-${index}`,
-    disabled: isMobile // Disable sorting on mobile
-  });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
   const handleSave = () => {
     onEdit(index, {
       ...editData,
@@ -80,7 +58,7 @@ function SortableShow({ show, index, onDelete, onEdit, onToggleHighlight, initia
 
   if (isEditing) {
     return (
-      <Card className="border-primary/20" style={style} ref={setNodeRef}>
+      <Card className="border-primary/20">
         <CardContent className={cn("space-y-4", isMobile ? "p-4" : "p-4")}>
           <div className={cn("grid gap-4", isMobile ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2")}>
             <div>
@@ -171,8 +149,6 @@ function SortableShow({ show, index, onDelete, onEdit, onToggleHighlight, initia
 
   return (
     <div
-      ref={setNodeRef}
-      style={style}
       className={cn(
         "group flex items-center justify-between rounded-md border transition-all",
         show.is_highlighted 
@@ -182,19 +158,6 @@ function SortableShow({ show, index, onDelete, onEdit, onToggleHighlight, initia
       )}
     >
       <div className={cn("flex items-center gap-3", isMobile && "w-full")}>
-        {/* Hide drag handle on mobile */}
-        {!isMobile && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing"
-            {...attributes}
-            {...listeners}
-          >
-            <GripVertical className="w-4 h-4" />
-          </Button>
-        )}
-        
         {show.is_highlighted && (
           <Star className="w-4 h-4 text-yellow-500 fill-current flex-shrink-0" />
         )}
@@ -280,13 +243,6 @@ export default function ShowsEditor({ profile, user, onSave, onCancel, onFormDat
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
   useEffect(() => {
     const allShows = [
       ...(profile?.upcoming_shows || []),
@@ -313,22 +269,6 @@ export default function ShowsEditor({ profile, user, onSave, onCancel, onFormDat
       shows: shows,
     });
   }, [shows]);
-
-  const handleDragEnd = (event: any) => {
-    // Skip drag handling on mobile
-    if (isMobile) return;
-    
-    const { active, over } = event;
-
-    if (active.id !== over.id) {
-      setShows((items) => {
-        const activeIndex = items.findIndex((_, index) => `show-${index}` === active.id);
-        const overIndex = items.findIndex((_, index) => `show-${index}` === over.id);
-
-        return arrayMove(items, activeIndex, overIndex);
-      });
-    }
-  };
 
   const handleAddShow = () => {
     const today = new Date();
@@ -548,52 +488,21 @@ export default function ShowsEditor({ profile, user, onSave, onCancel, onFormDat
         </div>
 
         {shows.length > 0 && (
-          isMobile ? (
-            // Mobile: Simple list without drag and drop
-            <div className="space-y-4">
-              {shows.map((show, index) => (
-                <div key={`show-${index}`} data-show-index={index}>
-                  <SortableShow
-                    show={show}
-                    index={index}
-                    onDelete={handleDeleteShow}
-                    onEdit={handleEditShow}
-                    onToggleHighlight={handleToggleHighlight}
-                    initiallyEditing={newlyAddedShowIndex === index}
-                    isMobile={true}
-                  />
-                </div>
-              ))}
-            </div>
-          ) : (
-            // Desktop: Full drag and drop functionality
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleDragEnd}
-            >
-              <SortableContext
-                items={shows.map((_, index) => `show-${index}`)}
-                strategy={verticalListSortingStrategy}
-              >
-                <div className="space-y-3">
-                  {shows.map((show, index) => (
-                    <div key={`show-${index}`} data-show-index={index}>
-                      <SortableShow
-                        show={show}
-                        index={index}
-                        onDelete={handleDeleteShow}
-                        onEdit={handleEditShow}
-                        onToggleHighlight={handleToggleHighlight}
-                        initiallyEditing={newlyAddedShowIndex === index}
-                        isMobile={false}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </SortableContext>
-            </DndContext>
-          )
+          <div className="space-y-4">
+            {shows.map((show, index) => (
+              <div key={`show-${index}`} data-show-index={index}>
+                <SortableShow
+                  show={show}
+                  index={index}
+                  onDelete={handleDeleteShow}
+                  onEdit={handleEditShow}
+                  onToggleHighlight={handleToggleHighlight}
+                  initiallyEditing={newlyAddedShowIndex === index}
+                  isMobile={isMobile}
+                />
+              </div>
+            ))}
+          </div>
         )}
 
         {shows.length === 0 && (
