@@ -461,7 +461,7 @@ export default function Dashboard() {
                         <div className="hidden md:flex items-center gap-3">
                           <Button
                             onClick={copyPublicLink}
-                            variant="outline"
+                            variant="minimal"
                             size="sm"
                             className="flex items-center gap-2"
                           >
@@ -470,7 +470,7 @@ export default function Dashboard() {
                           </Button>
                           <Button
                             onClick={previewProfile}
-                            variant="outline"
+                            variant="minimal"
                             size="sm"
                             className="flex items-center gap-2"
                           >
@@ -484,7 +484,7 @@ export default function Dashboard() {
                        {!profile.is_published && (
                          <Button
                            onClick={() => setShowPreviewModal(true)}
-                           variant="outline"
+                           variant="minimal"
                            size="sm"
                            className="flex items-center gap-2 transition-all duration-200"
                          >
@@ -496,11 +496,11 @@ export default function Dashboard() {
                        {/* Publish button - full width on mobile */}
                        <Button
                          onClick={togglePublishStatus}
-                         variant={profile.is_published ? "outline" : "default"}
+                         variant={profile.is_published ? "minimal" : "default"}
                          className={cn(
                            "flex items-center justify-center gap-2 font-medium px-4 md:px-6 w-full md:w-auto min-h-[44px]",
                            profile.is_published 
-                             ? "border-orange-500/50 text-orange-600 hover:bg-orange-500/10" 
+                             ? "text-orange-600 hover:text-orange-500" 
                              : "bg-green-600 hover:bg-green-700 text-white"
                          )}
                        >

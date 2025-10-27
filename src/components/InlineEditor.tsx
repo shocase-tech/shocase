@@ -1192,7 +1192,7 @@ const handleGalleryUpload = async (file: File) => {
       
       {/* Action Buttons - Hidden in mobile modal mode since modal has its own buttons */}
       {!isInMobileModal && (
-        <div className="flex items-center justify-center pt-6 border-t border-white/10">
+        <div className="flex items-center justify-center gap-4 pt-6 border-t border-white/10">
           {isInitialSetup ? (
             <Button
               onClick={() => handleSave(true)}
@@ -1213,31 +1213,29 @@ const handleGalleryUpload = async (file: File) => {
           ) : (
             <>
               <Button
-                variant="outline"
+                variant="minimal"
                 onClick={onCancel}
                 disabled={loading}
               >
                 Cancel
               </Button>
-              <div className="flex items-center gap-3">
-                <Button
-                  onClick={() => handleSave(false)}
-                  disabled={loading}
-                  variant="outline"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="w-4 h-4 mr-2" />
-                      Save
-                    </>
-                  )}
-                </Button>
-              </div>
+              <Button
+                onClick={() => handleSave(false)}
+                disabled={loading}
+                variant="minimal"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Save
+                  </>
+                )}
+              </Button>
             </>
           )}
         </div>

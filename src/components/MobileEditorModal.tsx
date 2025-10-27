@@ -119,7 +119,7 @@ export default function MobileEditorModal({
         {/* Sticky bottom banner with save/cancel buttons */}
         <div className="sticky bottom-0 left-0 right-0 bg-background border-t px-4 py-3 flex gap-3">
           <Button
-            variant="outline"
+            variant="minimal"
             onClick={handleCancel}
             disabled={isSaving}
             className="flex-1"

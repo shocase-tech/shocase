@@ -73,7 +73,7 @@ const HeroSection = () => {
         
         {/* CTA Button */}
         <Button 
-          variant="hero" 
+          variant="pill-hero" 
           size="lg" 
           className="px-8 py-3 text-lg"
           onClick={() => navigate("/auth")}

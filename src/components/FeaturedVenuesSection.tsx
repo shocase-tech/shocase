@@ -194,6 +194,7 @@ const FeaturedVenuesSection = () => {
           transition={{ duration: 0.6, delay: 0.4 }}
         >
           <Button 
+            variant="pill-hero"
             size="lg" 
             onClick={() => navigate('/venues')}
             className="group px-8 py-6 text-base"

@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Save } from "lucide-react";
 
 interface SectionSaveButtonProps {
@@ -10,18 +9,17 @@ interface SectionSaveButtonProps {
 
 export default function SectionSaveButton({ onSave, loading = false, sectionName }: SectionSaveButtonProps) {
   return (
-    <Card className="border-primary/20 bg-primary/5">
-      <CardContent className="pt-6">
-        <Button 
-          onClick={onSave} 
-          disabled={loading} 
-          className="w-full gap-2"
-          size="lg"
-        >
-          <Save className="w-4 h-4" />
-          {loading ? "Saving..." : `Update ${sectionName}`}
-        </Button>
-      </CardContent>
-    </Card>
+    <div className="pt-6 flex justify-center">
+      <Button 
+        onClick={onSave} 
+        disabled={loading} 
+        variant="minimal"
+        className="gap-2"
+        size="lg"
+      >
+        <Save className="w-4 h-4" />
+        {loading ? "Saving..." : `Update ${sectionName}`}
+      </Button>
+    </div>
   );
 }

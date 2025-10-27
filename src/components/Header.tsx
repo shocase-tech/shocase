@@ -174,31 +174,31 @@ const Header = () => {
           {/* Center Navigation - Desktop */}
           <nav className="hidden md:flex items-center gap-2">
             <Button 
-              variant="ghost" 
+              variant="pill" 
               onClick={() => navigate("/venues")}
-              className="text-white/80 hover:text-white hover:bg-white/10 hover:border hover:border-white/20 transition-all duration-300"
+              className="text-white/80 hover:text-white"
             >
               Venues
             </Button>
             <Button 
-              variant="ghost" 
+              variant="pill" 
               onClick={() => user ? navigate("/epk") : navigate("/auth")}
-              className="text-white/80 hover:text-white hover:bg-white/10 hover:border hover:border-white/20 transition-all duration-300"
+              className="text-white/80 hover:text-white"
             >
               Press Kit
             </Button>
             <Button 
-              variant="ghost" 
+              variant="pill" 
               onClick={() => user ? navigate("/outreach") : navigate("/auth")}
-              className="text-white/80 hover:text-white hover:bg-white/10 hover:border hover:border-white/20 transition-all duration-300"
+              className="text-white/80 hover:text-white"
             >
               Outreach
             </Button>
             {isLandingPage && (
               <Button 
-                variant="ghost" 
+                variant="pill" 
                 onClick={scrollToPricing}
-                className="text-white/80 hover:text-white hover:bg-white/10 hover:border hover:border-white/20 transition-all duration-300"
+                className="text-white/80 hover:text-white"
               >
                 Pricing
               </Button>

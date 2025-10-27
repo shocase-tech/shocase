@@ -106,12 +106,12 @@ const AppHeader = () => {
 
   const NavButton = ({ label, path }: { label: string; path: string }) => (
     <Button
-      variant="ghost"
+      variant="minimal"
       onClick={() => {
         navigate(path);
         setMobileMenuOpen(false);
       }}
-      className={`transition-all duration-200 hover:border hover:border-white/20 hover:backdrop-blur-sm ${
+      className={`transition-all duration-200 ${
         isActivePath(path)
           ? "text-primary font-semibold"
           : "text-muted-foreground hover:text-foreground"

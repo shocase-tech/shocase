@@ -1,4 +1,4 @@
-import { Check } from "lucide-react";
+import { Check, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
@@ -121,12 +121,13 @@ const PricingSection = () => {
               </ul>
               
               <Button 
-                variant={tier.buttonVariant}
+                variant={tier.name === "Pro" ? "default" : "text-arrow"}
                 className="w-full"
                 size="lg"
                 onClick={() => navigate('/auth')}
               >
                 {tier.buttonText}
+                {tier.name !== "Pro" && <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />}
               </Button>
             </div>
           ))}
