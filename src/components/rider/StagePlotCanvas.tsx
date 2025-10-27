@@ -15,8 +15,11 @@ import ElectricPianoSVG from "@/assets/stage-equipment/Electric Piano.svg";
 import SynthSVG from "@/assets/stage-equipment/Synth.svg";
 import GuitarASVG from "@/assets/stage-equipment/Guitar A.svg";
 import GuitarBSVG from "@/assets/stage-equipment/Guitar B.svg";
+import GuitarCSVG from "@/assets/stage-equipment/Guitar C.svg";
 import BassGuitarSVG from "@/assets/stage-equipment/Bass Guitar.svg";
 import FoldbackSpeakerSVG from "@/assets/stage-equipment/Foldback Speaker.svg";
+import FoldbackSpeakerLeftSVG from "@/assets/stage-equipment/Foldback Speaker Left.svg";
+import FoldbackSpeakerRightSVG from "@/assets/stage-equipment/Foldback Speaker Right.svg";
 import DJDecksSVG from "@/assets/stage-equipment/DJ Decks.svg";
 import DrumMachineSVG from "@/assets/stage-equipment/Drum Machine.svg";
 import PedalBoardSVG from "@/assets/stage-equipment/Pedal Board.svg";
@@ -24,15 +27,25 @@ import DIMonoSVG from "@/assets/stage-equipment/DI Mono.svg";
 import DIStereoSVG from "@/assets/stage-equipment/DI Stereo.svg";
 import BoomMicLeftSVG from "@/assets/stage-equipment/Boom Mic Left.svg";
 import BoomMicRightSVG from "@/assets/stage-equipment/Boom Mic Right.svg";
+import ShortBoomMicLeftSVG from "@/assets/stage-equipment/Short Boom Mic Left.svg";
+import ShortBoomMicRightSVG from "@/assets/stage-equipment/Short Boom Mic Right.svg";
+import ClampMicLeftSVG from "@/assets/stage-equipment/Clamp Mic Left.svg";
+import ClampMicRightSVG from "@/assets/stage-equipment/Clamp Mic Right.svg";
+import ClipMicLeftSVG from "@/assets/stage-equipment/Clip Mic Left.svg";
+import ClipMicRightSVG from "@/assets/stage-equipment/Clip Mic Right.svg";
 import PersonASVG from "@/assets/stage-equipment/Person A.svg";
 import PersonBSVG from "@/assets/stage-equipment/Person B.svg";
 import PersonCSVG from "@/assets/stage-equipment/Person C.svg";
+import PersonDSVG from "@/assets/stage-equipment/Person D.svg";
+import PersonESVG from "@/assets/stage-equipment/Person E.svg";
 import LaptopSVG from "@/assets/stage-equipment/Laptop.svg";
 import SoundcardSVG from "@/assets/stage-equipment/Soundcard.svg";
 import RiserSVG from "@/assets/stage-equipment/Riser.svg";
 import StandSVG from "@/assets/stage-equipment/Stand.svg";
 import KeyboardStandSVG from "@/assets/stage-equipment/Keyboard Stand.svg";
 import GuitarStandSVG from "@/assets/stage-equipment/Guitar Stand.svg";
+import PowerDropSVG from "@/assets/stage-equipment/Power Drop.svg";
+import SamplePadSVG from "@/assets/stage-equipment/Sample Pad.svg";
 
 interface Props {
   data: any;
@@ -47,7 +60,7 @@ interface Props {
 }
 
 export interface StagePlotCanvasRef {
-  addElement: (element: typeof STAGE_ELEMENTS[0]) => void;
+  addElement: (element: typeof STAGE_ELEMENTS[0], position?: { x: number; y: number }) => void;
   clearCanvas: () => void;
   deleteSelected: () => void;
   undo: () => void;
@@ -61,30 +74,43 @@ const STAGE_ELEMENTS = [
   { id: "standing-mic", label: "Standing Mic", svg: StandingMicSVG, scale: 0.8 },
   { id: "boom-mic-left", label: "Boom Mic Left", svg: BoomMicLeftSVG, scale: 0.8 },
   { id: "boom-mic-right", label: "Boom Mic Right", svg: BoomMicRightSVG, scale: 0.8 },
+  { id: "short-boom-mic-left", label: "Short Boom Mic Left", svg: ShortBoomMicLeftSVG, scale: 0.8 },
+  { id: "short-boom-mic-right", label: "Short Boom Mic Right", svg: ShortBoomMicRightSVG, scale: 0.8 },
+  { id: "clamp-mic-left", label: "Clamp Mic Left", svg: ClampMicLeftSVG, scale: 0.8 },
+  { id: "clamp-mic-right", label: "Clamp Mic Right", svg: ClampMicRightSVG, scale: 0.8 },
+  { id: "clip-mic-left", label: "Clip Mic Left", svg: ClipMicLeftSVG, scale: 0.8 },
+  { id: "clip-mic-right", label: "Clip Mic Right", svg: ClipMicRightSVG, scale: 0.8 },
   { id: "guitar-amp", label: "Guitar Amp", svg: GuitarAmpSVG, scale: 0.6 },
   { id: "bass-amp", label: "Bass Amp", svg: BassAmpSVG, scale: 0.6 },
-  { id: "drums", label: "Drum Kit", svg: DrumsSVG, scale: 0.5 },
+  { id: "drums", label: "Drums", svg: DrumsSVG, scale: 0.5 },
   { id: "midi-keyboard", label: "MIDI Keyboard", svg: MIDIKeyboardSVG, scale: 0.5 },
   { id: "electric-piano", label: "Electric Piano", svg: ElectricPianoSVG, scale: 0.5 },
   { id: "synth", label: "Synth", svg: SynthSVG, scale: 0.5 },
   { id: "guitar-a", label: "Guitar A", svg: GuitarASVG, scale: 0.6 },
   { id: "guitar-b", label: "Guitar B", svg: GuitarBSVG, scale: 0.6 },
+  { id: "guitar-c", label: "Guitar C", svg: GuitarCSVG, scale: 0.6 },
   { id: "bass-guitar", label: "Bass Guitar", svg: BassGuitarSVG, scale: 0.6 },
-  { id: "foldback-speaker", label: "Floor Monitor", svg: FoldbackSpeakerSVG, scale: 0.6 },
+  { id: "foldback-speaker", label: "Foldback Speaker", svg: FoldbackSpeakerSVG, scale: 0.6 },
+  { id: "foldback-speaker-left", label: "Foldback Speaker Left", svg: FoldbackSpeakerLeftSVG, scale: 0.6 },
+  { id: "foldback-speaker-right", label: "Foldback Speaker Right", svg: FoldbackSpeakerRightSVG, scale: 0.6 },
   { id: "dj-decks", label: "DJ Decks", svg: DJDecksSVG, scale: 0.5 },
   { id: "drum-machine", label: "Drum Machine", svg: DrumMachineSVG, scale: 0.6 },
   { id: "pedal-board", label: "Pedal Board", svg: PedalBoardSVG, scale: 0.7 },
-  { id: "di-mono", label: "DI Box Mono", svg: DIMonoSVG, scale: 0.8 },
-  { id: "di-stereo", label: "DI Box Stereo", svg: DIStereoSVG, scale: 0.8 },
+  { id: "di-mono", label: "DI Mono", svg: DIMonoSVG, scale: 0.8 },
+  { id: "di-stereo", label: "DI Stereo", svg: DIStereoSVG, scale: 0.8 },
   { id: "person-a", label: "Person A", svg: PersonASVG, scale: 0.5 },
   { id: "person-b", label: "Person B", svg: PersonBSVG, scale: 0.5 },
   { id: "person-c", label: "Person C", svg: PersonCSVG, scale: 0.5 },
+  { id: "person-d", label: "Person D", svg: PersonDSVG, scale: 0.5 },
+  { id: "person-e", label: "Person E", svg: PersonESVG, scale: 0.5 },
   { id: "laptop", label: "Laptop", svg: LaptopSVG, scale: 0.7 },
-  { id: "soundcard", label: "Audio Interface", svg: SoundcardSVG, scale: 0.6 },
+  { id: "soundcard", label: "Soundcard", svg: SoundcardSVG, scale: 0.6 },
   { id: "riser", label: "Riser", svg: RiserSVG, scale: 0.4 },
   { id: "stand", label: "Stand", svg: StandSVG, scale: 0.8 },
   { id: "keyboard-stand", label: "Keyboard Stand", svg: KeyboardStandSVG, scale: 0.5 },
   { id: "guitar-stand", label: "Guitar Stand", svg: GuitarStandSVG, scale: 0.7 },
+  { id: "power-drop", label: "Power Drop", svg: PowerDropSVG, scale: 0.7 },
+  { id: "sample-pad", label: "Sample Pad", svg: SamplePadSVG, scale: 0.6 },
 ];
 
 const StagePlotCanvas = forwardRef<StagePlotCanvasRef, Props>(({ 
@@ -230,8 +256,8 @@ const StagePlotCanvas = forwardRef<StagePlotCanvasRef, Props>(({
     setHistoryStep(newHistory.length - 1);
   };
 
-  const addElement = async (element: typeof STAGE_ELEMENTS[0]) => {
-    await addElementToCanvas(element);
+  const addElement = async (element: typeof STAGE_ELEMENTS[0], position?: { x: number; y: number }) => {
+    await addElementToCanvas(element, position);
   };
 
   // Expose methods to parent via ref
@@ -244,7 +270,7 @@ const StagePlotCanvas = forwardRef<StagePlotCanvasRef, Props>(({
     downloadCanvas,
   }));
 
-  const addElementToCanvas = async (element: typeof STAGE_ELEMENTS[0]) => {
+  const addElementToCanvas = async (element: typeof STAGE_ELEMENTS[0], position?: { x: number; y: number }) => {
     if (!fabricCanvas) return;
 
     try {
@@ -255,9 +281,14 @@ const StagePlotCanvas = forwardRef<StagePlotCanvasRef, Props>(({
 
       // Scale and position the image
       imgElement.scale(element.scale);
+      
+      // Use provided position or default to random placement
+      const left = position ? position.x : 300 + Math.random() * 200;
+      const top = position ? position.y : 150 + Math.random() * 200;
+      
       imgElement.set({
-        left: 300 + Math.random() * 200,
-        top: 150 + Math.random() * 200,
+        left,
+        top,
         selectable: true,
         hasControls: true,
       });
@@ -265,7 +296,9 @@ const StagePlotCanvas = forwardRef<StagePlotCanvasRef, Props>(({
       fabricCanvas.add(imgElement);
       fabricCanvas.renderAll();
       
-      toast.success(`Added ${element.label}`);
+      if (!position) {
+        toast.success(`Added ${element.label}`);
+      }
     } catch (error) {
       console.error("Error loading SVG:", error);
       toast.error(`Failed to add ${element.label}`);

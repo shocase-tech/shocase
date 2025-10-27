@@ -591,7 +591,7 @@ export default function RiderBuilder() {
               // Clear canvas first
               stagePlotRef.current.clearCanvas();
               
-              // Add each element from the generated stage plot
+              // Add each element from the generated stage plot with smart positioning
               setTimeout(() => {
                 template.stagePlotData?.elements.forEach((element: any) => {
                   // Find matching element from STAGE_ELEMENTS by label
@@ -600,7 +600,8 @@ export default function RiderBuilder() {
                   );
                   
                   if (stageElement) {
-                    stagePlotRef.current?.addElement(stageElement);
+                    // Pass the calculated position from the template
+                    stagePlotRef.current?.addElement(stageElement, { x: element.x, y: element.y });
                   }
                 });
                 toast.success("Rider and stage plot generated from template!");

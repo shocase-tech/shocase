@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Rider } from "@/pages/RiderBuilder";
 import { ChevronLeft, ChevronRight, Check, Users } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { generateStageLayout } from "@/lib/stagePositioning";
 
 interface Props {
   open: boolean;
@@ -71,42 +72,20 @@ export default function RiderWizard({ open, onOpenChange, onComplete, riderType 
     const stagePlotData: any = { elements: [] };
 
     if (riderType === "technical") {
-      // Generate Stage Plot Data
-      let xOffset = 100;
-      const yPosition = 300;
+      // Generate Stage Plot Data using smart positioning
+      const stageLayout = generateStageLayout(members);
       
-      members.forEach((member) => {
-        member.instruments.forEach((instrument) => {
-          const inst = instrument.toLowerCase();
-          let elementType = "Standing Mic";
-          
-          if (inst.includes("drum") && !inst.includes("machine")) {
-            elementType = "Drum Kit";
-          } else if (inst.includes("keyboard") || inst.includes("piano")) {
-            elementType = "Keyboard Stand";
-          } else if (inst.includes("guitar") && !inst.includes("bass")) {
-            elementType = "Guitar Stand";
-          } else if (inst.includes("bass")) {
-            elementType = "Bass Amp";
-          } else if (inst.includes("dj")) {
-            elementType = "DJ Decks";
-          } else if (inst.includes("vocal")) {
-            elementType = "Standing Mic";
-          } else if (inst.includes("synth")) {
-            elementType = "Synth";
-          }
-          
+      stageLayout.forEach((memberPos) => {
+        memberPos.elements.forEach((element) => {
           stagePlotData.elements.push({
             id: crypto.randomUUID(),
-            type: elementType,
-            x: xOffset,
-            y: yPosition,
+            type: element.type,
+            x: element.x,
+            y: element.y,
             rotation: 0,
             scaleX: 1,
             scaleY: 1,
           });
-          
-          xOffset += 150;
         });
       });
 
