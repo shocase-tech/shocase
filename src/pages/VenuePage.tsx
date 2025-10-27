@@ -150,7 +150,7 @@ const VenuePage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black">
+      <div className="min-h-screen bg-gray-950">
         <Skeleton className="w-full h-[50vh]" />
         <div className="max-w-4xl mx-auto px-4 py-8 space-y-4">
           <Skeleton className="h-8 w-3/4" />
@@ -163,7 +163,7 @@ const VenuePage = () => {
 
   if (notFound || !venue) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
         <Helmet>
           <title>Venue Not Found - SHOCASE</title>
         </Helmet>
@@ -189,7 +189,7 @@ const VenuePage = () => {
 
       <AppHeader />
 
-      <div className="min-h-screen bg-black">
+      <div className="min-h-screen bg-gray-950">
         {/* Hero Section */}
         <div className="relative h-[60vh] overflow-hidden">
           {venue.hero_image_url ? (

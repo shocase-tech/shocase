@@ -221,7 +221,7 @@ export default function RiderBuilder() {
   return (
     <>
       <AppHeader />
-      <div className="min-h-screen bg-black">
+      <div className="min-h-screen bg-gradient-to-b from-background via-background to-primary/5">
         {/* Header */}
         <div className="border-b border-border/50 bg-card/80 backdrop-blur-lg sticky top-0 z-10 shadow-lg">
           <div className="container mx-auto px-4 py-4">

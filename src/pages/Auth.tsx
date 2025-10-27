@@ -251,7 +251,7 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-background/80 p-4">
       <Card className="w-full max-w-md glass-card border-white/10 transition-all duration-500 animate-slide-in-up">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl gradient-text">
