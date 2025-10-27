@@ -211,35 +211,63 @@ const Venues = () => {
           </div>
 
           {/* Filters */}
-          <div className="bg-gray-900 rounded-lg p-6 mb-8 space-y-4">
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input placeholder="Search venues..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10 bg-gray-800 border-gray-700 text-white" />
+          <div className="bg-gray-900 rounded-2xl p-6 mb-8 space-y-4">
+            {/* Search and Sort Row */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="relative md:col-span-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input placeholder="Search venues..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10 bg-gray-800/50 border-gray-700 text-white rounded-xl" />
+              </div>
+              
+              {/* Sort Controls */}
+              <Button 
+                variant="outline" 
+                className={`w-full justify-start rounded-xl ${sortByProximity ? 'bg-primary/20 border-primary' : 'bg-gray-800/50 border-gray-700'} text-white hover:bg-gray-700`}
+                onClick={getUserLocation}
+              >
+                <Navigation className="h-4 w-4 mr-2" />
+                Near Me {sortByProximity && '✓'}
+              </Button>
+
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="bg-gray-800/50 border-gray-700 text-white rounded-xl">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl">
+                  <SelectItem value="name-asc">Name (A-Z)</SelectItem>
+                  <SelectItem value="name-desc">Name (Z-A)</SelectItem>
+                  <SelectItem value="capacity-asc">Capacity (Low-High)</SelectItem>
+                  <SelectItem value="capacity-desc">Capacity (High-Low)</SelectItem>
+                  {userLocation && <SelectItem value="proximity">Distance</SelectItem>}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Filters Section */}
             <div>
               <h3 className="text-sm font-semibold text-gray-400 mb-3">Filters</h3>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              {/* City */}
+              {/* Boroughs */}
               <Select value={selectedCity} onValueChange={setSelectedCity}>
-                <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                <SelectTrigger className="bg-gray-800/50 border-gray-700 text-white rounded-xl">
                   <MapPin className="h-4 w-4 mr-2" />
                   <SelectValue placeholder="All Boroughs" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="rounded-xl">
                   <SelectItem value="all">All Boroughs</SelectItem>
-                  {allCities.map(city => <SelectItem key={city} value={city}>{city}</SelectItem>)}
+                  <SelectItem value="Manhattan">Manhattan</SelectItem>
+                  <SelectItem value="Brooklyn">Brooklyn</SelectItem>
+                  <SelectItem value="Bronx">Bronx</SelectItem>
+                  <SelectItem value="Queens">Queens</SelectItem>
                 </SelectContent>
               </Select>
 
               {/* Venue Type */}
               <Select value={selectedVenueType} onValueChange={setSelectedVenueType}>
-                <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                <SelectTrigger className="bg-gray-800/50 border-gray-700 text-white rounded-xl">
                   <SelectValue placeholder="All Types" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="rounded-xl">
                   <SelectItem value="all">All Types</SelectItem>
                   {allVenueTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
                 </SelectContent>
@@ -247,12 +275,12 @@ const Venues = () => {
 
               {/* Genre */}
               <div className="relative">
-                <Button variant="outline" className="w-full justify-start bg-gray-800 border-gray-700 text-white hover:bg-gray-700" onClick={() => setGenreDropdownOpen(!genreDropdownOpen)}>
+                <Button variant="outline" className="w-full justify-start bg-gray-800/50 border-gray-700 text-white hover:bg-gray-700 rounded-xl" onClick={() => setGenreDropdownOpen(!genreDropdownOpen)}>
                   Genres {selectedGenres.length > 0 && `(${selectedGenres.length})`}
                 </Button>
-                {genreDropdownOpen && allGenres.length > 0 && <div className="absolute top-full mt-2 w-full bg-gray-800 border border-gray-700 rounded-lg p-3 z-10 max-h-64 overflow-y-auto">
+                {genreDropdownOpen && allGenres.length > 0 && <div className="absolute top-full mt-2 w-full bg-gray-800 border border-gray-700 rounded-xl p-3 z-10 max-h-64 overflow-y-auto">
                     <div className="flex flex-wrap gap-2">
-                      {allGenres.map(genre => <Badge key={genre} variant={selectedGenres.includes(genre) ? "default" : "outline"} className="cursor-pointer" onClick={() => toggleGenre(genre)}>
+                      {allGenres.map(genre => <Badge key={genre} variant={selectedGenres.includes(genre) ? "default" : "outline"} className="cursor-pointer rounded-full" onClick={() => toggleGenre(genre)}>
                           {genre}
                         </Badge>)}
                     </div>
@@ -262,43 +290,13 @@ const Venues = () => {
               {/* My Venues */}
               <Button 
                 variant="outline" 
-                className={`w-full justify-start ${showMyVenues ? 'bg-primary/20 border-primary' : 'bg-gray-800 border-gray-700'} text-white hover:bg-gray-700`}
+                className={`w-full justify-start rounded-xl ${showMyVenues ? 'bg-primary/20 border-primary' : 'bg-gray-800/50 border-gray-700'} text-white hover:bg-gray-700`}
                 onClick={() => setShowMyVenues(!showMyVenues)}
               >
                 <Heart className="h-4 w-4 mr-2" />
                 My Venues {showMyVenues && '✓'}
               </Button>
             </div>
-            </div>
-
-            {/* Sort Section */}
-            <div>
-              <h3 className="text-sm font-semibold text-gray-400 mb-3">Sort By</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Proximity */}
-                <Button 
-                  variant="outline" 
-                  className={`w-full justify-start ${sortByProximity ? 'bg-primary/20 border-primary' : 'bg-gray-800 border-gray-700'} text-white hover:bg-gray-700`}
-                  onClick={getUserLocation}
-                >
-                  <Navigation className="h-4 w-4 mr-2" />
-                  Near Me {sortByProximity && '✓'}
-                </Button>
-
-                {/* Sort Dropdown */}
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
-                    <SelectValue placeholder="Sort by" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="name-asc">Name (A-Z)</SelectItem>
-                    <SelectItem value="name-desc">Name (Z-A)</SelectItem>
-                    <SelectItem value="capacity-asc">Capacity (Low-High)</SelectItem>
-                    <SelectItem value="capacity-desc">Capacity (High-Low)</SelectItem>
-                    {userLocation && <SelectItem value="proximity">Distance</SelectItem>}
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
 
             {/* Capacity Slider */}
