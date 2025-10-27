@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { FloatingLabelInput } from "@/components/ui/floating-label-input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -414,9 +415,9 @@ const saveSection = async (sectionData: any) => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="artist_name">Artist Name *</Label>
-                  <Input
+                  <FloatingLabelInput
                     id="artist_name"
+                    label="Artist Name *"
                     value={formData.artist_name}
                     onChange={(e) => setFormData({ ...formData, artist_name: e.target.value })}
                     required
@@ -602,16 +603,16 @@ const saveSection = async (sectionData: any) => {
               <div className="space-y-4">
                 <Label>Contact Information</Label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Input
-                    placeholder="Email address"
+                  <FloatingLabelInput
+                    label="Contact Email"
                     value={formData.contact_info.email || ""}
                     onChange={(e) => setFormData({
                       ...formData,
                       contact_info: { ...formData.contact_info, email: e.target.value }
                     })}
                   />
-                  <Input
-                    placeholder="Phone number"
+                  <FloatingLabelInput
+                    label="Phone Number"
                     value={formData.contact_info.phone || ""}
                     onChange={(e) => setFormData({
                       ...formData,
@@ -658,19 +659,12 @@ const saveSection = async (sectionData: any) => {
 
               {/* Location - NEW */}
               <div className="space-y-2">
-                <Label htmlFor="location" className="text-sm font-medium">
-                  Location
-                </Label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    id="location"
-                    placeholder="e.g., Nashville, TN or London, UK"
-                    value={formData.location || ""}
-                    onChange={(e) => updateField('location', e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
+                <FloatingLabelInput
+                  id="location"
+                  label="Location"
+                  value={formData.location || ""}
+                  onChange={(e) => updateField('location', e.target.value)}
+                />
                 <p className="text-xs text-muted-foreground">
                   Your city and state/country for booking inquiries
                 </p>
