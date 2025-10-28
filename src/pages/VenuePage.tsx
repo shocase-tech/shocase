@@ -387,7 +387,7 @@ const VenuePage = () => {
                       <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
                       <div>
                         <p className="text-white font-medium">Backline</p>
-                        <p className="text-gray-400 text-sm">{venue.backline_details}</p>
+                        <p className="text-gray-400 text-sm max-w-full break-words whitespace-pre-wrap">{venue.backline_details}</p>
                       </div>
                     </div>
                   )}
