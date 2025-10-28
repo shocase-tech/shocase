@@ -1,13 +1,6 @@
 import { format } from "date-fns";
-import { Calendar, Music2 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
+import { Calendar } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface VenueEvent {
   date: string;
@@ -43,70 +36,51 @@ const VenueWeeklyCalendar = ({ events, lastUpdated }: VenueWeeklyCalendarProps) 
   };
 
   return (
-    <section className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-          <Calendar className="h-6 w-6 text-primary" />
-          Upcoming Shows
-        </h2>
-        {lastUpdated && (
-          <p className="text-gray-500 text-xs">
-            Updated {formatLastUpdated(lastUpdated)}
-          </p>
-        )}
-      </div>
-
-      {!hasEvents ? (
-        <Card className="bg-gray-900/50 border-gray-800">
-          <CardContent className="py-12 text-center">
-            <Music2 className="h-12 w-12 text-gray-600 mx-auto mb-3" />
-            <p className="text-gray-400">No upcoming shows this week</p>
-          </CardContent>
-        </Card>
-      ) : (
-        <Carousel
-          opts={{
-            align: "start",
-            loop: false,
-          }}
-          className="w-full"
-        >
-          <CarouselContent className="-ml-2 md:-ml-4">
-            {events.map((event, index) => (
-              <CarouselItem key={index} className="pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3">
-                <Card className="bg-gradient-to-br from-gray-900 to-gray-900/50 border-gray-800 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 group">
-                  <CardContent className="p-5">
-                    <div className="space-y-3">
-                      <div className="flex items-start gap-3">
-                        <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                          <Music2 className="h-6 w-6 text-primary" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-white font-semibold text-sm leading-tight">
-                            {formatEventDate(event.date)}
-                          </p>
-                          {event.time && (
-                            <p className="text-gray-400 text-xs mt-0.5">
-                              {event.time}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      <div className="pt-2 border-t border-gray-800">
-                        <p className="text-gray-300 text-sm font-medium line-clamp-2">
-                          {event.artists}
-                        </p>
-                      </div>
+    <section>
+      <h2 className="text-2xl font-bold text-white mb-4">Upcoming Shows</h2>
+      <Card className="bg-gray-900 border-gray-800">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-white text-lg flex items-center gap-2">
+            <Calendar className="h-5 w-5" />
+            This Week
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {!hasEvents ? (
+            <p className="text-gray-400 text-sm py-4">No upcoming shows found.</p>
+          ) : (
+            <div className="space-y-3">
+              {events.map((event, index) => (
+                <div
+                  key={index}
+                  className="border-l-2 border-primary/50 pl-4 py-2 hover:border-primary transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white font-medium text-sm">
+                        {formatEventDate(event.date)}
+                        {event.time && (
+                          <span className="text-gray-400 font-normal ml-2">
+                            • {event.time}
+                          </span>
+                        )}
+                      </p>
+                      <p className="text-gray-300 text-sm mt-1 truncate">
+                        {event.artists}
+                      </p>
                     </div>
-                  </CardContent>
-                </Card>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious className="hidden md:flex -left-12" />
-          <CarouselNext className="hidden md:flex -right-12" />
-        </Carousel>
-      )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          {lastUpdated && (
+            <p className="text-gray-500 text-xs mt-4 pt-3 border-t border-gray-800">
+              Last updated: {formatLastUpdated(lastUpdated)}
+            </p>
+          )}
+        </CardContent>
+      </Card>
     </section>
   );
 };
