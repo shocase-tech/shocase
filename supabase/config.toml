@@ -8,3 +8,9 @@ verify_jwt = false
 
 [functions.get-gmail-auth-url]
 verify_jwt = false
+
+[functions.fetch-venue-events]
+verify_jwt = false
+
+[functions.update-all-venue-events]
+verify_jwt = false

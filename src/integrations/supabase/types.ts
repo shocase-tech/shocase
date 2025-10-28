@@ -436,6 +436,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           dice_venue_url: string | null
+          events_last_updated: string | null
           facebook_url: string | null
           featured: boolean | null
           gallery_images: string[] | null
@@ -462,6 +463,7 @@ export type Database = {
           venue_notes: string | null
           venue_type: string | null
           website_url: string | null
+          weekly_events: Json | null
           zip_code: string | null
         }
         Insert: {
@@ -476,6 +478,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           dice_venue_url?: string | null
+          events_last_updated?: string | null
           facebook_url?: string | null
           featured?: boolean | null
           gallery_images?: string[] | null
@@ -502,6 +505,7 @@ export type Database = {
           venue_notes?: string | null
           venue_type?: string | null
           website_url?: string | null
+          weekly_events?: Json | null
           zip_code?: string | null
         }
         Update: {
@@ -516,6 +520,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           dice_venue_url?: string | null
+          events_last_updated?: string | null
           facebook_url?: string | null
           featured?: boolean | null
           gallery_images?: string[] | null
@@ -542,6 +547,7 @@ export type Database = {
           venue_notes?: string | null
           venue_type?: string | null
           website_url?: string | null
+          weekly_events?: Json | null
           zip_code?: string | null
         }
         Relationships: []
@@ -706,6 +712,7 @@ export type Database = {
         Args: { profile_user_id: string }
         Returns: boolean
       }
+      trigger_venue_events_update: { Args: never; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

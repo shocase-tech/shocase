@@ -11,6 +11,7 @@ import { Helmet } from "react-helmet-async";
 import AppHeader from "@/components/AppHeader";
 import BookVenueModal from "@/components/venues/BookVenueModal";
 import Footer from "@/components/Footer";
+import VenueWeeklyCalendar from "@/components/VenueWeeklyCalendar";
 
 interface Venue {
   id: string;
@@ -36,6 +37,8 @@ interface Venue {
   backline_details: string | null;
   venue_notes: string | null;
   requirements: any;
+  weekly_events: any[] | null;
+  events_last_updated: string | null;
 }
 
 const VenuePage = () => {
@@ -366,6 +369,12 @@ const VenuePage = () => {
               </Card>
             </div>
           </section>
+
+          {/* Weekly Calendar Section */}
+          <VenueWeeklyCalendar 
+            events={venue.weekly_events}
+            lastUpdated={venue.events_last_updated}
+          />
 
           {/* Requirements Section */}
           {(venue.backline_details || venue.venue_notes || venue.requirements) && (
