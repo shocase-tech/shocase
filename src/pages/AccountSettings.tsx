@@ -9,14 +9,16 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Helmet } from "react-helmet-async";
 import AppHeader from "@/components/AppHeader";
-import { Loader2, User, Mail, Key } from "lucide-react";
+import { Loader2, User, Mail, Key, Shield, RefreshCw } from "lucide-react";
 import Footer from "@/components/Footer";
 
 export default function AccountSettings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [savingEmail, setSavingEmail] = useState(false);
+  const [refreshingShows, setRefreshingShows] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -32,6 +34,16 @@ export default function AccountSettings() {
       }
       setUser(session.user);
       setEmail(session.user.email || "");
+      
+      // Check if user is admin
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', session.user.id)
+        .eq('role', 'admin')
+        .maybeSingle();
+      
+      setIsAdmin(!!roleData);
       setLoading(false);
     };
 
@@ -122,6 +134,28 @@ export default function AccountSettings() {
       });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleRefreshShows = async () => {
+    setRefreshingShows(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('update-all-venue-events');
+
+      if (error) throw error;
+
+      toast({
+        title: "Refresh started",
+        description: `Updating events for ${data.total || 'all'} venues. This may take several minutes.`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to start venue refresh",
+        variant: "destructive",
+      });
+    } finally {
+      setRefreshingShows(false);
     }
   };
 
@@ -245,6 +279,50 @@ export default function AccountSettings() {
                 </Button>
               </CardContent>
             </Card>
+
+            {/* Admin Controls */}
+            {isAdmin && (
+              <Card className="bg-card/50 backdrop-blur border-primary/20">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Shield className="w-5 h-5" />
+                    Admin Controls
+                  </CardTitle>
+                  <CardDescription>
+                    Administrative functions and site management
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-4 border border-white/10 rounded-lg">
+                      <div>
+                        <p className="font-medium">Refresh All Venue Shows</p>
+                        <p className="text-sm text-muted-foreground">
+                          Manually trigger AI to update weekly events for all venues
+                        </p>
+                      </div>
+                      <Button
+                        onClick={handleRefreshShows}
+                        disabled={refreshingShows}
+                        variant="outline"
+                      >
+                        {refreshingShows ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Refreshing...
+                          </>
+                        ) : (
+                          <>
+                            <RefreshCw className="w-4 h-4 mr-2" />
+                            Refresh
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Danger Zone */}
             <Card className="bg-card/50 backdrop-blur border-red-500/20">
