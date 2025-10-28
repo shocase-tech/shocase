@@ -27,7 +27,40 @@ serve(async (req) => {
     const todayStr = today.toISOString().split('T')[0];
     const nextWeekStr = nextWeek.toISOString().split('T')[0];
 
-    const systemPrompt = `You are a web scraping assistant that extracts upcoming event information for music venues. 
+    // Fetch website content to provide to AI
+    let websiteContent = '';
+    const urlToFetch = venue.event_calendar_url || venue.website_url;
+    
+    if (urlToFetch) {
+      try {
+        console.log(`Fetching content from: ${urlToFetch}`);
+        const websiteResponse = await fetch(urlToFetch, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+          }
+        });
+        
+        if (websiteResponse.ok) {
+          const html = await websiteResponse.text();
+          // Extract text content and limit size
+          const textContent = html
+            .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+            .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
+            .replace(/<[^>]+>/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+          
+          websiteContent = textContent.substring(0, 8000); // Limit to avoid token limits
+          console.log(`Fetched ${websiteContent.length} characters from website`);
+        } else {
+          console.log(`Failed to fetch website: ${websiteResponse.status}`);
+        }
+      } catch (fetchError) {
+        console.error(`Error fetching website content:`, fetchError);
+      }
+    }
+
+    const systemPrompt = `You are an event extraction assistant. Extract upcoming music events from the provided website content.
 Return ONLY valid JSON, no additional text or explanation.
 Return an array of events with this exact structure:
 [
@@ -39,17 +72,18 @@ Return an array of events with this exact structure:
 ]
 If no events are found, return an empty array: []`;
 
-    const userPrompt = `Find upcoming shows at this venue between ${todayStr} and ${nextWeekStr}:
+    const userPrompt = `Extract upcoming shows at this venue between ${todayStr} and ${nextWeekStr}:
 
 Venue Name: ${venue.name}
 Address: ${venue.address}, ${venue.city}, ${venue.state || ''}
-${venue.website_url ? `Website: ${venue.website_url}` : ''}
-${venue.instagram_handle ? `Instagram: @${venue.instagram_handle}` : ''}
-${venue.facebook_url ? `Facebook: ${venue.facebook_url}` : ''}
-${venue.event_calendar_url ? `Event Calendar: ${venue.event_calendar_url}` : ''}
 
-${venue.event_calendar_url ? `IMPORTANT: Use the Event Calendar link above as your primary source for finding events.` : 'Search for event listings on their website, social media, and ticket platforms.'}
-Extract show information including date, artist names (comma-separated if multiple), and time.
+${websiteContent ? `WEBSITE CONTENT:\n${websiteContent}\n\n` : 'No website content available. '}
+
+Extract show information including:
+- Date (must be between ${todayStr} and ${nextWeekStr})
+- Artist names (comma-separated if multiple artists)
+- Time (if available)
+
 Return ONLY the JSON array, no other text.`;
 
     console.log(`Fetching events for venue: ${venue.name}`);
