@@ -603,6 +603,31 @@ export type Database = {
         }
         Relationships: []
       }
+      artist_analytics_base: {
+        Row: {
+          applications_remaining_this_month: number | null
+          applications_this_month: number | null
+          artist_id: string | null
+          artist_location: string | null
+          artist_name: string | null
+          booking_success_rate_percent: number | null
+          current_tier: string | null
+          days_active: number | null
+          first_application_date: string | null
+          genre: string | null
+          last_application_date: string | null
+          monthly_revenue_from_artist: number | null
+          most_applied_city: string | null
+          pending_responses: number | null
+          preferred_venue_type: string | null
+          subscription_start_date: string | null
+          subscription_status: string | null
+          total_applications: number | null
+          total_bookings: number | null
+          total_rejections: number | null
+        }
+        Relationships: []
+      }
       platform_analytics: {
         Row: {
           active_artists_last_30_days: number | null
@@ -611,10 +636,38 @@ export type Database = {
           applications_last_7_days: number | null
           applications_today: number | null
           artists_with_bookings: number | null
-          avg_applications_per_artist: number | null
           bookings_last_30_days: number | null
           featured_venues: number | null
-          max_applications_by_single_artist: number | null
+          most_popular_application_day: number | null
+          most_popular_application_hour: number | null
+          most_popular_venue_city: string | null
+          mrr_from_elite: number | null
+          mrr_from_pro: number | null
+          new_users_last_30_days: number | null
+          new_users_last_7_days: number | null
+          platform_conversion_rate_percent: number | null
+          total_active_artists: number | null
+          total_applications_all_time: number | null
+          total_bookings_all_time: number | null
+          total_mrr: number | null
+          total_venues: number | null
+          users_on_elite: number | null
+          users_on_free: number | null
+          users_on_pro: number | null
+          venues_with_applications: number | null
+        }
+        Relationships: []
+      }
+      platform_analytics_base: {
+        Row: {
+          active_artists_last_30_days: number | null
+          active_venues: number | null
+          applications_last_30_days: number | null
+          applications_last_7_days: number | null
+          applications_today: number | null
+          artists_with_bookings: number | null
+          bookings_last_30_days: number | null
+          featured_venues: number | null
           most_popular_application_day: number | null
           most_popular_application_hour: number | null
           most_popular_venue_city: string | null
