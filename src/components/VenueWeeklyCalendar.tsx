@@ -1,12 +1,11 @@
 import { format } from "date-fns";
-import { Calendar, ExternalLink } from "lucide-react";
+import { Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface VenueEvent {
   date: string;
   artists: string;
   time?: string | null;
-  ticket_link?: string | null;
 }
 
 interface VenueWeeklyCalendarProps {
@@ -70,17 +69,6 @@ const VenueWeeklyCalendar = ({ events, lastUpdated }: VenueWeeklyCalendarProps) 
                         {event.artists}
                       </p>
                     </div>
-                    {event.ticket_link && (
-                      <a
-                        href={event.ticket_link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-shrink-0 text-primary hover:text-primary/80 transition-colors"
-                        aria-label="View tickets"
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                      </a>
-                    )}
                   </div>
                 </div>
               ))}

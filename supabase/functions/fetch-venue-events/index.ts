@@ -34,8 +34,7 @@ Return an array of events with this exact structure:
   {
     "date": "YYYY-MM-DD",
     "artists": "Artist Name 1, Artist Name 2",
-    "time": "8:00 PM" or null,
-    "ticket_link": "https://..." or null
+    "time": "8:00 PM" or null
   }
 ]
 If no events are found, return an empty array: []`;
@@ -47,9 +46,10 @@ Address: ${venue.address}, ${venue.city}, ${venue.state || ''}
 ${venue.website_url ? `Website: ${venue.website_url}` : ''}
 ${venue.instagram_handle ? `Instagram: @${venue.instagram_handle}` : ''}
 ${venue.facebook_url ? `Facebook: ${venue.facebook_url}` : ''}
+${venue.event_calendar_url ? `Event Calendar: ${venue.event_calendar_url}` : ''}
 
-Search for event listings on their website, social media, and ticket platforms.
-Extract show information including date, artist names (comma-separated if multiple), time, and ticket links.
+${venue.event_calendar_url ? `IMPORTANT: Use the Event Calendar link above as your primary source for finding events.` : 'Search for event listings on their website, social media, and ticket platforms.'}
+Extract show information including date, artist names (comma-separated if multiple), and time.
 Return ONLY the JSON array, no other text.`;
 
     console.log(`Fetching events for venue: ${venue.name}`);

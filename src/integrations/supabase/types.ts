@@ -457,6 +457,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           dice_venue_url: string | null
+          event_calendar_url: string | null
           events_last_updated: string | null
           facebook_url: string | null
           featured: boolean | null
@@ -499,6 +500,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           dice_venue_url?: string | null
+          event_calendar_url?: string | null
           events_last_updated?: string | null
           facebook_url?: string | null
           featured?: boolean | null
@@ -541,6 +543,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           dice_venue_url?: string | null
+          event_calendar_url?: string | null
           events_last_updated?: string | null
           facebook_url?: string | null
           featured?: boolean | null
