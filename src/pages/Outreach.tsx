@@ -503,7 +503,7 @@ export default function Outreach() {
         .from("venue_applications")
         .update({
           status: "sent",
-          sent_at: sentDate.toISOString(),
+          updated_at: sentDate.toISOString(),
         })
         .eq("id", markAsSentDialog.applicationId);
 
