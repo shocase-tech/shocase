@@ -27,7 +27,7 @@ export default function FloatingProgressIndicator({
 }: FloatingProgressIndicatorProps) {
   const [position, setPosition] = useState<FloatingPosition>('bottom-right');
   const [displayMode, setDisplayMode] = useState<DisplayMode>('corner');
-  const positionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const positionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isMobile = useIsMobile();
   const incompleteMilestones = milestones.filter(m => !m.completed).slice(0, 2);
   const completedCount = milestones.filter(m => m.completed).length;

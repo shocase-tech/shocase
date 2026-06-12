@@ -16,8 +16,8 @@ export function useAutoSaveInput({
   const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const successTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleKeyDown = useCallback(async (event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>, value: string) => {
     if (event.key === 'Enter') {

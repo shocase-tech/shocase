@@ -33,8 +33,8 @@ export function useDashboardStatePersistence({
   getFormData
 }: UseDashboardStatePersistenceProps) {
   const hasRestoredRef = useRef(false);
-  const saveTimeoutRef = useRef<NodeJS.Timeout>();
-  const intervalRef = useRef<NodeJS.Timeout>();
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const intervalRef = useRef<ReturnType<typeof setTimeout>>();
   const restoredFromSavedStateRef = useRef(false);
   
   // Capture form data from all active editors
