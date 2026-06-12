@@ -23,9 +23,6 @@ import newIcon from "@/assets/newicon.svg";
 const Header = () => {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [artistName, setArtistName] = useState<string | null>(null);
-  const [iconPosition, setIconPosition] = useState({ x: 24, y: 24 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -103,60 +100,17 @@ const Header = () => {
     return email.substring(0, 2).toUpperCase();
   };
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    const rect = e.currentTarget.getBoundingClientRect();
-    setDragOffset({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
-    });
-  };
-
-  const handleMouseMove = (e: MouseEvent) => {
-    if (isDragging) {
-      setIconPosition({
-        x: e.clientX - dragOffset.x,
-        y: e.clientY - dragOffset.y
-      });
-    }
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  useEffect(() => {
-    if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-    }
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isDragging, dragOffset]);
-
   return (
     <>
-      {/* Draggable Icon */}
-      <div 
-        className="fixed z-50 cursor-grab active:cursor-grabbing select-none"
-        style={{
-          left: `${iconPosition.x}px`,
-          top: `${iconPosition.y}px`,
-          filter: isDragging ? 'drop-shadow(0 10px 20px rgba(0,0,0,0.3))' : 'none'
-        }}
-        onMouseDown={handleMouseDown}
-        onClick={(e) => {
-          if (!isDragging) {
-            navigate('/');
-          }
-        }}
+      {/* Logo */}
+      <div
+        className="fixed z-50 cursor-pointer select-none"
+        style={{ left: '24px', top: '24px' }}
+        onClick={() => navigate('/')}
       >
-        <img 
-          src={newIcon} 
-          alt="SHOCASE Icon" 
+        <img
+          src={newIcon}
+          alt="SHOCASE Icon"
           className="h-[3.6rem] w-auto"
           draggable={false}
         />

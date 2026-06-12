@@ -255,7 +255,7 @@ export default function Auth() {
       <Card className="w-full max-w-md glass-card border-white/10 transition-all duration-500 animate-slide-in-up">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl gradient-text">
-            {showResetForm ? "Reset Password" : "Welcome to WinningEPK"}
+            {showResetForm ? "Reset Password" : "Welcome to Shocase"}
           </CardTitle>
           <CardDescription>
             {showResetForm ? "Enter your email to receive a reset link" : "Create your professional electronic press kit"}

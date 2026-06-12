@@ -45,7 +45,7 @@ const FeaturedVenuesSection = () => {
         .select('id, name, slug, city, hero_image_url, logo_url, capacity')
         .eq('featured', true)
         .eq('is_active', true)
-        .limit(4);
+        .limit(3);
 
       if (data) setVenues(data);
       setLoading(false);
@@ -101,13 +101,13 @@ const FeaturedVenuesSection = () => {
 
         {/* Venue Cards - Horizontal Scroll Effect */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-            {[...Array(4)].map((_, i) => (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {[...Array(3)].map((_, i) => (
               <Skeleton key={i} className="h-80 w-full rounded-2xl" />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto mb-16">
             {venues.map((venue, index) => (
               <motion.div
                 key={venue.id}

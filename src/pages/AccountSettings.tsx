@@ -334,7 +334,7 @@ export default function AccountSettings() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Need to delete your account? Contact support at support@shocase.com
+                  Need to delete your account? Contact support at shocase.artists@gmail.com
                 </p>
               </CardContent>
             </Card>

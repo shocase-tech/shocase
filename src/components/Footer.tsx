@@ -18,7 +18,7 @@ const Footer = () => {
           {/* Center - Copyright & Legal Links */}
           <div className="text-center">
             <p className="text-muted-foreground text-sm mb-1">
-              © 2025 Shocase. All rights reserved.
+              © {new Date().getFullYear()} Shocase. All rights reserved.
             </p>
             <div className="flex gap-3 justify-center">
               <Link 
