@@ -119,7 +119,7 @@ export default function Outreach() {
   // Settings state
   const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | null>(null);
-  const [saveTimeout, setSaveTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [saveTimeout, setSaveTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
 
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -503,7 +503,7 @@ export default function Outreach() {
         .from("venue_applications")
         .update({
           status: "sent",
-          sent_at: sentDate.toISOString(),
+          updated_at: sentDate.toISOString(),
         })
         .eq("id", markAsSentDialog.applicationId);
 
