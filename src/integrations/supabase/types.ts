@@ -104,6 +104,44 @@ export type Database = {
         }
         Relationships: []
       }
+      epk_views: {
+        Row: {
+          city: string | null
+          country: string | null
+          device_type: string | null
+          id: string
+          profile_id: string
+          referrer: string | null
+          viewed_at: string
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          device_type?: string | null
+          id?: string
+          profile_id: string
+          referrer?: string | null
+          viewed_at?: string
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          device_type?: string | null
+          id?: string
+          profile_id?: string
+          referrer?: string | null
+          viewed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "epk_views_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "artist_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gmail_tokens: {
         Row: {
           access_token: string
@@ -226,6 +264,36 @@ export type Database = {
         }
         Relationships: []
       }
+      stage_plots: {
+        Row: {
+          canvas_json: string
+          created_at: string
+          id: string
+          name: string
+          thumbnail_url: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          canvas_json: string
+          created_at?: string
+          id?: string
+          name?: string
+          thumbnail_url?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          canvas_json?: string
+          created_at?: string
+          id?: string
+          name?: string
+          thumbnail_url?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       subscription_tiers: {
         Row: {
           cooldown_days: number | null
@@ -283,6 +351,7 @@ export type Database = {
       user_subscriptions: {
         Row: {
           applications_this_period: number | null
+          cancel_at_period_end: boolean | null
           created_at: string | null
           current_period_end: string | null
           current_period_start: string | null
@@ -292,11 +361,13 @@ export type Database = {
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
           tier_id: string
+          trial_end: string | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
           applications_this_period?: number | null
+          cancel_at_period_end?: boolean | null
           created_at?: string | null
           current_period_end?: string | null
           current_period_start?: string | null
@@ -306,11 +377,13 @@ export type Database = {
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           tier_id: string
+          trial_end?: string | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
           applications_this_period?: number | null
+          cancel_at_period_end?: boolean | null
           created_at?: string | null
           current_period_end?: string | null
           current_period_start?: string | null
@@ -320,6 +393,7 @@ export type Database = {
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           tier_id?: string
+          trial_end?: string | null
           updated_at?: string | null
           user_id?: string
         }
@@ -342,6 +416,8 @@ export type Database = {
           created_at: string | null
           email_body: string
           email_subject: string
+          follow_up_dismissed_at: string | null
+          follow_up_sent_at: string | null
           gmail_draft_id: string | null
           gmail_message_id: string | null
           id: string
@@ -361,6 +437,8 @@ export type Database = {
           created_at?: string | null
           email_body: string
           email_subject: string
+          follow_up_dismissed_at?: string | null
+          follow_up_sent_at?: string | null
           gmail_draft_id?: string | null
           gmail_message_id?: string | null
           id?: string
@@ -380,6 +458,8 @@ export type Database = {
           created_at?: string | null
           email_body?: string
           email_subject?: string
+          follow_up_dismissed_at?: string | null
+          follow_up_sent_at?: string | null
           gmail_draft_id?: string | null
           gmail_message_id?: string | null
           id?: string
