@@ -1,44 +1,42 @@
-import { Check, ArrowRight } from "lucide-react";
+import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 
 const tiers = [
   {
     name: "Free",
     price: "$0",
     period: "/month",
-    description: "Get Started",
+    description: "Get started",
     features: [
       "Create EPK",
       "Share landing page",
       "Basic analytics",
       "Browse venues"
     ],
-    buttonText: "Start Free",
-    buttonVariant: "outline" as const,
+    buttonText: "Start free",
     popular: false
   },
   {
     name: "Pro",
     price: "$9.99",
     period: "/month",
-    description: "For Growing Artists",
+    description: "For growing artists",
     features: [
       "Everything in Free",
       "AI email generation (10/month)",
       "Outreach tracking",
       "Priority support"
     ],
-    buttonText: "Start Pro Trial",
-    buttonVariant: "default" as const,
+    buttonText: "Start Pro trial",
     popular: true
   },
   {
     name: "Elite",
     price: "$29.99",
     period: "/month",
-    description: "For Serious Artists",
+    description: "For serious artists",
     features: [
       "Everything in Pro",
       "Unlimited AI emails",
@@ -47,89 +45,83 @@ const tiers = [
       "Direct venue contacts"
     ],
     buttonText: "Go Elite",
-    buttonVariant: "outline" as const,
     popular: false
   }
 ];
 
 const PricingSection = () => {
   const navigate = useNavigate();
-  const [isVisible, setIsVisible] = useState(false);
-  const sectionRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-        }
-      },
-      { threshold: 0.2 }
-    );
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
 
   return (
-    <section 
+    <section
       id="pricing-section"
-      ref={sectionRef}
-      className="relative py-24 px-6 bg-gradient-to-b from-background via-background/95 to-background overflow-hidden"
+      className="relative py-24 px-6 bg-background"
     >
-      <div className="max-w-7xl mx-auto">
-        <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 gradient-text">
-          Choose Your Plan
-        </h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="max-w-6xl mx-auto">
+        <motion.div
+          className="mb-14 text-center"
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <p className="eyebrow mb-4">Pricing</p>
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground">
+            Start free. Upgrade to get booked.
+          </h2>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
           {tiers.map((tier, index) => (
-            <div
+            <motion.div
               key={tier.name}
-              className={`glass-card rounded-2xl p-8 relative group hover:-translate-y-2 hover:shadow-glow transition-all duration-500 ${
-                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-              }`}
-              style={{
-                transitionDelay: isVisible ? `${index * 150}ms` : '0ms'
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{
+                duration: 0.5,
+                delay: index * 0.08,
+                ease: [0.22, 1, 0.36, 1]
               }}
+              className={`relative flex flex-col rounded-xl p-8 bg-card border ${
+                tier.popular
+                  ? "border-primary/60"
+                  : "border-white/[0.06]"
+              }`}
             >
               {tier.popular && (
-                <div className="absolute -top-4 right-4 bg-gradient-to-r from-primary to-accent text-primary-foreground text-xs font-bold px-4 py-1 rounded-full shadow-glow">
-                  Most Popular
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
+                  Most popular
                 </div>
               )}
-              
-              <div className="text-center mb-6">
-                <h3 className="text-2xl font-bold mb-2">{tier.name}</h3>
-                <p className="text-sm text-muted-foreground mb-4">{tier.description}</p>
-                <div className="flex items-baseline justify-center gap-1">
-                  <span className="text-4xl font-bold">{tier.price}</span>
-                  <span className="text-muted-foreground">{tier.period}</span>
+
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-1">{tier.name}</h3>
+                <p className="text-sm text-muted-foreground mb-5">{tier.description}</p>
+                <div className="flex items-baseline gap-1">
+                  <span className="font-display text-4xl font-bold">{tier.price}</span>
+                  <span className="text-sm text-muted-foreground">{tier.period}</span>
                 </div>
               </div>
-              
-              <ul className="space-y-3 mb-8">
+
+              <ul className="space-y-3 mb-8 flex-1">
                 {tier.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2">
-                    <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                    <span className="text-sm">{feature}</span>
+                  <li key={feature} className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                    <span className="text-sm text-foreground/90">{feature}</span>
                   </li>
                 ))}
               </ul>
-              
-              <Button 
-                variant={tier.name === "Pro" ? "default" : "text-arrow"}
+
+              <Button
+                variant={tier.popular ? "default" : "secondary"}
                 className="w-full"
                 size="lg"
                 onClick={() => navigate('/auth')}
               >
                 {tier.buttonText}
-                {tier.name !== "Pro" && <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />}
               </Button>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

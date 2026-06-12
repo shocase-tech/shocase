@@ -1,6 +1,6 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, useScroll, useTransform, useSpring } from "framer-motion";
+import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { Users, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,23 +20,6 @@ const FeaturedVenuesSection = () => {
   const navigate = useNavigate();
   const [venues, setVenues] = useState<Venue[]>([]);
   const [loading, setLoading] = useState(true);
-  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "end start"]
-  });
-
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 100,
-    damping: 30,
-    restDelta: 0.001
-  });
-
-  const y = useTransform(smoothProgress, [0, 1], [100, -100]);
-  const opacity = useTransform(smoothProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
-  const scale = useTransform(smoothProgress, [0, 0.2, 0.8, 1], [0.8, 1, 1, 0.8]);
 
   useEffect(() => {
     const fetchVenues = async () => {
@@ -54,163 +37,95 @@ const FeaturedVenuesSection = () => {
     fetchVenues();
   }, []);
 
-
   return (
-    <section 
-      ref={containerRef}
-      className="relative min-h-screen py-32 px-6 bg-gradient-to-b from-background via-background/95 to-background overflow-hidden"
-    >
-      {/* Animated background gradient blobs */}
-      <motion.div 
-        className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl"
-        style={{ y }}
-      />
-      <motion.div 
-        className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl"
-        style={{ y: useTransform(y, (value) => -value) }}
-      />
-
-      <motion.div 
-        className="max-w-7xl mx-auto"
-        style={{ opacity, scale }}
-      >
-        {/* Header Text with parallax */}
-        <motion.div 
-          className="text-center mb-20"
-          style={{ y: useTransform(smoothProgress, [0, 1], [50, -50]) }}
+    <section className="relative py-24 px-6 bg-background">
+      <div className="max-w-6xl mx-auto">
+        {/* Section Header */}
+        <motion.div
+          className="mb-14"
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
-          <motion.h2 
-            className="text-5xl md:text-7xl lg:text-8xl font-bold gradient-text mb-4"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            shocase<br />your music
-          </motion.h2>
-          <motion.p
-            className="text-lg text-muted-foreground max-w-2xl mx-auto"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            Featured venues waiting to hear from you
-          </motion.p>
+          <p className="eyebrow mb-4">Venue directory</p>
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-foreground max-w-xl">
+              Stages waiting to hear from you
+            </h2>
+            <Button
+              variant="pill"
+              size="lg"
+              onClick={() => navigate('/venues')}
+              className="group shrink-0 px-6"
+            >
+              Explore all venues
+              <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
+            </Button>
+          </div>
         </motion.div>
 
-        {/* Venue Cards - Horizontal Scroll Effect */}
+        {/* Venue Cards */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[...Array(3)].map((_, i) => (
-              <Skeleton key={i} className="h-80 w-full rounded-2xl" />
+              <Skeleton key={i} className="h-80 w-full rounded-xl" />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {venues.map((venue, index) => (
               <motion.div
                 key={venue.id}
-                initial={{ opacity: 0, y: 50 }}
+                initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ 
-                  duration: 0.5, 
-                  delay: index * 0.1,
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{
+                  duration: 0.5,
+                  delay: index * 0.08,
                   ease: [0.22, 1, 0.36, 1]
                 }}
-                onMouseEnter={() => setHoveredCard(index)}
-                onMouseLeave={() => setHoveredCard(null)}
-                className="group"
+                className="group cursor-pointer"
+                onClick={() => navigate(`/venues/${venue.slug}`)}
               >
-                <motion.div
-                  className="relative h-80 rounded-2xl overflow-hidden glass-card"
-                  whileHover={{ y: -8, scale: 1.02 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                >
+                <div className="relative h-80 rounded-xl overflow-hidden border border-white/[0.06] transition-colors duration-300 group-hover:border-white/[0.14]">
                   {/* Image */}
                   <div className="absolute inset-0">
                     {venue.hero_image_url || venue.logo_url ? (
-                      <img 
-                        src={venue.hero_image_url || venue.logo_url || ''} 
+                      <img
+                        src={venue.hero_image_url || venue.logo_url || ''}
                         alt={venue.name}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20" />
+                      <div className="w-full h-full bg-secondary" />
                     )}
                   </div>
 
                   {/* Gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent opacity-90 group-hover:opacity-95 transition-opacity duration-300" />
-
-                  {/* Hover glow effect */}
-                  <motion.div 
-                    className="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                    initial={false}
-                    animate={{
-                      opacity: hoveredCard === index ? 1 : 0
-                    }}
-                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
 
                   {/* Content */}
                   <div className="absolute inset-0 p-6 flex flex-col justify-end">
-                    <motion.div
-                      initial={false}
-                      animate={{
-                        y: hoveredCard === index ? -8 : 0
-                      }}
-                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                    >
-                      <h3 className="text-2xl font-bold mb-2 text-foreground">
-                        {venue.name}
-                      </h3>
-                      <p className="text-sm text-muted-foreground mb-3">
-                        {venue.city}
-                      </p>
-                      {venue.capacity && (
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Users className="w-4 h-4" />
-                          <span>Capacity: {venue.capacity}</span>
-                        </div>
-                      )}
-                    </motion.div>
+                    <h3 className="text-2xl font-bold mb-1 text-white">
+                      {venue.name}
+                    </h3>
+                    <p className="text-sm text-white/60 mb-2">
+                      {venue.city}
+                    </p>
+                    {venue.capacity && (
+                      <div className="flex items-center gap-2 text-sm text-white/60">
+                        <Users className="w-4 h-4" />
+                        <span>Capacity: {venue.capacity}</span>
+                      </div>
+                    )}
                   </div>
-
-                  {/* Border glow on hover */}
-                  <div className="absolute inset-0 border-2 border-primary/0 group-hover:border-primary/20 rounded-2xl transition-colors duration-300" />
-                </motion.div>
+                </div>
               </motion.div>
             ))}
           </div>
         )}
-
-        {/* CTA Button with animation */}
-        <motion.div 
-          className="text-center"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-        >
-          <Button 
-            variant="pill-hero"
-            size="lg" 
-            onClick={() => navigate('/venues')}
-            className="group px-8 py-6 text-base"
-          >
-            Explore All Venues
-            <motion.span
-              className="inline-block ml-2"
-              initial={{ x: 0 }}
-              whileHover={{ x: 5 }}
-              transition={{ type: "spring", stiffness: 400, damping: 10 }}
-            >
-              <ArrowRight className="w-5 h-5" />
-            </motion.span>
-          </Button>
-        </motion.div>
-      </motion.div>
+      </div>
     </section>
   );
 };

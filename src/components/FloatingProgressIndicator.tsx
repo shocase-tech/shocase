@@ -306,13 +306,11 @@ export default function FloatingProgressIndicator({
                 {profile && onTogglePublish && (
                   <Button
                     onClick={onTogglePublish}
-                    variant={profile.is_published ? "outline" : "default"}
+                    variant={profile.is_published ? "ghost" : "default"}
                     size="sm"
                     className={cn(
                       "flex items-center gap-2 text-xs px-4 py-2 transition-all duration-200 flex-shrink-0",
-                      profile.is_published 
-                        ? "border-orange-500/50 text-orange-600 hover:bg-orange-500/10" 
-                        : "bg-green-600 hover:bg-green-700 text-white"
+                      profile.is_published && "text-muted-foreground hover:text-foreground"
                     )}
                   >
                     {profile.is_published ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
@@ -373,13 +371,11 @@ export default function FloatingProgressIndicator({
             {/* Publish Button */}
             <Button
               onClick={onTogglePublish}
-              variant={profile.is_published ? "outline" : "default"}
+              variant={profile.is_published ? "ghost" : "default"}
               size="sm"
               className={cn(
                 "w-full flex items-center gap-2 text-xs transition-all duration-200",
-                profile.is_published 
-                  ? "border-orange-500/50 text-orange-600 hover:bg-orange-500/10 hover:border-orange-500/70" 
-                  : "bg-green-600 hover:bg-green-700 text-white shadow-sm hover:shadow-md"
+                profile.is_published && "text-muted-foreground hover:text-foreground"
               )}
             >
               {profile.is_published ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}

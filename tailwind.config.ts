@@ -18,6 +18,10 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+				display: ['"Space Grotesk"', 'Inter', 'system-ui', 'sans-serif']
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -118,12 +122,28 @@ export default {
 						transform: 'translateY(0)',
 						opacity: '1'
 					}
+				},
+				'marquee': {
+					'0%': { transform: 'translateX(0)' },
+					'100%': { transform: 'translateX(-50%)' }
+				},
+				'fade-up': {
+					'0%': {
+						opacity: '0',
+						transform: 'translateY(16px)'
+					},
+					'100%': {
+						opacity: '1',
+						transform: 'translateY(0)'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				'slide-in-up': 'slide-in-up 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+				'slide-in-up': 'slide-in-up 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+				'marquee': 'marquee 40s linear infinite',
+				'fade-up': 'fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both'
 			}
 		}
 	},

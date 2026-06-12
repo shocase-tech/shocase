@@ -3,49 +3,66 @@ import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
-    <footer className="bg-background border-t border-glass">
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          {/* Left - Logo */}
-          <div className="flex items-center">
-            <img 
-              src={showcaseLogo} 
-              alt="Shocase" 
-              className="h-8 w-auto"
+    <footer className="bg-background border-t border-white/[0.06]">
+      <div className="max-w-6xl mx-auto px-6 py-14">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+          {/* Brand */}
+          <div>
+            <img
+              src={showcaseLogo}
+              alt="Shocase"
+              className="h-8 w-auto mb-4"
             />
+            <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
+              Professional press kits, venue discovery, and outreach for
+              independent artists.
+            </p>
           </div>
 
-          {/* Center - Copyright & Legal Links */}
-          <div className="text-center">
-            <p className="text-muted-foreground text-sm mb-1">
-              © {new Date().getFullYear()} Shocase. All rights reserved.
+          {/* Product */}
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-4">
+              Product
             </p>
-            <div className="flex gap-3 justify-center">
-              <Link 
-                to="/privacy-policy"
-                className="text-muted-foreground text-sm hover:text-primary transition-colors duration-200"
+            <nav className="flex flex-col gap-3">
+              <Link to="/venues" className="text-sm text-foreground/80 hover:text-foreground transition-colors">
+                Venues
+              </Link>
+              <Link to="/epk" className="text-sm text-foreground/80 hover:text-foreground transition-colors">
+                Press Kit
+              </Link>
+              <Link to="/outreach" className="text-sm text-foreground/80 hover:text-foreground transition-colors">
+                Outreach
+              </Link>
+            </nav>
+          </div>
+
+          {/* Company */}
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-4">
+              Company
+            </p>
+            <nav className="flex flex-col gap-3">
+              <a
+                href="mailto:shocase.artists@gmail.com"
+                className="text-sm text-foreground/80 hover:text-foreground transition-colors"
               >
+                Contact
+              </a>
+              <Link to="/privacy-policy" className="text-sm text-foreground/80 hover:text-foreground transition-colors">
                 Privacy Policy
               </Link>
-              <span className="text-muted-foreground">•</span>
-              <Link 
-                to="/terms-and-conditions"
-                className="text-muted-foreground text-sm hover:text-primary transition-colors duration-200"
-              >
+              <Link to="/terms-and-conditions" className="text-sm text-foreground/80 hover:text-foreground transition-colors">
                 Terms & Conditions
               </Link>
-            </div>
+            </nav>
           </div>
+        </div>
 
-          {/* Right - Contact */}
-          <div className="text-center md:text-right">
-            <a 
-              href="mailto:shocase.artists@gmail.com"
-              className="text-foreground text-sm font-medium hover:text-primary transition-colors duration-200"
-            >
-              Contact
-            </a>
-          </div>
+        <div className="mt-12 pt-6 border-t border-white/[0.06]">
+          <p className="text-xs text-muted-foreground">
+            © {new Date().getFullYear()} Shocase. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>

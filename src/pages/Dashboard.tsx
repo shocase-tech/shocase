@@ -431,10 +431,7 @@ export default function Dashboard() {
             <Card ref={progressCardRef} className="glass-card border-white/10 animate-slide-in-up">
               <CardContent className="pt-4 pb-4">
                   <div className="flex items-center justify-between mb-3">
-                   <div className="flex items-center gap-2">
-                     <h2 className="text-base md:text-lg font-semibold">Your kit is {completionPercentage}% complete</h2>
-                   </div>
-                   <div className="text-xl md:text-2xl font-bold text-primary">{completionPercentage}%</div>
+                   <h2 className="text-base md:text-lg font-semibold">Your kit is {completionPercentage}% complete</h2>
                  </div>
                 <p className="text-xs md:text-sm text-muted-foreground mb-3">
                   {completedMilestones} of {milestones.length} milestones completed
@@ -444,69 +441,67 @@ export default function Dashboard() {
                 {/* Publish Controls */}
                 <div className="border-t border-white/10 pt-3 md:pt-4">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    {/* Hide descriptive text on mobile */}
-                    <div className="hidden MD:block">
+                    <div className="hidden md:block">
                       <h3 className="font-medium mb-1">EPK Publication</h3>
                       <p className="text-sm text-muted-foreground">
-                        {profile.is_published 
+                        {profile.is_published
                           ? "Your EPK is live and publicly accessible"
                           : "Complete your EPK and publish it to make it live"
                         }
                       </p>
                     </div>
-                    
+
                     <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 md:gap-3">
-                      {/* Desktop: Show copy/view buttons inline */}
-                      {profile.is_published && (
-                        <div className="hidden md:flex items-center gap-3">
-                          <Button
-                            onClick={copyPublicLink}
-                            variant="minimal"
-                            size="sm"
-                            className="flex items-center gap-2"
-                          >
-                            <Copy className="w-4 h-4" />
-                            Copy Link
-                          </Button>
+                      {profile.is_published ? (
+                        <>
+                          {/* Primary actions for a live EPK */}
                           <Button
                             onClick={previewProfile}
-                            variant="minimal"
-                            size="sm"
-                            className="flex items-center gap-2"
+                            variant="default"
+                            className="flex items-center justify-center gap-2 w-full md:w-auto min-h-[44px] px-4 md:px-6"
                           >
                             <ExternalLink className="w-4 h-4" />
                             View EPK
                           </Button>
-                        </div>
+                          <Button
+                            onClick={copyPublicLink}
+                            variant="secondary"
+                            className="flex items-center justify-center gap-2 w-full md:w-auto min-h-[44px]"
+                          >
+                            <Copy className="w-4 h-4" />
+                            Copy Link
+                          </Button>
+                          {/* Demoted destructive action */}
+                          <Button
+                            onClick={togglePublishStatus}
+                            variant="ghost"
+                            size="sm"
+                            className="flex items-center justify-center gap-2 text-muted-foreground hover:text-foreground w-full md:w-auto"
+                          >
+                            <EyeOff className="w-4 h-4" />
+                            Unpublish
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <Button
+                            onClick={() => setShowPreviewModal(true)}
+                            variant="secondary"
+                            className="flex items-center justify-center gap-2 w-full md:w-auto min-h-[44px]"
+                          >
+                            <Eye className="w-4 h-4" />
+                            Preview
+                          </Button>
+                          <Button
+                            onClick={togglePublishStatus}
+                            variant="default"
+                            className="flex items-center justify-center gap-2 font-medium px-4 md:px-6 w-full md:w-auto min-h-[44px]"
+                          >
+                            <Eye className="w-4 h-4" />
+                            Publish EPK
+                          </Button>
+                        </>
                       )}
-                      
-                      {/* Preview button for unpublished EPKs */}
-                       {!profile.is_published && (
-                         <Button
-                           onClick={() => setShowPreviewModal(true)}
-                           variant="minimal"
-                           size="sm"
-                           className="flex items-center gap-2 transition-all duration-200"
-                         >
-                           <Eye className="w-4 h-4" />
-                           Preview
-                         </Button>
-                       )}
-                       
-                       {/* Publish button - full width on mobile */}
-                       <Button
-                         onClick={togglePublishStatus}
-                         variant={profile.is_published ? "minimal" : "default"}
-                         className={cn(
-                           "flex items-center justify-center gap-2 font-medium px-4 md:px-6 w-full md:w-auto min-h-[44px]",
-                           profile.is_published 
-                             ? "text-orange-600 hover:text-orange-500" 
-                             : "bg-green-600 hover:bg-green-700 text-white"
-                         )}
-                       >
-                         {profile.is_published ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                         {profile.is_published ? "Unpublish EPK" : "Publish EPK"}
-                       </Button>
                     </div>
                   </div>
                 </div>

@@ -91,6 +91,12 @@ const AppHeader = () => {
   };
 
   const getInitials = (email: string) => {
+    if (artistName) {
+      const words = artistName.trim().split(/\s+/);
+      return words.length > 1
+        ? (words[0][0] + words[1][0]).toUpperCase()
+        : artistName.substring(0, 2).toUpperCase();
+    }
     return email.substring(0, 2).toUpperCase();
   };
 

@@ -70,7 +70,7 @@ export default function ArtistProfileView({ profile }: ArtistProfileViewProps) {
         <CardHeader>
           <div className="flex items-start justify-between">
             <div>
-              <CardTitle className="text-2xl gradient-text">{profile.artist_name}</CardTitle>
+              <CardTitle className="text-2xl text-foreground">{profile.artist_name}</CardTitle>
               {profile.genre && profile.genre.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-2">
                   {profile.genre.map((genre, index) => (

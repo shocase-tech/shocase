@@ -16,7 +16,6 @@ import appleMusicColorIcon from "@/assets/streaming/apple-music-color.svg";
 import appleMusicLightIcon from "@/assets/streaming/apple-music-light.svg";
 import tiktokIcon from "@/assets/social/tiktok-white.png";
 import instagramIcon from "@/assets/social/instagram-gradient.png";
-import shocaseIcon from "@/assets/newicon.svg";
 import PublicImage from "@/components/PublicImage";
 import Footer from "@/components/Footer";
 import { FeaturedTrackEmbed } from "@/components/FeaturedTrackEmbed";
@@ -286,18 +285,9 @@ export default function SimplePublicProfile() {
           </div>
         )}
         
-        {/* Floating Elements */}
-        <div className="absolute top-20 left-20 w-32 h-32 bg-primary/20 rounded-full blur-xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-20 w-48 h-48 bg-accent/20 rounded-full blur-2xl animate-pulse delay-1000"></div>
-
         {/* Background Image Content */}
         <div className="relative z-10 max-w-6xl mx-auto px-6 text-center">
-          {/* Shocase Icon - hidden on mobile */}
-          <div className="hidden md:flex items-center justify-center mb-8">
-            <img src={shocaseIcon} alt="SHOCASE" className="w-20 h-20" />
-          </div>
-          
-          <h1 className="text-5xl md:text-7xl font-bold gradient-text mb-6">
+          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
             {profile.artist_name}
           </h1>
           
@@ -372,7 +362,6 @@ export default function SimplePublicProfile() {
                   <a href={`mailto:${(profile.contact_info as any).email}`}>
                     <Mail className="w-5 h-5 mr-2" />
                     Book Now
-                    <Star className="w-5 h-5 ml-2 group-hover:animate-spin" />
                   </a>
                 </Button>
               ) : profile.featured_track_url ? (
@@ -404,7 +393,6 @@ export default function SimplePublicProfile() {
                   <a href={`mailto:${(profile.contact_info as any).email}`}>
                     <Mail className="w-5 h-5 mr-2" />
                     Book Now
-                    <Star className="w-5 h-5 ml-2 group-hover:animate-spin" />
                   </a>
                 </Button>
               )}

@@ -106,7 +106,11 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display tracking-tight;
   }
 }
 
@@ -117,5 +121,15 @@ All colors MUST be HSL.
   
   .gradient-text {
     @apply bg-gradient-primary bg-clip-text text-transparent;
+  }
+
+  /* Agency-style section label */
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.2em] text-primary;
+  }
+
+  /* Flat elevated surface — replaces glassmorphism on marketing pages */
+  .surface-card {
+    @apply bg-card border border-white/[0.06] rounded-xl;
   }
 }

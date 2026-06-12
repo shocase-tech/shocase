@@ -24,10 +24,10 @@ const Index = () => {
     <main className="min-h-screen bg-gradient-dark">
       <Header />
       <HeroSection />
+      <MarqueeBanner />
       <HowItWorksSection />
       <FeaturedVenuesSection />
       <FeaturesSection />
-      <MarqueeBanner />
       <PricingSection />
       <CTASection />
       <Footer />
